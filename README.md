@@ -1,6 +1,6 @@
 # hierarchical-nmf-python
-* python codes for hierarchical rank2 nmf
-* Python 3.6+, Numpy
+* fork of https://github.com/rudvlf0413/hierarchical-nmf-python
+* with familiar SKLearn interface  
 
 ## Reference
 - Papers: [Fast rank-2 nonnegative matrix factorization for hierarchical document clustering](https://smallk.github.io/papers/hierNMF2.pdf)
