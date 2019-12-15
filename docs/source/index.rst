@@ -10,6 +10,8 @@ Welcome to hierarchical-nmf-python's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+hnmf
+modules
 
 
 Indices and tables

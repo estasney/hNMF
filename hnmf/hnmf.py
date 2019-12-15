@@ -78,7 +78,7 @@ class HierarchicalNMF(BaseEstimator):
     """
 
     def __init__(self, k: int,
-                 random_state=42,
+                 random_state: int = 42,
                  trial_allowance: int = 100,
                  unbalanced: float = 0.1,
                  vec_norm: int = 2,
