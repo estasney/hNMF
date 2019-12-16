@@ -266,6 +266,14 @@ class HierarchicalNMF(BaseEstimator):
             else:
                 leaves = np.where(is_leaf == 1)[0]
                 temp_priority = priorities[leaves]
+
+                if len(np.where(temp_priority > 0)[0]) > 0:
+                    min_priority = np.min(temp_priority[temp_priority > 0])
+                    split_node = np.argmax(temp_priority)
+                else: # There are no more candidates stop early
+                    min_priority = -1
+                    split_node = 0
+
                 min_priority = np.min(temp_priority[temp_priority > 0])
                 split_node = np.argmax(temp_priority)
                 if temp_priority[split_node] < 0:
@@ -280,8 +288,12 @@ class HierarchicalNMF(BaseEstimator):
                     self.clusters_ = clusters
                     self.Ws_ = Ws
                     self.Hs_ = Hs
+                    self.W_buffer_ = np.array(W_buffer)
+                    self.H_buffer_ = self._stack_H_buffer(H_buffer)
                     self.priorities_ = priorities
                     self.graph_ = tree_to_nx(tree.T)
+                    self.n_nodes_ = self.is_leaf_.shape[0]
+                    self.n_leafs_ = np.count_nonzero(self.is_leaf_)
                     return self
 
                 split_node = leaves[split_node]  # Attempt to split this node
