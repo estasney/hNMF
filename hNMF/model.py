@@ -5,16 +5,19 @@ from typing import Union, TypeVar, List, Tuple, Type, Dict
 
 import networkx as nx
 import numpy as np
+from scipy.sparse.csr import csr_matrix
 
 from sklearn.base import BaseEstimator
 from sklearn.decomposition import NMF
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from tqdm.auto import tqdm
 
-from hnmf.helpers import (anls_entry_rank2_precompute, trial_split, nmfsh_comb_rank2, tree_to_nx,
+
+from hNMF.helpers import (anls_entry_rank2_precompute, trial_split, nmfsh_comb_rank2, tree_to_nx,
                           trial_split_sklearn)
 
 Vectorizer = TypeVar('Vectorizer', dict, TfidfVectorizer, CountVectorizer)
+Array = TypeVar('Array', np.ndarray, csr_matrix)
 
 
 class NMFMethod(Enum):
@@ -83,10 +86,18 @@ class HierarchicalNMF(BaseEstimator):
     clusters_ :
         A cell array of length 2*(k-1). The i-th element contains the subset of items at the node with numbering i.
 
+    graph_ :
+        NetworkX DiGraph of nodes
 
-    Da Kuang, Haesun Park,
-    Fast rank-2 nonnegative matrix factorization for hierarchical document clustering,
-    The 19th ACM SIGKDD International Conference on Knowledge, Discovery, and Data Mining (KDD '13), pp. 739-747, 2013.
+    Methods
+    -------
+    fit(X)
+        Fit k number of leaves to input array
+
+    Notes
+    -----
+    Adapted from [1]_
+
     """
 
     def __init__(self, k: int,
@@ -130,7 +141,7 @@ class HierarchicalNMF(BaseEstimator):
         self.id2sample_ = None
         self.id2feature_ = None
 
-    def init_2_rank(self, X, term_subset):
+    def _init_2_rank(self, X, term_subset):
         if self.nmf_method == NMFMethod.SKLEARN:
             return self._init_fit_sklearn(X, term_subset)
         elif self.nmf_method == NMFMethod.ORIGINAL:
@@ -226,7 +237,7 @@ class HierarchicalNMF(BaseEstimator):
             stacked.append(stacked_buff)
         return np.array(stacked)
 
-    def fit(self, X):
+    def fit(self, X: Array):
         n_samples, n_features = X.shape
         self.n_samples_ = n_samples
         self.n_features_ = n_features
@@ -242,7 +253,7 @@ class HierarchicalNMF(BaseEstimator):
         splits = -np.ones(self.k - 1, dtype=self.dtype)
 
         term_subset = np.where(np.sum(X, axis=1) != 0)[0]  # Where X has at least one non-zero
-        W, H = self.init_2_rank(X, term_subset)
+        W, H = self._init_2_rank(X, term_subset)
 
         result_used = 0
         pb = tqdm(desc="Finding Leaves", total=len(range(self.k - 1)))
@@ -375,6 +386,21 @@ class HierarchicalNMF(BaseEstimator):
 
     def top_items_in_node(self, node: int, n: int = 10, id2sample: Vectorizer = None, merge=False) \
             -> Union[List[Tuple], List[List]]:
+        """
+
+        Parameters
+        ----------
+        node
+            Index of node to return top items
+        n
+            Number of items to return
+        id2sample
+            Optional, if provided returns decoded items
+        merge
+            If False, returns top items for each column in node. If True, columns are averaged across rows and top items
+            are computed from the result
+
+        """
 
         self._handle_vectorizer(id2sample, 'id2sample_')
         node = self.H_buffer_[node]
@@ -393,6 +419,24 @@ class HierarchicalNMF(BaseEstimator):
 
     def top_items_in_nodes(self, n: int = 10, id2sample: Vectorizer = None, merge=False, idx=None) \
             -> List[Dict[str, List]]:
+        """
+
+        Parameters
+        ----------
+        n
+            Number of items to return
+        id2sample
+            Optional, if provided returns decoded items
+        merge
+            If False, returns top items for each column in node. If True, columns are averaged across rows and top items
+            are computed from the result
+        idx
+            Optional, if provided, returns top items only for nodes specified in idx
+
+        Returns
+        -------
+
+        """
 
         self._handle_vectorizer(id2sample, 'id2sample_')
         if idx is not None:
@@ -420,6 +464,21 @@ class HierarchicalNMF(BaseEstimator):
     def top_items_in_leaves(self, n: int = 10, id2sample: Vectorizer = None, merge=False) \
             -> List[Dict[str, List]]:
 
+        """
+        Convenience method to return top items occurring from nodes identified as leaves
+
+        Parameters
+        ----------
+         n
+            Number of items to return
+        id2sample
+            Optional, if provided returns decoded items
+        merge
+            If False, returns top items for each column in node. If True, columns are averaged across rows and top items
+            are computed from the result
+
+        """
+
         leaf_idx = np.where(self.is_leaf_ == 1)[0]
         output = self.top_items_in_nodes(n, id2sample, merge, leaf_idx)
         return output
@@ -435,6 +494,20 @@ class HierarchicalNMF(BaseEstimator):
             return i
 
     def top_items_in_W(self, n: int, leafs_only: bool, id2sample: Vectorizer, id2feature: Vectorizer):
+        """
+
+        Parameters
+        ----------
+        n
+            Number of items to return
+        leafs_only
+            Whether to filter top items to nodes identified as leaves
+        id2sample
+            Optional, if provided returns decoded items from self.H
+        id2feature
+            Optional, if provided returns decoded items from self.W
+
+        """
         self._handle_vectorizer(id2sample, 'id2sample_')
         self._handle_vectorizer(id2feature, 'id2feature_')
         output = {self._handle_encoding(i): [] for i in range(self.n_features_)}
@@ -461,6 +534,17 @@ class HierarchicalNMF(BaseEstimator):
         return output
 
     def enrich_tree(self, n: int, id2sample: Vectorizer):
+        """
+        Appends decoded top items to :py:attr:`self.graph_` Useful if it is desired to export for visualization
+
+        Parameters
+        ----------
+        n
+            The number of top items to add to each node
+        id2sample
+            Decodes items
+
+        """
         g = self.graph_
         self._handle_vectorizer(id2sample, 'id2sample_')
         nodes = self.H_buffer_
@@ -485,6 +569,16 @@ class HierarchicalNMF(BaseEstimator):
         return self.graph_
 
     def json_graph(self, fp: Union[str, Type[None]] = None):
+        """
+        Export the graph to json
+
+        Parameters
+        ----------
+        fp
+            Optional, if provided graph is written to this filepath
+
+
+        """
         data = nx.readwrite.json_graph.node_link_data(self.graph_)
         # fix inconsistency where nodes have str ids and edges are integers
         for e in data['nodes']:
@@ -492,21 +586,6 @@ class HierarchicalNMF(BaseEstimator):
         for e in data['links']:
             e['source'] = str(e['source'])
             e['target'] = str(e['target'])
-
-        if not fp:
-            return data
-        else:
-            import json
-            with open(fp, "w+", encoding="utf-8") as json_file:
-                json.dump(data, json_file, indent=4)
-
-    def cytoscape_graph(self, fp: Union[str, Type[None]] = None):
-        data = nx.readwrite.json_graph.cytoscape.cytoscape_data(self.graph_)
-
-        # fix inconsistency where nodes have str ids and edges are integers
-        for e in data['elements']['edges']:
-            e['data']['source'] = str(e['data']['source'])
-            e['data']['target'] = str(e['data']['target'])
 
         if not fp:
             return data

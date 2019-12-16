@@ -12,8 +12,6 @@
 #
 import os
 import sys
-# sys.path.insert(0, os.path.abspath('../../hierarchical-nmf-python/hnmf'))
-# sys.path.insert(0, os.path.abspath('../../hierarchical-nmf-python'))
 sys.path.insert(0, os.path.abspath("../.."))
 
 
@@ -21,7 +19,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 
 # -- Project information -----------------------------------------------------
 
-project = 'hierarchical-nmf-python'
+project = 'hNMF'
 copyright = '2019, Eric Stasney'
 author = 'Eric Stasney'
 
@@ -60,3 +58,7 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+rst_epilog = """
+.. |project| replace:: hNMF
+"""

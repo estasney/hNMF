@@ -1,4 +1,4 @@
-from hnmf import model
+from hNMF import model
 import unittest
 from sklearn.datasets import make_blobs
 

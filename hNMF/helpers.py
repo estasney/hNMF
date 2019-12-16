@@ -119,12 +119,9 @@ def hier8_neat(X, k, random_state=0, trial_allowance: int = 3, unbalanced: float
      (Now the entries in 'partitioning' having value 0 indicate outliers that do not belong to any cluster.)
 
 
-     References
+     Notes
      ----------
-     Da Kuang, Haesun Park
-     Fast rank-2 nonnegative matrix factorization for hierarchical document clustering, KDD 2013
-
-     Feb 2013
+     Adapted from [1]_
     """
 
     # Repack params
