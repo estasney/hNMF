@@ -12,7 +12,11 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../hnmf/'))
+# sys.path.insert(0, os.path.abspath('../../hierarchical-nmf-python/hnmf'))
+# sys.path.insert(0, os.path.abspath('../../hierarchical-nmf-python'))
+sys.path.insert(0, os.path.abspath("../.."))
+
+
 
 
 # -- Project information -----------------------------------------------------
@@ -31,6 +35,7 @@ release = '0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
     'sphinx_autodoc_typehints'
 ]

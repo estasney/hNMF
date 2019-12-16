@@ -54,15 +54,9 @@ def anls_entry_rank2_precompute(left, right, H, dtype):
     return H
 
 
-def hier8_neat(X, k, random_state=0,
-               trial_allowance: int = 3,
-               unbalanced: float = 0.1,
-               vec_norm: Union[float, int] = 2.0,
-               normW: bool = True,
-               anls_alg: callable = anls_entry_rank2_precompute,
-               tol: float = 1e-4,
-               maxiter: int = 10000
-               ):
+def hier8_neat(X, k, random_state=0, trial_allowance: int = 3, unbalanced: float = 0.1,
+               vec_norm: Union[float, int] = 2.0, normW: bool = True, anls_alg: callable = anls_entry_rank2_precompute,
+               tol: float = 1e-4, maxiter: int = 10000):
     """
 
     :param X:
@@ -77,7 +71,9 @@ def hier8_neat(X, k, random_state=0,
     :param maxiter: Maximum number of iteration times in each run of NMF
     :return:
 
-    Output parameters --
+    Output parameters
+    -----------------
+
      From the output parameters, you can reconstruct the tree and "replay" the k-1 steps that generated it.
 
      For a binary tree with k leaf nodes, the total number of nodes (including leaf and non-leaf nodes)
@@ -108,7 +104,9 @@ def hier8_neat(X, k, random_state=0,
     priorities: An array of length 2*(k-1).
                  Its i-th element is the modified NDCG scores at the node with numbering i (see the reference paper).
 
-     Tips:
+     Tips
+     ----
+
      If you want to have the flat partitioning induced by the leaf nodes in the final tree,
      use this script:
 
@@ -121,7 +119,8 @@ def hier8_neat(X, k, random_state=0,
      (Now the entries in 'partitioning' having value 0 indicate outliers that do not belong to any cluster.)
 
 
-     References:
+     References
+     ----------
      Da Kuang, Haesun Park
      Fast rank-2 nonnegative matrix factorization for hierarchical document clustering, KDD 2013
 

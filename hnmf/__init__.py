@@ -1,2 +1,2 @@
-from .hnmf import HierarchicalNMF, NMFInitMethod, NMFMethod
-from .helpers import *
+from hnmf.model import *
+from hnmf.helpers import *

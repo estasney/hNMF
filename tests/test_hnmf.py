@@ -1,11 +1,11 @@
-from hnmf import hnmf
+from hnmf import model
 import unittest
 from sklearn.datasets import make_blobs
 
 
 class MyTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.module = hnmf.HierarchicalNMF
+        self.module = model.HierarchicalNMF
         self.model = None
         self.X = None
         self.output = None

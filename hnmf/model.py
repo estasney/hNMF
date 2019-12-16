@@ -23,6 +23,10 @@ class NMFMethod(Enum):
 
 
 class NMFInitMethod(Enum):
+    """
+    Class that
+
+    """
     DEFAULT = None
     RANDOM = 'random'
     NNDSVD = 'nndsvd'
@@ -39,37 +43,45 @@ class HierarchicalNMF(BaseEstimator):
 
     Parameters
     ----------
-    k: int, The number of desired leaf nodes
-    random_state: int, random seed
-    trial_allowance: int, Number of trials allowed for removing outliers and splitting a node again. See parameter T in Algorithm 3 in the reference paper.
-    unbalanced: float, A threshold to determine if one of the two clusters is an outlier set. A smaller value means more tolerance for imbalance between two clusters. See parameter beta in Algorithm 3 in the reference paper.
-    vec_norm: int, Indicates which norm to use for the normalization of W or H, e.g. vec_norm=2 means Euclidean norm; vec_norm=0 means no normalization.
-    normW: bool, true if normalizing columns of W; false if normalizing rows of H.
-    anls_alg: callable, must implement NNLS
-    tol: Tolerance parameter for stopping criterion in each run of NMF.
-    maxiter: Maximum number of iteration times in each run of NMF
-    dtype: Dtype used for numpy arrays
-    nmf_method: Use NMF as implemented by Sklearn or Original Paper
-    nmf_init_method: Only used when nmf_method is sklearn. Specifies nmf init procedure
 
+    k:
+        The number of desired leaf nodes
+    random_state :
+        random seed
+    trial_allowance :
+        Number of trials allowed for removing outliers and splitting a node again. See parameter T in Algorithm 3 in the reference paper.
+    unbalanced :
+        A threshold to determine if one of the two clusters is an outlier set. A smaller value means more tolerance for imbalance between two clusters. See parameter beta in Algorithm 3 in the reference paper.
+    vec_norm :
+        Indicates which norm to use for the normalization of W or H, e.g. vec_norm=2 means Euclidean norm; vec_norm=0 means no normalization.
+    normW :
+        true if normalizing columns of W; false if normalizing rows of H.
+    anls_alg :
+        must implement NNLS
+    tol :
+        Tolerance parameter for stopping criterion in each run of NMF.
+    maxiter :
+        Maximum number of iteration times in each run of NMF
+    dtype :
+        Dtype used for numpy arrays
+    nmf_method :
+        Use NMF as implemented by Sklearn or Original Paper
+    nmf_init_method :
+        Only used when nmf_method is sklearn. Specifies nmf init procedure
 
     Attributes
     ----------
-    tree_: A 2-by-(k-1) matrix that encodes the tree structure. The two entries in the i-th column are the numberings
-           of the two children of the node with numbering i.
-           The root node has numbering 0, with its two children always having numbering 1 and numbering 2.
-           Thus the root node is NOT included in the 'tree' variable.
+    tree_ :
+        A 2-by-(k-1) matrix that encodes the tree structure. The two entries in the i-th column are the numberings of the two children of the node with numbering i. The root node has numbering 0, with its two children always having numbering 1 and numbering 2. Thus the root node is NOT included in the 'tree' variable.
 
-    splits_: An array of length k-1. It keeps track of the numberings of the nodes being split
-             from the 1st split to the (k-1)-th split. (The first entry is always 0.)
+    splits_ :
+        An array of length k-1. It keeps track of the numberings of the nodes being split from the 1st split to the (k-1)-th split. (The first entry is always 0.)
 
-    is_leaf_: An array of length 2*(k-1). A "1" at index i means that the node with numbering i is a leaf node
-              in the final tree generated, and "0" indicates non-leaf nodes in the final tree.
+    is_leaf_ :
+        An array of length 2*(k-1). A "1" at index i means that the node with numbering i is a leaf node in the final tree generated, and "0" indicates non-leaf nodes in the final tree.
 
-    clusters_: A cell array of length 2*(k-1). The i-th element contains the subset of items
-               at the node with numbering i.
-
-
+    clusters_ :
+        A cell array of length 2*(k-1). The i-th element contains the subset of items at the node with numbering i.
 
 
     Da Kuang, Haesun Park,

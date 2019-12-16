@@ -7,11 +7,11 @@ Welcome to hierarchical-nmf-python's documentation!
 ===================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
-hnmf
-modules
+   model
+   modules
 
 
 Indices and tables
