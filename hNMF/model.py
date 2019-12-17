@@ -237,6 +237,9 @@ class HierarchicalNMF(BaseEstimator):
             stacked.append(stacked_buff)
         return np.array(stacked)
 
+    def _remove_empty(self, x):
+        return [c for c in x if c is not None]
+
     def fit(self, X: Array):
         n_samples, n_features = X.shape
         self.n_samples_ = n_samples
@@ -276,24 +279,36 @@ class HierarchicalNMF(BaseEstimator):
 
                 min_priority = np.min(temp_priority[temp_priority > 0])
                 split_node = np.argmax(temp_priority)
-                if temp_priority[split_node] < 0:
+                if temp_priority[split_node] < 0 or min_priority == -1:
                     tqdm.write("Cannot generate all {k} leaf clusters, stopping at {k_current} leaf clusters"
                                .format(k=self.k, k_current=i))
                     pb.close()
-                    Ws = [W for W in Ws if W is not None]
-                    Hs = [H for H in Hs if H is not None]
+
+                    Ws = self._remove_empty(Ws)
+                    W_buffer = self._remove_empty(W_buffer)
+
+                    Hs = self._remove_empty(Hs)
+                    H_buffer = self._remove_empty(H_buffer)
+
+                    # Resize attributes
+                    tree = tree[:, :result_used]
+                    splits = splits[:result_used]
+                    is_leaf = is_leaf[:result_used]
+                    clusters = clusters[:result_used]
+                    priorities = priorities[:result_used]
+
                     self.tree_ = tree.T
                     self.splits_ = splits
                     self.is_leaf_ = is_leaf
-                    self.clusters_ = clusters
+                    self.n_nodes_ = self.is_leaf_.shape[0]
+                    self.n_leafs_ = np.count_nonzero(self.is_leaf_)
+                    self.clusters_ = self._stack_clusters(clusters)
                     self.Ws_ = Ws
                     self.Hs_ = Hs
                     self.W_buffer_ = np.array(W_buffer)
                     self.H_buffer_ = self._stack_H_buffer(H_buffer)
                     self.priorities_ = priorities
                     self.graph_ = tree_to_nx(tree.T)
-                    self.n_nodes_ = self.is_leaf_.shape[0]
-                    self.n_leafs_ = np.count_nonzero(self.is_leaf_)
                     return self
 
                 split_node = leaves[split_node]  # Attempt to split this node
