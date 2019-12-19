@@ -12,7 +12,6 @@ from sklearn.decomposition import NMF
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from tqdm.auto import tqdm
 
-
 from hNMF.helpers import (anls_entry_rank2_precompute, trial_split, nmfsh_comb_rank2, tree_to_nx,
                           trial_split_sklearn)
 
@@ -52,11 +51,14 @@ class HierarchicalNMF(BaseEstimator):
     random_state :
         random seed
     trial_allowance :
-        Number of trials allowed for removing outliers and splitting a node again. See parameter T in Algorithm 3 in the reference paper.
+        Number of trials allowed for removing outliers and splitting a node again. See parameter T in Algorithm 3 in
+        the reference paper.
     unbalanced :
-        A threshold to determine if one of the two clusters is an outlier set. A smaller value means more tolerance for imbalance between two clusters. See parameter beta in Algorithm 3 in the reference paper.
+        A threshold to determine if one of the two clusters is an outlier set. A smaller value means more tolerance for
+        imbalance between two clusters. See parameter beta in Algorithm 3 in the reference paper.
     vec_norm :
-        Indicates which norm to use for the normalization of W or H, e.g. vec_norm=2 means Euclidean norm; vec_norm=0 means no normalization.
+        Indicates which norm to use for the normalization of W or H, e.g. vec_norm=2 means Euclidean norm; vec_norm=0
+        means no normalization.
     normW :
         true if normalizing columns of W; false if normalizing rows of H.
     anls_alg :
@@ -75,13 +77,17 @@ class HierarchicalNMF(BaseEstimator):
     Attributes
     ----------
     tree_ :
-        A 2-by-(k-1) matrix that encodes the tree structure. The two entries in the i-th column are the numberings of the two children of the node with numbering i. The root node has numbering 0, with its two children always having numbering 1 and numbering 2. Thus the root node is NOT included in the 'tree' variable.
+        A 2-by-(k-1) matrix that encodes the tree structure. The two entries in the i-th column are the numberings of
+        the two children of the node with numbering i. The root node has numbering 0, with its two children always
+        having numbering 1 and numbering 2. Thus the root node is NOT included in the 'tree' variable.
 
     splits_ :
-        An array of length k-1. It keeps track of the numberings of the nodes being split from the 1st split to the (k-1)-th split. (The first entry is always 0.)
+        An array of length k-1. It keeps track of the numberings of the nodes being split from the 1st split to the
+        (k-1)-th split. (The first entry is always 0.)
 
     is_leaf_ :
-        An array of length 2*(k-1). A "1" at index i means that the node with numbering i is a leaf node in the final tree generated, and "0" indicates non-leaf nodes in the final tree.
+        An array of length 2*(k-1). A "1" at index i means that the node with numbering i is a leaf node in the final
+        tree generated, and "0" indicates non-leaf nodes in the final tree.
 
     clusters_ :
         A cell array of length 2*(k-1). The i-th element contains the subset of items at the node with numbering i.
@@ -273,7 +279,7 @@ class HierarchicalNMF(BaseEstimator):
                 if len(np.where(temp_priority > 0)[0]) > 0:
                     min_priority = np.min(temp_priority[temp_priority > 0])
                     split_node = np.argmax(temp_priority)
-                else: # There are no more candidates stop early
+                else:  # There are no more candidates stop early
                     min_priority = -1
                     split_node = 0
 
