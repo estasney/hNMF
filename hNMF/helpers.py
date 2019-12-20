@@ -59,43 +59,55 @@ def hier8_neat(X, k, random_state=0, trial_allowance: int = 3, unbalanced: float
                tol: float = 1e-4, maxiter: int = 10000):
     """
 
-    :param X:
-    :param k: int, The number of desired leaf nodes
-    :param random_state:
-    :param trial_allowance: Number of trials allowed for removing outliers and splitting a node again. See parameter T in Algorithm 3 in the reference paper.
-    :param unbalanced: A threshold to determine if one of the two clusters is an outlier set. A smaller value means more tolerance for unbalance between two clusters. See parameter beta in Algorithm 3 in the reference paper.
-    :param vec_norm: Indicates which norm to use for the normalization of W or H, e.g. vec_norm=2 means Euclidean norm; vec_norm=0 means no normalization.
-    :param normW: true if normalizing columns of W; false if normalizing rows of H.
-    :param anls_alg: The function handle to NNLS algorithm whose signature is the same as @anls_entry_rank2_precompute
-    :param tol: Tolerance parameter for stopping criterion in each run of NMF.
-    :param maxiter: Maximum number of iteration times in each run of NMF
-    :return:
+    Parameters
+    ----------
 
-    Output parameters
-    -----------------
+    X :
 
-     From the output parameters, you can reconstruct the tree and "replay" the k-1 steps that generated it.
+    k :
+     int, The number of desired leaf nodes
+    random_state :
 
-     For a binary tree with k leaf nodes, the total number of nodes (including leaf and non-leaf nodes)
+    trial_allowance :
+     Number of trials allowed for removing outliers and splitting a node again. See parameter T in Algorithm 3 in the reference paper.
+    unbalanced :
+     A threshold to determine if one of the two clusters is an outlier set. A smaller value means more tolerance for unbalance between two clusters. See parameter beta in Algorithm 3 in the reference paper.
+    vec_norm :
+     Indicates which norm to use for the normalization of W or H, e.g. vec_norm=2 means Euclidean norm; vec_norm=0 means no normalization.
+    normW :
+     true if normalizing columns of W; false if normalizing rows of H.
+    anls_alg :
+     The function handle to NNLS algorithm whose signature is the same as @anls_entry_rank2_precompute
+    tol :
+     Tolerance parameter for stopping criterion in each run of NMF.
+    maxiter :
+     Maximum number of iteration times in each run of NMF
+
+
+    Returns
+    -------
+
+    From the output parameters, you can reconstruct the tree and "replay" the k-1 steps that generated it.
+
+    For a binary tree with k leaf nodes, the total number of nodes (including leaf and non-leaf nodes)
      is 2*(k-1) plus the root node, because k-1 splits are performed and each split generates two new nodes.
 
-     We only keep track of the 2*(k-1) non-root node in the output.
+    We only keep track of the 2*(k-1) non-root node in the output.
 
-     tree: A 2-by-(k-1) matrix that encodes the tree structure. The two entries in the i-th column are the numberings
+    tree: A 2-by-(k-1) matrix that encodes the tree structure. The two entries in the i-th column are the numberings
            of the two children of the node with numbering i.
            The root node has numbering 0, with its two children always having numbering 1 and numbering 2.
            Thus the root node is NOT included in the 'tree' variable.
 
 
-
-     splits: An array of length k-1. It keeps track of the numberings of the nodes being split
+    splits: An array of length k-1. It keeps track of the numberings of the nodes being split
              from the 1st split to the (k-1)-th split. (The first entry is always 0.)
 
-     is_leaf: An array of length 2*(k-1). A "1" at index i means that the node with numbering i is a leaf node
+    is_leaf: An array of length 2*(k-1). A "1" at index i means that the node with numbering i is a leaf node
               in the final tree generated, and "0" indicates non-leaf nodes in the final tree.
 
-     clusters: A cell array of length 2*(k-1). The i-th element contains the subset of items
-               at the node with numbering i.
+    clusters: A cell array of length 2*(k-1). The i-th element contains the subset of items
+        at the node with numbering i.
 
 
     Ws: A cell array of length 2*(k-1).
@@ -104,8 +116,8 @@ def hier8_neat(X, k, random_state=0, trial_allowance: int = 3, unbalanced: float
     priorities: An array of length 2*(k-1).
                  Its i-th element is the modified NDCG scores at the node with numbering i (see the reference paper).
 
-     Tips
-     ----
+    Notes
+    -----
 
      If you want to have the flat partitioning induced by the leaf nodes in the final tree,
      use this script:

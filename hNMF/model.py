@@ -409,33 +409,50 @@ class HierarchicalNMF(BaseEstimator):
             raise AttributeError("Unexpected vectorizer received")
         return getattr(self, attr)
 
-    def _handle_tops(self, arr: Union[np.ndarray, list], ranks: Union[np.ndarray, list], vec: str = 'id2sample_') -> \
-            List[Tuple]:
-        vec = getattr(self, vec)
+    def _handle_tops(self, arr: Union[np.ndarray, list], ranks: Union[np.ndarray, list],
+                     vec: Union[str, Type[None]] = 'id2feature_') -> List[Tuple]:
         if vec:
-            return [(vec[i], arr[i]) for i in ranks if arr[i] > 0]
+            vec_ = getattr(self, vec, None)
+        else:
+            vec_ = None
+
+        if vec_ is not None:
+            return [(vec_[i], arr[i]) for i in ranks if arr[i] > 0]
         else:
             return [(i, arr[i]) for i in ranks if arr[i] > 0]
 
-    def top_items_in_node(self, node: int, n: int = 10, id2sample: Vectorizer = None, merge=False) \
+    def _handle_encoding(self, i: int, vec: Union[str, Type[None]]) -> Union[int, str]:
+        if vec:
+            vec_ = getattr(self, vec, None)
+        else:
+            vec_ = getattr(self, vec, None)
+        if vec_ is not None:
+            return vec_[i]
+        else:
+            return i
+
+    def top_features_in_node(self, node: int, n: int = 10, id2feature: Vectorizer = None, merge=False) \
             -> Union[List[Tuple], List[List]]:
         """
 
         Parameters
         ----------
+
+        For a given node, return the top n values
+
         node
             Index of node to return top items
         n
             Number of items to return
-        id2sample
-            Optional, if provided returns decoded items
+        id2feature
+            Optional, if provided returns decoded features
         merge
             If False, returns top items for each column in node. If True, columns are averaged across rows and top items
             are computed from the result
 
         """
 
-        self._handle_vectorizer(id2sample, 'id2sample_')
+        self._handle_vectorizer(id2feature, 'id2feature_')
         node = self.H_buffer_[node]
         n1, n2 = node[0], node[1]
         if merge:
@@ -450,15 +467,18 @@ class HierarchicalNMF(BaseEstimator):
         t2_tops = self._handle_tops(arr=n2, ranks=t2)
         return [t1_tops, t2_tops]
 
-    def top_items_in_nodes(self, n: int = 10, id2sample: Vectorizer = None, merge=False, idx=None) \
+    def top_features_in_nodes(self, n: int = 10, id2feature: Vectorizer = None, merge=False, idx=None) \
             -> List[Dict[str, List]]:
         """
 
         Parameters
         ----------
+
+        Return the top n values from all nodes or nodes present in idx if idx is not None
+
         n
             Number of items to return
-        id2sample
+        id2feature
             Optional, if provided returns decoded items
         merge
             If False, returns top items for each column in node. If True, columns are averaged across rows and top items
@@ -466,12 +486,10 @@ class HierarchicalNMF(BaseEstimator):
         idx
             Optional, if provided, returns top items only for nodes specified in idx
 
-        Returns
-        -------
 
         """
 
-        self._handle_vectorizer(id2sample, 'id2sample_')
+        self._handle_vectorizer(id2feature, 'id2feature_')
         if idx is not None:
             nodes = self.H_buffer_[idx]
         else:
@@ -485,16 +503,16 @@ class HierarchicalNMF(BaseEstimator):
                 m = n1 * n2
                 t = m.argsort()[::-1][:n]
                 tops = self._handle_tops(arr=m, ranks=t)
-                output.append({'node': node_id, 'words': tops})
+                output.append({'node': node_id, 'features': tops})
             else:
                 t1 = n1.argsort()[::-1][:n]
                 t2 = n2.argsort()[::-1][:n]
                 t1_tops = self._handle_tops(arr=n1, ranks=t1)
                 t2_tops = self._handle_tops(arr=n2, ranks=t2)
-                output.append({"node": node_id, 'words': [t1_tops, t2_tops]})
+                output.append({"node": node_id, 'features': [t1_tops, t2_tops]})
         return output
 
-    def top_items_in_leaves(self, n: int = 10, id2sample: Vectorizer = None, merge=False) \
+    def top_features_in_leaves(self, n: int = 10, id2feature: Vectorizer = None, merge=False) \
             -> List[Dict[str, List]]:
 
         """
@@ -504,7 +522,7 @@ class HierarchicalNMF(BaseEstimator):
         ----------
          n
             Number of items to return
-        id2sample
+        id2feature
             Optional, if provided returns decoded items
         merge
             If False, returns top items for each column in node. If True, columns are averaged across rows and top items
@@ -513,21 +531,13 @@ class HierarchicalNMF(BaseEstimator):
         """
 
         leaf_idx = np.where(self.is_leaf_ == 1)[0]
-        output = self.top_items_in_nodes(n, id2sample, merge, leaf_idx)
+        output = self.top_features_in_nodes(n, id2feature, merge, leaf_idx)
         return output
 
-    def _handle_encoding(self, i: int, is_sample=True):
-        if is_sample:
-            target_attr = getattr(self, 'id2sample_')
-        else:
-            target_attr = getattr(self, 'id2feature_')
-        if target_attr:
-            return target_attr[i]
-        else:
-            return i
-
-    def top_items_in_W(self, n: int, leafs_only: bool, id2sample: Vectorizer, id2feature: Vectorizer):
+    def top_nodes_in_features(self, n: int, leafs_only: bool, id2feature: Vectorizer):
         """
+
+        Returns the top items for W.
 
         Parameters
         ----------
@@ -535,51 +545,143 @@ class HierarchicalNMF(BaseEstimator):
             Number of items to return
         leafs_only
             Whether to filter top items to nodes identified as leaves
-        id2sample
-            Optional, if provided returns decoded items from self.H
         id2feature
-            Optional, if provided returns decoded items from self.W
+            Optional, if provided returns decoded features
+
+        Notes
+        -----
+        Rather than return the top features for each node, this returns the top nodes for each feature.
 
         """
-        self._handle_vectorizer(id2sample, 'id2sample_')
         self._handle_vectorizer(id2feature, 'id2feature_')
-        output = {self._handle_encoding(i): [] for i in range(self.n_features_)}
 
-        reconstructions = np.array([np.dot(self.W_buffer_[i], self.H_buffer_[i]) for i in range(self.n_nodes_)])
+        # Idx of leaves
+        node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
 
-        for i, item in enumerate(self.clusters_.T):
+        # A dictionary of {feature : [top_nodes]}
+        # output = {self._handle_encoding(i, is_sample=False): [] for i in range(self.n_features_)}
+        output = {}
+
+        # Array to hold feature weight from each reconstructed matrix
+        feature_weights = np.zeros(shape=(self.n_nodes_, self.n_features_))
+
+        for node_idx in range(len(self.W_buffer_)):
+
+            # Don't bother reconstructing nodes we won't access
+            if leafs_only and node_idx not in node_leaf_idx:
+                continue
+
+            # Reconstructed has a shape n_samples, n_features
+            reconstructed = np.dot(self.W_buffer_[node_idx], self.H_buffer_[node_idx])
+
+            # L2 Normalization
+            # reconstructed = normalize(reconstructed, norm='l2', axis=1, return_norm=False)
+
+            # Get the sum of weights for each feature across samples
+            feature_node_weights = reconstructed.sum(axis=0)
+            feature_weights[node_idx] = feature_node_weights
+
+        # Transpose array so we can iterate per feature
+        for feature_idx, feature_weight in enumerate(feature_weights.T):
+
+            # Reindex here to prevent non-leaves from appearing in top items. This could happen if a feature has
+            # non-zero weights < n
+
             if leafs_only:
-                cluster_memberships = np.logical_and.reduce([self.is_leaf_ == 1, item == 1])
-                cluster_memberships = np.argwhere(cluster_memberships)
-                if len(cluster_memberships) == 0:
-                    continue
-                else:
-                    cluster_memberships = cluster_memberships[0]
+                weights = feature_weight[node_leaf_idx]
             else:
-                cluster_memberships = np.argwhere(item).flatten()
-            membership_tops = []
-            for membership in cluster_memberships:
-                cluster_features = reconstructions[membership][:, i]
-                top_features = cluster_features.argsort()[::-1][:n]
-                tops = self._handle_tops(arr=cluster_features, ranks=top_features, vec='id2feature_')
-                membership_tops.append({"node": membership, "words": tops})
-            output[self._handle_encoding(i)] = membership_tops
+                weights = feature_weight
+
+            top_idx = weights.argsort()[::-1][:n]
+            tops = self._handle_tops(arr=weights, ranks=top_idx, vec=None)
+
+            # Decode
+            feature_key = self._handle_encoding(i=feature_idx, vec='id2feature_')
+            output[feature_key] = tops
+
         return output
 
-    def enrich_tree(self, n: int, id2sample: Vectorizer):
+    def top_nodes_in_samples(self, n: int, leafs_only: bool, id2feature: Vectorizer, id2sample: Vectorizer):
         """
-        Appends decoded top items to :py:attr:`self.graph_` Useful if it is desired to export for visualization
+
+        Returns the top nodes for each sample.
+
+        Parameters
+        ----------
+        n
+            Number of items to return
+        leafs_only
+            Whether to filter top items to nodes identified as leaves
+        id2feature
+            Optional, if provided returns decoded features
+        id2sample
+            Optional, if provided returns decoded samples. Should be of form idx : decoded_value
+
+
+        """
+        self._handle_vectorizer(id2feature, 'id2feature_')
+        self._handle_vectorizer(id2sample, 'id2sample_')
+
+        # Idx of leaves
+        node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
+
+        # A dictionary of {sample : [top_nodes]}
+
+        output = {}
+
+        # Array to hold feature weight from each reconstructed matrix
+        node_weights = np.zeros(shape=(self.n_samples_, self.n_nodes_))
+
+        for node_idx in range(len(self.W_buffer_)):
+
+            # Don't bother reconstructing nodes we won't access
+            if leafs_only and node_idx not in node_leaf_idx:
+                continue
+
+            # Reconstructed has a shape n_samples, n_features
+            reconstructed = np.dot(self.W_buffer_[node_idx], self.H_buffer_[node_idx])
+
+            # L2 Normalization
+            # reconstructed = normalize(reconstructed, norm='l2', axis=1, return_norm=False)
+
+            # Get the sum of weights for each feature across samples
+            feature_node_weights = reconstructed.sum(axis=0)
+            feature_weights[node_idx] = feature_node_weights
+
+        # Transpose array so we can iterate per feature
+        for feature_idx, feature_weight in enumerate(feature_weights.T):
+
+            # Reindex here to prevent non-leaves from appearing in top items. This could happen if a feature has
+            # non-zero weights < n
+
+            if leafs_only:
+                weights = feature_weight[node_leaf_idx]
+            else:
+                weights = feature_weight
+
+            top_idx = weights.argsort()[::-1][:n]
+            tops = self._handle_tops(arr=weights, ranks=top_idx, vec=None)
+
+            # Decode
+            feature_key = self._handle_encoding(i=feature_idx, vec='id2feature_')
+            output[feature_key] = tops
+
+        return output
+
+    def enrich_tree(self, n: int, id2feature: Vectorizer):
+        """
+        Appends decoded top features to :py:attr:`self.graph_` Useful if it is desired to export for visualization
 
         Parameters
         ----------
         n
             The number of top items to add to each node
-        id2sample
-            Decodes items
+        id2feature
+            Decodes features
 
         """
         g = self.graph_
-        self._handle_vectorizer(id2sample, 'id2sample_')
+        self._handle_vectorizer(id2feature, 'id2feature_')
         nodes = self.H_buffer_
         node_id_incrementer = g.number_of_nodes() + 1
         id2nodeid = defaultdict()
@@ -593,7 +695,7 @@ class HierarchicalNMF(BaseEstimator):
             for arr, ranks in [(n1, t1), (n2, t2)]:
                 for rank in ranks:
                     weight = arr[rank]
-                    name = self._handle_encoding(rank)
+                    name = self._handle_encoding(rank, True)
                     word_node_id = id2nodeid[rank]
                     g.add_node(word_node_id, name=name, is_word=True, id=str(word_node_id))
                     g.add_edge(node_id, word_node_id, weight=weight)
