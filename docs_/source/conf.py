@@ -63,7 +63,7 @@ html_context = {
     'display_github': True,
     'github_user': 'estasney',
     'github_repo': 'hNMF',
-    'github_version': 'master/doc'
+    'github_version': 'master/docs_/source'
     }
 
 rst_epilog = """
