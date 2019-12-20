@@ -102,7 +102,7 @@ class HierarchicalNMF(BaseEstimator):
 
     Notes
     -----
-    Adapted from [1]_
+    Adapted from [rank-2]_
 
     """
 
@@ -601,7 +601,7 @@ class HierarchicalNMF(BaseEstimator):
 
         return output
 
-    def top_nodes_in_samples(self, n: int, leafs_only: bool, id2feature: Vectorizer, id2sample: Vectorizer):
+    def top_nodes_in_samples(self, n: int, leafs_only: bool, id2sample: Vectorizer):
         """
 
         Returns the top nodes for each sample.
@@ -612,14 +612,11 @@ class HierarchicalNMF(BaseEstimator):
             Number of items to return
         leafs_only
             Whether to filter top items to nodes identified as leaves
-        id2feature
-            Optional, if provided returns decoded features
         id2sample
             Optional, if provided returns decoded samples. Should be of form idx : decoded_value
 
 
         """
-        self._handle_vectorizer(id2feature, 'id2feature_')
         self._handle_vectorizer(id2sample, 'id2sample_')
 
         # Idx of leaves
@@ -629,41 +626,24 @@ class HierarchicalNMF(BaseEstimator):
 
         output = {}
 
-        # Array to hold feature weight from each reconstructed matrix
-        node_weights = np.zeros(shape=(self.n_samples_, self.n_nodes_))
+        # Ws_ is shape n_nodes, n_samples
+        # Transpose weights so it has samples as rows, nodes as columns
 
-        for node_idx in range(len(self.W_buffer_)):
+        if leafs_only:
+            weights = self.Ws_[node_leaf_idx].T
+        else:
+            weights = self.Ws_[node_leaf_idx].T
 
-            # Don't bother reconstructing nodes we won't access
-            if leafs_only and node_idx not in node_leaf_idx:
-                continue
+        sample_tops = weights.argsort()[::-1][:, :n]
 
-            # Reconstructed has a shape n_samples, n_features
-            reconstructed = np.dot(self.W_buffer_[node_idx], self.H_buffer_[node_idx])
+        # Create an array with samples as rows, top n weights as columns
+        sample_top_weights = np.take_along_axis(weights, sample_tops, axis=1)
 
-            # L2 Normalization
-            # reconstructed = normalize(reconstructed, norm='l2', axis=1, return_norm=False)
+        for sample_idx, (node_ids, node_weights) in enumerate(zip(sample_tops, sample_top_weights)):
+            tops = [(node_id, weight) for node_id, weight in zip(node_ids, node_weights)]
 
-            # Get the sum of weights for each feature across samples
-            feature_node_weights = reconstructed.sum(axis=0)
-            feature_weights[node_idx] = feature_node_weights
-
-        # Transpose array so we can iterate per feature
-        for feature_idx, feature_weight in enumerate(feature_weights.T):
-
-            # Reindex here to prevent non-leaves from appearing in top items. This could happen if a feature has
-            # non-zero weights < n
-
-            if leafs_only:
-                weights = feature_weight[node_leaf_idx]
-            else:
-                weights = feature_weight
-
-            top_idx = weights.argsort()[::-1][:n]
-            tops = self._handle_tops(arr=weights, ranks=top_idx, vec=None)
-
-            # Decode
-            feature_key = self._handle_encoding(i=feature_idx, vec='id2feature_')
+            # Decode samples if available
+            feature_key = self._handle_encoding(i=sample_idx, vec='id2sample_')
             output[feature_key] = tops
 
         return output
