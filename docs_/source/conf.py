@@ -59,6 +59,13 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+html_context = {
+    'display_github': True,
+    'github_user': 'estasney',
+    'github_repo': 'hNMF',
+    'github_version': 'master/doc'
+    }
+
 rst_epilog = """
 .. |project| replace:: hNMF
 """
