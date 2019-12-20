@@ -133,7 +133,7 @@ def hier8_neat(X, k, random_state=0, trial_allowance: int = 3, unbalanced: float
 
      Notes
      ----------
-     Adapted from [1]_
+     Adapted from [rank-2]_
     """
 
     # Repack params
