@@ -86,14 +86,21 @@ class HierarchicalNMF(BaseEstimator):
         (k-1)-th split. (The first entry is always 0.)
 
     is_leaf_ :
-        An array of length 2*(k-1). A "1" at index i means that the node with numbering i is a leaf node in the final
+        An array of length 2*(k-1). A "1" at index ``i`` means that the node with numbering ``i`` is a leaf node in the final
         tree generated, and "0" indicates non-leaf nodes in the final tree.
 
     clusters_ :
-        A cell array of length 2*(k-1). The i-th element contains the subset of items at the node with numbering i.
+        Array with shape(n_nodes, n_samples). A "1" at index ``i`` means that the sample with numbering ``c`` was
+        included in this nodes subset
 
     graph_ :
         NetworkX DiGraph of nodes
+
+    Hs_ :
+        Array with shape (n_nodes, 2)
+
+    Ws_ :
+        Array with shape (n_nodes, n_samples)
 
     Methods
     -------
@@ -102,6 +109,16 @@ class HierarchicalNMF(BaseEstimator):
 
     Notes
     -----
+
+    ``W`` refers to the decomposed matrix. scikit-learn equivalent of::
+
+        W = model.fit_transform(X)
+
+    ``H`` refers to the factorization matrix. scikit-learn equivalent of::
+
+        model.components_
+
+
     Adapted from [rank-2]_
 
     """
@@ -262,6 +279,9 @@ class HierarchicalNMF(BaseEstimator):
         splits = -np.ones(self.k - 1, dtype=self.dtype)
 
         term_subset = np.where(np.sum(X, axis=1) != 0)[0]  # Where X has at least one non-zero
+
+        # W (n_samples|term_subset, 2)
+        # H (2, n_features)
         W, H = self._init_2_rank(X, term_subset)
 
         result_used = 0
@@ -321,6 +341,8 @@ class HierarchicalNMF(BaseEstimator):
                 is_leaf[split_node] = 0
                 W = W_buffer[split_node]
                 H = H_buffer[split_node]
+
+                # Find which features are clustered on this node
                 split_subset = clusters[split_node]
                 new_nodes = [result_used, result_used + 1]
                 tree[:, split_node] = new_nodes
@@ -328,12 +350,29 @@ class HierarchicalNMF(BaseEstimator):
             result_used += 2
             # For each row find where it is more greatly represented
             cluster_subset = np.argmax(H, axis=0)
-            clusters[new_nodes[0]] = split_subset[np.where(cluster_subset == 0)[0]]
-            clusters[new_nodes[1]] = split_subset[np.where(cluster_subset == 1)[0]]
+
+            subset_0 = np.where(cluster_subset == 0)[0]
+            subset_1 = np.where(cluster_subset == 1)[0]
+
+            clusters[new_nodes[0]] = split_subset[subset_0]
+            clusters[new_nodes[1]] = split_subset[subset_1]
             Ws[new_nodes[0]] = W[:, 0]
             Ws[new_nodes[1]] = W[:, 1]
-            Hs[new_nodes[0]] = H[:, 0]
-            Hs[new_nodes[1]] = H[:, 1]
+
+
+            # These will not have shape of (2, n_features) because they are fitting a subset
+            # Create zero filled array of shape (2, n_features)
+            h_temp = np.zeros(shape=(2, self.n_features_), dtype=self.dtype)
+            # Which features are present in H
+
+            h_temp[0, split_subset] = H[0]
+            h_temp[1, split_subset] = H[1]
+
+            Hs[new_nodes[0]] = h_temp[0]
+            Hs[new_nodes[1]] = h_temp[1]
+
+            del h_temp
+
             splits[i] = split_node
             is_leaf[new_nodes] = 1
 
@@ -431,8 +470,8 @@ class HierarchicalNMF(BaseEstimator):
         else:
             return i
 
-    def top_features_in_node(self, node: int, n: int = 10, id2feature: Vectorizer = None, merge=False) \
-            -> Union[List[Tuple], List[List]]:
+    def top_features_in_node(self, node: int, n: int = 10, id2feature: Vectorizer = None) \
+            -> List[Tuple]:
         """
 
         Parameters
@@ -446,29 +485,18 @@ class HierarchicalNMF(BaseEstimator):
             Number of items to return
         id2feature
             Optional, if provided returns decoded features
-        merge
-            If False, returns top items for each column in node. If True, columns are averaged across rows and top items
-            are computed from the result
 
         """
 
         self._handle_vectorizer(id2feature, 'id2feature_')
-        node = self.H_buffer_[node]
-        n1, n2 = node[0], node[1]
-        if merge:
-            m = n1 * n2
-            t = m.argsort()[::-1][:n]
-            tops = self._handle_tops(arr=m, ranks=t)
-            return tops
+        node = self.Hs_[node]
+        ranks = node.argsort()[::-1][:n]
+        tops = self._handle_tops(arr=node, ranks=ranks)
+        return tops
 
-        t1 = n1.argsort()[::-1][:n]
-        t2 = n2.argsort()[::-1][:n]
-        t1_tops = self._handle_tops(arr=n1, ranks=t1)
-        t2_tops = self._handle_tops(arr=n2, ranks=t2)
-        return [t1_tops, t2_tops]
-
-    def top_features_in_nodes(self, n: int = 10, id2feature: Vectorizer = None, merge=False, idx=None) \
-            -> List[Dict[str, List]]:
+    def top_features_in_nodes(self, n: int = 10, id2feature: Vectorizer = None, idx=None,
+                              leaves_only=False) \
+            -> List[Dict[str, List[Tuple]]]:
         """
 
         Parameters
@@ -485,53 +513,26 @@ class HierarchicalNMF(BaseEstimator):
             are computed from the result
         idx
             Optional, if provided, returns top items only for nodes specified in idx
-
+        leaves_only
+            If True and idx is None return top items for all leaf nodes
 
         """
 
         self._handle_vectorizer(id2feature, 'id2feature_')
         if idx is not None:
-            nodes = self.H_buffer_[idx]
+            nodes = self.Hs_[idx]
+        elif idx is None and leaves_only is True:
+            idx = np.where(self.is_leaf_ == 1)[0]
+            nodes = self.Hs_[idx]
         else:
-            idx = np.arange(0, self.H_buffer_.shape[0])
-            nodes = self.H_buffer_[idx]
+            idx = np.arange(0, self.Hs_.shape[0])
+            nodes = self.Hs_[idx]
 
         output = []
         for node_id, node in zip(idx, nodes):
-            n1, n2 = node[0], node[1]
-            if merge:
-                m = n1 * n2
-                t = m.argsort()[::-1][:n]
-                tops = self._handle_tops(arr=m, ranks=t)
-                output.append({'node': node_id, 'features': tops})
-            else:
-                t1 = n1.argsort()[::-1][:n]
-                t2 = n2.argsort()[::-1][:n]
-                t1_tops = self._handle_tops(arr=n1, ranks=t1)
-                t2_tops = self._handle_tops(arr=n2, ranks=t2)
-                output.append({"node": node_id, 'features': [t1_tops, t2_tops]})
-        return output
-
-    def top_features_in_leaves(self, n: int = 10, id2feature: Vectorizer = None, merge=False) \
-            -> List[Dict[str, List]]:
-
-        """
-        Convenience method to return top items occurring from nodes identified as leaves
-
-        Parameters
-        ----------
-         n
-            Number of items to return
-        id2feature
-            Optional, if provided returns decoded items
-        merge
-            If False, returns top items for each column in node. If True, columns are averaged across rows and top items
-            are computed from the result
-
-        """
-
-        leaf_idx = np.where(self.is_leaf_ == 1)[0]
-        output = self.top_features_in_nodes(n, id2feature, merge, leaf_idx)
+            ranks = node.argsort()[::-1][:n]
+            tops = self._handle_tops(arr=node, ranks=ranks)
+            output.append({'node': node_id, 'features': tops})
         return output
 
     def top_nodes_in_features(self, n: int, leaves_only: bool, id2feature: Vectorizer):
@@ -662,23 +663,19 @@ class HierarchicalNMF(BaseEstimator):
         """
         g = self.graph_
         self._handle_vectorizer(id2feature, 'id2feature_')
-        nodes = self.H_buffer_
+        nodes = self.Hs_
         node_id_incrementer = g.number_of_nodes() + 1
         id2nodeid = defaultdict()
         id2nodeid.default_factory = lambda: id2nodeid.__len__() + node_id_incrementer
 
         for node_id, node in enumerate(nodes):
-            n1, n2 = node[0], node[1]
-            t1 = n1.argsort()[::-1][:n]
-            t2 = n2.argsort()[::-1][:n]
-
-            for arr, ranks in [(n1, t1), (n2, t2)]:
-                for rank in ranks:
-                    weight = arr[rank]
-                    name = self._handle_encoding(rank, True)
-                    word_node_id = id2nodeid[rank]
-                    g.add_node(word_node_id, name=name, is_word=True, id=str(word_node_id))
-                    g.add_edge(node_id, word_node_id, weight=weight)
+            ranks = node.argsort()[::-1][:n]
+            for rank in ranks:
+                weight = node[rank]
+                name = self._handle_encoding(rank, True)
+                word_node_id = id2nodeid[rank]
+                g.add_node(word_node_id, name=name, is_word=True, id=str(word_node_id))
+                g.add_edge(node_id, word_node_id, weight=weight)
 
         self.graph_ = g
         return self.graph_
