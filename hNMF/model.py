@@ -133,7 +133,7 @@ class HierarchicalNMF(BaseEstimator):
         self.n_samples_ = None
         self.n_features_ = None
         self.n_nodes_ = 0
-        self.n_leafs_ = 0
+        self.n_leaves_ = 0
         self.tree_ = None
         self.splits_ = None
         self.is_leaf_ = None
@@ -257,7 +257,7 @@ class HierarchicalNMF(BaseEstimator):
         W_buffer = [None] * (2 * (self.k - 1))
         H_buffer = [None] * (2 * (self.k - 1))
         priorities = np.zeros(2 * self.k - 1, dtype=self.dtype)
-        is_leaf = -np.ones(2 * (self.k - 1), dtype=self.dtype)  # No leafs at start
+        is_leaf = -np.ones(2 * (self.k - 1), dtype=self.dtype)  # No leaves at start
         tree = np.zeros((2, 2 * (self.k - 1)), dtype=self.dtype)
         splits = -np.ones(self.k - 1, dtype=self.dtype)
 
@@ -307,7 +307,7 @@ class HierarchicalNMF(BaseEstimator):
                     self.splits_ = splits
                     self.is_leaf_ = is_leaf
                     self.n_nodes_ = self.is_leaf_.shape[0]
-                    self.n_leafs_ = np.count_nonzero(self.is_leaf_)
+                    self.n_leaves_ = np.count_nonzero(self.is_leaf_)
                     self.clusters_ = self._stack_clusters(clusters)
                     self.Ws_ = Ws
                     self.Hs_ = Hs
@@ -391,7 +391,7 @@ class HierarchicalNMF(BaseEstimator):
         self.priorities_ = priorities
         self.graph_ = tree_to_nx(tree.T)
         self.n_nodes_ = self.is_leaf_.shape[0]
-        self.n_leafs_ = np.count_nonzero(self.is_leaf_)
+        self.n_leaves_ = np.count_nonzero(self.is_leaf_)
         return self
 
     def _handle_vectorizer(self, vectorizer: Vectorizer, attr: str):
@@ -534,7 +534,7 @@ class HierarchicalNMF(BaseEstimator):
         output = self.top_features_in_nodes(n, id2feature, merge, leaf_idx)
         return output
 
-    def top_nodes_in_features(self, n: int, leafs_only: bool, id2feature: Vectorizer):
+    def top_nodes_in_features(self, n: int, leaves_only: bool, id2feature: Vectorizer):
         """
 
         Returns the top items for W.
@@ -543,7 +543,7 @@ class HierarchicalNMF(BaseEstimator):
         ----------
         n
             Number of items to return
-        leafs_only
+        leaves_only
             Whether to filter top items to nodes identified as leaves
         id2feature
             Optional, if provided returns decoded features
@@ -568,7 +568,7 @@ class HierarchicalNMF(BaseEstimator):
         for node_idx in range(len(self.W_buffer_)):
 
             # Don't bother reconstructing nodes we won't access
-            if leafs_only and node_idx not in node_leaf_idx:
+            if leaves_only and node_idx not in node_leaf_idx:
                 continue
 
             # Reconstructed has a shape n_samples, n_features
@@ -587,7 +587,7 @@ class HierarchicalNMF(BaseEstimator):
             # Reindex here to prevent non-leaves from appearing in top items. This could happen if a feature has
             # non-zero weights < n
 
-            if leafs_only:
+            if leaves_only:
                 weights = feature_weight[node_leaf_idx]
             else:
                 weights = feature_weight
@@ -601,7 +601,7 @@ class HierarchicalNMF(BaseEstimator):
 
         return output
 
-    def top_nodes_in_samples(self, n: int, leafs_only: bool, id2sample: Vectorizer):
+    def top_nodes_in_samples(self, n: int, leaves_only: bool, id2sample: Vectorizer):
         """
 
         Returns the top nodes for each sample.
@@ -610,7 +610,7 @@ class HierarchicalNMF(BaseEstimator):
         ----------
         n
             Number of items to return
-        leafs_only
+        leaves_only
             Whether to filter top items to nodes identified as leaves
         id2sample
             Optional, if provided returns decoded samples. Should be of form idx : decoded_value
@@ -629,7 +629,7 @@ class HierarchicalNMF(BaseEstimator):
         # Ws_ is shape n_nodes, n_samples
         # Transpose weights so it has samples as rows, nodes as columns
 
-        if leafs_only:
+        if leaves_only:
             weights = self.Ws_[node_leaf_idx].T
         else:
             weights = self.Ws_[node_leaf_idx].T
