@@ -507,9 +507,6 @@ class HierarchicalNMF(BaseEstimator):
             Number of items to return
         id2feature
             Optional, if provided returns decoded items
-        merge
-            If False, returns top items for each column in node. If True, columns are averaged across rows and top items
-            are computed from the result
         idx
             Optional, if provided, returns top items only for nodes specified in idx
         leaves_only
