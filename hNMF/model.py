@@ -97,7 +97,7 @@ class HierarchicalNMF(BaseEstimator):
         NetworkX DiGraph of nodes
 
     Hs_ :
-        Array with shape (n_nodes, 2)
+        Array with shape (n_nodes, n_features)
 
     Ws_ :
         Array with shape (n_nodes, n_samples)
@@ -359,7 +359,6 @@ class HierarchicalNMF(BaseEstimator):
             Ws[new_nodes[0]] = W[:, 0]
             Ws[new_nodes[1]] = W[:, 1]
 
-
             # These will not have shape of (2, n_features) because they are fitting a subset
             # Create zero filled array of shape (2, n_features)
             h_temp = np.zeros(shape=(2, self.n_features_), dtype=self.dtype)
@@ -535,10 +534,10 @@ class HierarchicalNMF(BaseEstimator):
             output.append({'node': node_id, 'features': tops})
         return output
 
-    def top_nodes_in_features(self, n: int, leaves_only: bool, id2feature: Vectorizer):
+    def top_nodes_in_features(self, leaves_only: bool, id2feature: Vectorizer):
         """
 
-        Returns the top items for W.
+        Returns the top items for ``W``.
 
         Parameters
         ----------
