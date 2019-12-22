@@ -163,6 +163,7 @@ class HierarchicalNMF(BaseEstimator):
         self.graph_ = None
         self.id2sample_ = None
         self.id2feature_ = None
+        self.feature2id_ = None
 
     def _init_2_rank(self, X, term_subset):
         if self.nmf_method == NMFMethod.SKLEARN:
@@ -441,8 +442,13 @@ class HierarchicalNMF(BaseEstimator):
                 return None
         if isinstance(vectorizer, dict):
             setattr(self, attr, vectorizer)
+            if attr == "id2feature_":
+                reverse_idx = {v: k for k, v in vectorizer.items()}
+                setattr(self, 'feature2id_', reverse_idx)
         elif type(vectorizer) in [TfidfVectorizer, CountVectorizer]:
             setattr(self, attr, {i: v for i, v in enumerate(vectorizer.get_feature_names())})
+            if attr == "id2feature_":
+                setattr(self, 'feature2id_', {v: i for i, v in enumerate(vectorizer.get_feature_names())})
         else:
             raise AttributeError("Unexpected vectorizer received")
         return getattr(self, attr)
@@ -531,74 +537,90 @@ class HierarchicalNMF(BaseEstimator):
             output.append({'node': node_id, 'features': tops})
         return output
 
-    def top_nodes_in_features(self, leaves_only: bool, id2feature: Vectorizer):
+    def top_nodes_in_feature(self, feature: Union[int, str], n: int = 10, leaves_only: bool = True,
+                             id2feature: Vectorizer = None):
         """
-
-        Returns the top items for ``W``.
+        Returns the top nodes for a specified feature
 
         Parameters
         ----------
+        feature
+            The feature to return the top nodes for. If string, ``id2feature`` must not be ``None`` or
+             ``HierarchicalNMF.id2feature_`` must not be ``None``
         n
-            Number of items to return
+            The number of nodes to return
         leaves_only
-            Whether to filter top items to nodes identified as leaves
+            Whether to filter nodes returned to leaf nodes
         id2feature
-            Optional, if provided returns decoded features
-
-        Notes
-        -----
-        Rather than return the top features for each node, this returns the top nodes for each feature.
+            Optional, if provided encodes ``feature`` if ``feature`` is passed as a string
 
         """
+
+        self._handle_vectorizer(id2feature, 'id2feature_')
+        node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
+        if isinstance(feature, str):
+            feature_idx = self.feature2id_[feature]
+        else:
+            feature_idx = feature
+
+        node_weights = self.Hs_.T[feature_idx]
+        ranks = node_weights.argsort()[::-1]
+        if leaves_only:
+            rank_is_leaf = np.isin(ranks, node_leaf_idx)
+            ranks = rank_is_leaf[rank_is_leaf]
+
+        ranks = ranks[:n]
+        tops = self._handle_tops(arr=node_weights, ranks=ranks, vec=None)
+        return tops
+
+    def top_nodes_in_features(self, features: Union[List[int], List[str], np.ndarray], n: int = 10,
+                              leaves_only: bool = True, id2feature: Vectorizer = None) -> Dict[
+        Union[str, int], List[Tuple]]:
+        """
+        Returns the top nodes for a specified feature
+
+        Parameters
+        ----------
+        features
+            The features to return the top nodes for. If features are strings, ``id2feature`` must not be ``None`` or
+             ``HierarchicalNMF.id2feature_`` must not be ``None``
+        n
+            The number of nodes to return
+        leaves_only
+            Whether to filter nodes returned to leaf nodes
+
+        id2feature
+            Optional, if provided encodes ``feature`` if ``feature`` is passed as a string
+
+        """
+
         self._handle_vectorizer(id2feature, 'id2feature_')
 
         # Idx of leaves
         node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
 
-        # A dictionary of {feature : [top_nodes]}
-        # output = {self._handle_encoding(i, is_sample=False): [] for i in range(self.n_features_)}
         output = {}
 
-        # Array to hold feature weight from each reconstructed matrix
-        feature_weights = np.zeros(shape=(self.n_nodes_, self.n_features_))
+        # Encode features if needed
+        feature_idx = [self.feature2id_[x] if isinstance(x, str) else x for x in features]
+        feature_names = [self.id2feature_[x] if isinstance(x, int) else x for x in feature_idx]
 
-        for node_idx in range(len(self.W_buffer_)):
+        node_weights = self.Hs_.T[feature_idx]
 
-            # Don't bother reconstructing nodes we won't access
-            if leaves_only and node_idx not in node_leaf_idx:
-                continue
+        ranks = np.apply_along_axis(lambda arr: arr.argsort()[::-1], axis=1, arr=node_weights)
 
-            # Reconstructed has a shape n_samples, n_features
-            reconstructed = np.dot(self.W_buffer_[node_idx], self.H_buffer_[node_idx])
+        if leaves_only:
+            ranks = np.apply_along_axis(lambda x: x[np.isin(x, node_leaf_idx)][:n], axis=1, arr=ranks)
+        else:
+            ranks = np.apply_along_axis(lambda x: x[:n], axis=1, arr=ranks)
 
-            # L2 Normalization
-            # reconstructed = normalize(reconstructed, norm='l2', axis=1, return_norm=False)
-
-            # Get the sum of weights for each feature across samples
-            feature_node_weights = reconstructed.sum(axis=0)
-            feature_weights[node_idx] = feature_node_weights
-
-        # Transpose array so we can iterate per feature
-        for feature_idx, feature_weight in enumerate(feature_weights.T):
-
-            # Reindex here to prevent non-leaves from appearing in top items. This could happen if a feature has
-            # non-zero weights < n
-
-            if leaves_only:
-                weights = feature_weight[node_leaf_idx]
-            else:
-                weights = feature_weight
-
-            top_idx = weights.argsort()[::-1][:n]
-            tops = self._handle_tops(arr=weights, ranks=top_idx, vec=None)
-
-            # Decode
-            feature_key = self._handle_encoding(i=feature_idx, vec='id2feature_')
-            output[feature_key] = tops
+        for feature_name, node_weight, rank in zip(feature_names, node_weights, ranks):
+            tops = self._handle_tops(arr=node_weight, ranks=rank, vec=None)
+            output[feature_name] = tops
 
         return output
 
-    def top_nodes_in_samples(self, n: int, leaves_only: bool, id2sample: Vectorizer):
+    def top_nodes_in_samples(self, n: int = 10, leaves_only: bool = True, id2sample: Vectorizer = None):
         """
 
         Returns the top nodes for each sample.
