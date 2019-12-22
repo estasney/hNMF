@@ -14,6 +14,12 @@
 - Improved performance timings
 - Convenience methods for interpreting results
 
+Performance
+***********
+The paper mentions that the hierarchical NMF process takes advantage of a fast 2-rank matrix decomposition. The Python
+implementation. While this may be true in MATLAB, the original Python implementation was bottlenecked when running the
+2-rank decomposition.
+
 .. _paper: https://smallk.github.io/papers/hierNMF2.pdf
 .. _repository: https://github.com/dakuang/hiernmf2
 .. _hierarchical-nmf-python: https://github.com/rudvlf0413/hierarchical-nmf-python
