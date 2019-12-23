@@ -275,7 +275,7 @@ class HierarchicalNMF(BaseEstimator):
         Hs = [None] * (2 * (self.k - 1))
         W_buffer = [None] * (2 * (self.k - 1))
         H_buffer = [None] * (2 * (self.k - 1))
-        priorities = np.zeros(2 * self.k - 1, dtype=self.dtype)
+        priorities = np.zeros(2 * (self.k - 1), dtype=self.dtype)
         is_leaf = -np.ones(2 * (self.k - 1), dtype=np.int)  # No leaves at start
         tree = np.zeros((2, 2 * (self.k - 1)), dtype=np.int)
         splits = -np.ones(self.k - 1, dtype=np.int)
@@ -652,7 +652,7 @@ class HierarchicalNMF(BaseEstimator):
         if leaves_only:
             weights = self.Ws_[node_leaf_idx].T
         else:
-            weights = self.Ws_[node_leaf_idx].T
+            weights = self.Ws_.T
 
         sample_tops = weights.argsort()[::-1][:, :n]
 
@@ -670,7 +670,36 @@ class HierarchicalNMF(BaseEstimator):
 
     # TODO top_samples_in_nodes
     # TODO sample_similarity_by_node_weights
-    # TODO top_nodes_by_n_features
+
+    def cluster_features(self, leaves_only: bool = True, id2feature: Vectorizer = None) \
+            -> Dict[int, List[Union[str, int]]]:
+        """
+        Returns the features assigned as a cluster to nodes
+
+        Parameters
+
+        ----------
+        leaves_only
+            Whether to return only leaf nodes
+        id2feature
+            Decodes features
+
+        """
+        self._handle_vectorizer(id2feature, 'id2feature_')
+
+        output = {}
+
+        node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
+
+        for i, node in enumerate(self.clusters_):
+            if leaves_only and i not in node_leaf_idx:
+                continue
+            node_features = np.argwhere(node).flatten()
+            features_decoded = [self._handle_encoding(i=feature_idx, vec='id2feature_')
+                                for feature_idx in node_features]
+            output[i] = features_decoded
+
+        return output
 
     def enrich_tree(self, n: int, id2feature: Vectorizer):
         """
