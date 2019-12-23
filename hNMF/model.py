@@ -276,9 +276,9 @@ class HierarchicalNMF(BaseEstimator):
         W_buffer = [None] * (2 * (self.k - 1))
         H_buffer = [None] * (2 * (self.k - 1))
         priorities = np.zeros(2 * self.k - 1, dtype=self.dtype)
-        is_leaf = -np.ones(2 * (self.k - 1))  # No leaves at start
-        tree = np.zeros((2, 2 * (self.k - 1)))
-        splits = -np.ones(self.k - 1)
+        is_leaf = -np.ones(2 * (self.k - 1), dtype=np.int)  # No leaves at start
+        tree = np.zeros((2, 2 * (self.k - 1)), dtype=np.int)
+        splits = -np.ones(self.k - 1, dtype=np.int)
 
         term_subset = np.where(np.sum(X, axis=1) != 0)[0]  # Where X has at least one non-zero
 
