@@ -649,6 +649,100 @@ included in this nodes subset
                  </a>
                 </p>
                 <dl class="method">
+                 <dt id="hNMF.model.HierarchicalNMF.cluster_features">
+                  <code class="sig-name descname">
+                   cluster_features
+                  </code>
+                  <span class="sig-paren">
+                   (
+                  </span>
+                  <em class="sig-param">
+                   leaves_only=True
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   id2feature=None
+                  </em>
+                  <span class="sig-paren">
+                   )
+                  </span>
+                  <a class="headerlink" href="#hNMF.model.HierarchicalNMF.cluster_features" title="Permalink to this definition">
+                   ¶
+                  </a>
+                 </dt>
+                 <dd>
+                  <p>
+                   Returns the features assigned as a cluster to nodes
+                  </p>
+                  <p>
+                   Parameters
+                  </p>
+                  <dl class="simple">
+                   <dt>
+                    leaves_only
+                   </dt>
+                   <dd>
+                    <p>
+                     Whether to return only leaf nodes
+                    </p>
+                   </dd>
+                   <dt>
+                    id2feature
+                   </dt>
+                   <dd>
+                    <p>
+                     Decodes features
+                    </p>
+                   </dd>
+                  </dl>
+                  <dl class="field-list simple">
+                   <dt class="field-odd">
+                    Return type
+                   </dt>
+                   <dd class="field-odd">
+                    <p>
+                     <code class="xref py py-class docutils literal notranslate">
+                      <span class="pre">
+                       Dict
+                      </span>
+                     </code>
+                     [
+                     <code class="xref py py-class docutils literal notranslate">
+                      <span class="pre">
+                       int
+                      </span>
+                     </code>
+                     ,
+                     <code class="xref py py-class docutils literal notranslate">
+                      <span class="pre">
+                       List
+                      </span>
+                     </code>
+                     [
+                     <code class="xref py py-data docutils literal notranslate">
+                      <span class="pre">
+                       Union
+                      </span>
+                     </code>
+                     [
+                     <code class="xref py py-class docutils literal notranslate">
+                      <span class="pre">
+                       str
+                      </span>
+                     </code>
+                     ,
+                     <code class="xref py py-class docutils literal notranslate">
+                      <span class="pre">
+                       int
+                      </span>
+                     </code>
+                     ]]]
+                    </p>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+                <dl class="method">
                  <dt id="hNMF.model.HierarchicalNMF.enrich_tree">
                   <code class="sig-name descname">
                    enrich_tree
