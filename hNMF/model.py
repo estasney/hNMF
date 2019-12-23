@@ -1,6 +1,7 @@
 # coding: utf-8
 from collections import defaultdict
 from enum import Enum
+from operator import itemgetter
 from typing import Union, TypeVar, List, Tuple, Type, Dict
 
 import networkx as nx
@@ -275,9 +276,9 @@ class HierarchicalNMF(BaseEstimator):
         W_buffer = [None] * (2 * (self.k - 1))
         H_buffer = [None] * (2 * (self.k - 1))
         priorities = np.zeros(2 * self.k - 1, dtype=self.dtype)
-        is_leaf = -np.ones(2 * (self.k - 1), dtype=self.dtype)  # No leaves at start
-        tree = np.zeros((2, 2 * (self.k - 1)), dtype=self.dtype)
-        splits = -np.ones(self.k - 1, dtype=self.dtype)
+        is_leaf = -np.ones(2 * (self.k - 1))  # No leaves at start
+        tree = np.zeros((2, 2 * (self.k - 1)))
+        splits = -np.ones(self.k - 1)
 
         term_subset = np.where(np.sum(X, axis=1) != 0)[0]  # Where X has at least one non-zero
 
@@ -659,13 +660,17 @@ class HierarchicalNMF(BaseEstimator):
         sample_top_weights = np.take_along_axis(weights, sample_tops, axis=1)
 
         for sample_idx, (node_ids, node_weights) in enumerate(zip(sample_tops, sample_top_weights)):
-            tops = [(node_id, weight) for node_id, weight in zip(node_ids, node_weights)]
-
+            tops = [(node_id, weight) for node_id, weight in zip(node_ids, node_weights) if weight > 0]
+            tops.sort(key=itemgetter(1), reverse=True)
             # Decode samples if available
             feature_key = self._handle_encoding(i=sample_idx, vec='id2sample_')
             output[feature_key] = tops
 
         return output
+
+    # TODO top_samples_in_nodes
+    # TODO sample_similarity_by_node_weights
+    # TODO top_nodes_by_n_features
 
     def enrich_tree(self, n: int, id2feature: Vectorizer):
         """
