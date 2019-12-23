@@ -1,6 +1,7 @@
 # coding: utf-8
 from collections import defaultdict
 from enum import Enum
+from operator import itemgetter
 from typing import Union, TypeVar, List, Tuple, Type, Dict
 
 import networkx as nx
@@ -245,7 +246,7 @@ class HierarchicalNMF(BaseEstimator):
             x = np.zeros(self.n_features_)
             x[cluster] = 1
             stacked.append(x)
-        return np.vstack(stacked)
+        return np.vstack(stacked).astype(np.int)
 
     def _stack_H_buffer(self, buffer: list) -> np.ndarray:
         # Returns components_ with shape (2*k-1, 2, n_features)
@@ -274,10 +275,10 @@ class HierarchicalNMF(BaseEstimator):
         Hs = [None] * (2 * (self.k - 1))
         W_buffer = [None] * (2 * (self.k - 1))
         H_buffer = [None] * (2 * (self.k - 1))
-        priorities = np.zeros(2 * self.k - 1, dtype=self.dtype)
-        is_leaf = -np.ones(2 * (self.k - 1), dtype=self.dtype)  # No leaves at start
-        tree = np.zeros((2, 2 * (self.k - 1)), dtype=self.dtype)
-        splits = -np.ones(self.k - 1, dtype=self.dtype)
+        priorities = np.zeros(2 * (self.k - 1), dtype=self.dtype)
+        is_leaf = -np.ones(2 * (self.k - 1), dtype=np.int)  # No leaves at start
+        tree = np.zeros((2, 2 * (self.k - 1)), dtype=np.int)
+        splits = -np.ones(self.k - 1, dtype=np.int)
 
         term_subset = np.where(np.sum(X, axis=1) != 0)[0]  # Where X has at least one non-zero
 
@@ -651,7 +652,7 @@ class HierarchicalNMF(BaseEstimator):
         if leaves_only:
             weights = self.Ws_[node_leaf_idx].T
         else:
-            weights = self.Ws_[node_leaf_idx].T
+            weights = self.Ws_.T
 
         sample_tops = weights.argsort()[::-1][:, :n]
 
@@ -659,11 +660,44 @@ class HierarchicalNMF(BaseEstimator):
         sample_top_weights = np.take_along_axis(weights, sample_tops, axis=1)
 
         for sample_idx, (node_ids, node_weights) in enumerate(zip(sample_tops, sample_top_weights)):
-            tops = [(node_id, weight) for node_id, weight in zip(node_ids, node_weights)]
-
+            tops = [(node_id, weight) for node_id, weight in zip(node_ids, node_weights) if weight > 0]
+            tops.sort(key=itemgetter(1), reverse=True)
             # Decode samples if available
             feature_key = self._handle_encoding(i=sample_idx, vec='id2sample_')
             output[feature_key] = tops
+
+        return output
+
+    # TODO top_samples_in_nodes
+    # TODO sample_similarity_by_node_weights
+
+    def cluster_features(self, leaves_only: bool = True, id2feature: Vectorizer = None) \
+            -> Dict[int, List[Union[str, int]]]:
+        """
+        Returns the features assigned as a cluster to nodes
+
+        Parameters
+
+        ----------
+        leaves_only
+            Whether to return only leaf nodes
+        id2feature
+            Decodes features
+
+        """
+        self._handle_vectorizer(id2feature, 'id2feature_')
+
+        output = {}
+
+        node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
+
+        for i, node in enumerate(self.clusters_):
+            if leaves_only and i not in node_leaf_idx:
+                continue
+            node_features = np.argwhere(node).flatten()
+            features_decoded = [self._handle_encoding(i=feature_idx, vec='id2feature_')
+                                for feature_idx in node_features]
+            output[i] = features_decoded
 
         return output
 
