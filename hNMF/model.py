@@ -246,7 +246,7 @@ class HierarchicalNMF(BaseEstimator):
             x = np.zeros(self.n_features_)
             x[cluster] = 1
             stacked.append(x)
-        return np.vstack(stacked)
+        return np.vstack(stacked).astype(np.int)
 
     def _stack_H_buffer(self, buffer: list) -> np.ndarray:
         # Returns components_ with shape (2*k-1, 2, n_features)
