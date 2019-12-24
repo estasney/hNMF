@@ -14,20 +14,14 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from tqdm.auto import tqdm
 
 from hNMF.helpers import (anls_entry_rank2_precompute, trial_split, nmfsh_comb_rank2, tree_to_nx,
-                          trial_split_sklearn)
+                          trial_split_sklearn, handle_enums)
 
 Vectorizer = TypeVar('Vectorizer', dict, TfidfVectorizer, CountVectorizer)
 Array = TypeVar('Array', np.ndarray, csr_matrix)
 
 
-class NMFMethod(Enum):
-    SKLEARN = 0
-    ORIGINAL = 1
-
-
 class NMFInitMethod(Enum):
-    """
-    Class that
+    """Specifies method used for initial matrices of W and H
 
     """
     DEFAULT = None
@@ -37,10 +31,73 @@ class NMFInitMethod(Enum):
     NNDSVDAR = 'nndsvdar'
 
 
+class NMFSolver(Enum):
+    """Specifies solver for NMF
+
+    """
+    CD = 'cd'
+    MU = 'mu'
+
+
+class NMFBetaLoss(Enum):
+    """Specifies beta loss for NMF
+
+    ``FRO`` refers to Frobenius (2)
+    ``KL`` refers to Kullback-Leibler (1)
+    ``IS`` refers to Itakura-Saito (0)
+    """
+    FRO = 2
+    KL = 1
+    IS = 0
+
+
 InitMethod = TypeVar('InitMethod', Type[NMFInitMethod], str, Type[None])
+Solver = TypeVar('Solver', Type[NMFSolver], str)
+BetaLoss = TypeVar('BetaLoss', Type[NMFBetaLoss], int, float, str)
 
 
 class HierarchicalNMF(BaseEstimator):
+    def __init__(self,
+                 k: int,
+                 unbalanced: float = 0.1,
+                 init: InitMethod = NMFInitMethod.DEFAULT,
+                 solver: Solver = NMFSolver.CD,
+                 beta_loss: BetaLoss = NMFBetaLoss.FRO,
+                 random_state: int = 42,
+                 trial_allowance: int = 100,
+                 tol: float = 1e-6,
+                 maxiter: int = 10000,
+                 dtype: Union[np.float32,
+                              np.float64] = np.float64):
+        self.k = k
+        self.unbalanced = unbalanced
+        self.init = handle_enums(init)
+        self.solver = handle_enums(solver)
+        self.beta_loss = handle_enums(beta_loss)
+        self.random = np.random.RandomState(seed=random_state)
+        self.trial_allowance = trial_allowance
+        self.tol = tol
+        self.maxiter = maxiter
+        self.dtype = dtype
+
+        self.n_samples_ = None
+        self.n_features_ = None
+        self.n_nodes_ = 0
+        self.n_leaves_ = 0
+        self.tree_ = None
+        self.splits_ = None
+        self.is_leaf_ = None
+        self.clusters_ = None
+        self.Ws_ = None
+        self.Hs_ = None
+        self.W_buffer_ = None
+        self.H_buffer_ = None
+        self.priorities_ = None
+        self.graph_ = None
+        self.id2sample_ = None
+        self.id2feature_ = None
+        self.feature2id_ = None
+
     """
     Implements Hierarchical rank-2 NMF
 
@@ -49,31 +106,26 @@ class HierarchicalNMF(BaseEstimator):
 
     k:
         The number of desired leaf nodes
+    unbalanced :
+        A threshold to determine if one of the two clusters is an outlier set. A smaller value means more tolerance for
+        imbalance between two clusters. See parameter beta in Algorithm 3 in the reference paper.
+    init :
+        The initialization method used to initially fill W and H
+    solver :
+        The solver used to minimize the distance function
+    beta_loss :
+        Beta divergence to be minimized
     random_state :
         random seed
     trial_allowance :
         Number of trials allowed for removing outliers and splitting a node again. See parameter T in Algorithm 3 in
         the reference paper.
-    unbalanced :
-        A threshold to determine if one of the two clusters is an outlier set. A smaller value means more tolerance for
-        imbalance between two clusters. See parameter beta in Algorithm 3 in the reference paper.
-    vec_norm :
-        Indicates which norm to use for the normalization of W or H, e.g. vec_norm=2 means Euclidean norm; vec_norm=0
-        means no normalization.
-    normW :
-        true if normalizing columns of W; false if normalizing rows of H.
-    anls_alg :
-        must implement NNLS
     tol :
         Tolerance parameter for stopping criterion in each run of NMF.
     maxiter :
         Maximum number of iteration times in each run of NMF
     dtype :
-        Dtype used for numpy arrays
-    nmf_method :
-        Use NMF as implemented by Sklearn or Original Paper
-    nmf_init_method :
-        Only used when nmf_method is sklearn. Specifies nmf init procedure
+        Dtype used for numpy arrays 
 
     Attributes
     ----------
@@ -124,59 +176,9 @@ class HierarchicalNMF(BaseEstimator):
 
     """
 
-    def __init__(self, k: int,
-                 random_state: int = 42,
-                 trial_allowance: int = 100,
-                 unbalanced: float = 0.1,
-                 vec_norm: int = 2,
-                 normW: bool = True,
-                 anls_alg: callable = anls_entry_rank2_precompute,
-                 tol: float = 1e-6,
-                 maxiter: int = 10000,
-                 dtype: Union[np.float32, np.float64] = np.float64,
-                 nmf_init_method: InitMethod = NMFInitMethod.DEFAULT,
-                 nmf_method: Union[type(NMFMethod.SKLEARN), type(NMFMethod.ORIGINAL)] = NMFMethod.SKLEARN):
-        self.k = k
-        self.random = np.random.RandomState(seed=random_state)
-        self.trial_allowance = trial_allowance
-        self.unbalanced = unbalanced
-        self.vec_norm = vec_norm
-        self.normW = normW
-        self.anls_alg = anls_alg
-        self.tol = tol
-        self.maxiter = maxiter
-        self.dtype = dtype
-        self.nmf_init_method = nmf_init_method.value if type(nmf_init_method) == NMFInitMethod else nmf_init_method
-        self.nmf_method = nmf_method
-        self.n_samples_ = None
-        self.n_features_ = None
-        self.n_nodes_ = 0
-        self.n_leaves_ = 0
-        self.tree_ = None
-        self.splits_ = None
-        self.is_leaf_ = None
-        self.clusters_ = None
-        self.Ws_ = None
-        self.Hs_ = None
-        self.W_buffer_ = None
-        self.H_buffer_ = None
-        self.priorities_ = None
-        self.graph_ = None
-        self.id2sample_ = None
-        self.id2feature_ = None
-        self.feature2id_ = None
-
-    def _init_2_rank(self, X, term_subset):
-        if self.nmf_method == NMFMethod.SKLEARN:
-            return self._init_fit_sklearn(X, term_subset)
-        elif self.nmf_method == NMFMethod.ORIGINAL:
-            return self._init_fit_original(X, term_subset)
-        else:
-            return self._init_fit_sklearn(X, term_subset)
-
-    def _init_fit_sklearn(self, X, term_subset):
+    def _init_fit(self, X, term_subset):
         nmf = NMF(n_components=2, random_state=self.random, tol=self.tol, max_iter=self.maxiter,
-                  init=self.nmf_init_method)
+                  init=self.init)
 
         if len(term_subset) == self.n_samples_:
             W = nmf.fit_transform(X)
@@ -190,80 +192,6 @@ class HierarchicalNMF(BaseEstimator):
             del W_tmp
 
         return W, H
-
-    def _init_fit_original(self, X, term_subset):
-        W = self.random.rand(len(term_subset), 2)
-        H = self.random.rand(2, self.n_features_)
-
-        # Compute the 2-rank NMF of W and H
-        if len(term_subset) == self.n_samples_:
-            # All documents have features
-            W, H = nmfsh_comb_rank2(X, W, H, anls_alg=self.anls_alg, vec_norm=self.vec_norm, normW=self.normW,
-                                    tol=self.tol,
-                                    maxiter=self.maxiter,
-                                    dtype=self.dtype)
-        else:
-            # Exclude documents without features
-            W_tmp, H = nmfsh_comb_rank2(X[term_subset, :], W, H, anls_alg=self.anls_alg, vec_norm=self.vec_norm,
-                                        normW=self.normW,
-                                        tol=self.tol,
-                                        maxiter=self.maxiter,
-                                        dtype=self.dtype)
-
-            W = np.zeros((self.n_samples_, 2), dtype=self.dtype)
-            W[term_subset, :] = W_tmp
-            del W_tmp
-        return W, H
-
-    def _trial_split(self, min_priority, X, subset, W_parent, random_state, trial_allowance,
-                     unbalanced, dtype, anls_alg, vec_norm, normW, tol, maxiter, nmf_init_method):
-
-        if self.nmf_method == NMFMethod.SKLEARN:
-            subset, W_buffer_one, H_buffer_one, priority_one = trial_split_sklearn(min_priority=min_priority, X=X,
-                                                                                   subset=subset, W_parent=W_parent,
-                                                                                   random_state=random_state,
-                                                                                   trial_allowance=trial_allowance,
-                                                                                   unbalanced=unbalanced, dtype=dtype,
-                                                                                   tol=tol, maxiter=maxiter,
-                                                                                   nmf_init_method=nmf_init_method)
-        else:
-            subset, W_buffer_one, H_buffer_one, priority_one = trial_split(min_priority=min_priority,
-                                                                           X=X, subset=subset,
-                                                                           random_state=random_state,
-                                                                           trial_allowance=trial_allowance,
-                                                                           unbalanced=unbalanced,
-                                                                           dtype=dtype,
-                                                                           anls_alg=anls_alg,
-                                                                           vec_norm=vec_norm,
-                                                                           normW=normW,
-                                                                           tol=tol, maxiter=maxiter, W_parent=W_parent)
-
-        return subset, W_buffer_one, H_buffer_one, priority_one
-
-    def _stack_clusters(self, clusters: list):
-        stacked = []
-        for cluster in clusters:
-            x = np.zeros(self.n_features_)
-            x[cluster] = 1
-            stacked.append(x)
-        return np.vstack(stacked).astype(np.int)
-
-    def _stack_H_buffer(self, buffer: list) -> np.ndarray:
-        # Returns components_ with shape (2*k-1, 2, n_features)
-        stacked = []
-        for i, buff in enumerate(buffer):
-            x1 = np.zeros(self.n_features_)
-            x2 = np.zeros(self.n_features_)
-            cluster = self.clusters_[i]
-            cluster_nz_idx = np.argwhere(cluster).flatten()
-            x1[cluster_nz_idx] = buff[0, :]
-            x2[cluster_nz_idx] = buff[1, :]
-            stacked_buff = np.vstack([x1, x2])
-            stacked.append(stacked_buff)
-        return np.array(stacked)
-
-    def _remove_empty(self, x):
-        return [c for c in x if c is not None]
 
     def fit(self, X: Array):
         n_samples, n_features = X.shape
@@ -284,7 +212,7 @@ class HierarchicalNMF(BaseEstimator):
 
         # W (n_samples|term_subset, 2)
         # H (2, n_features)
-        W, H = self._init_2_rank(X, term_subset)
+        W, H = self._init_fit(X, term_subset)
 
         result_used = 0
         pb = tqdm(desc="Finding Leaves", total=len(range(self.k - 1)))
@@ -305,8 +233,6 @@ class HierarchicalNMF(BaseEstimator):
                     min_priority = -1
                     split_node = 0
 
-                min_priority = np.min(temp_priority[temp_priority > 0])
-                split_node = np.argmax(temp_priority)
                 if temp_priority[split_node] < 0 or min_priority == -1:
                     tqdm.write("Cannot generate all {k} leaf clusters, stopping at {k_current} leaf clusters"
                                .format(k=self.k, k_current=i))
@@ -378,40 +304,34 @@ class HierarchicalNMF(BaseEstimator):
             is_leaf[new_nodes] = 1
 
             subset = clusters[new_nodes[0]]
-            subset, W_buffer_one, H_buffer_one, priority_one = self._trial_split(min_priority=min_priority,
-                                                                                 X=X,
-                                                                                 subset=subset,
-                                                                                 W_parent=W[:, 0],
-                                                                                 random_state=self.random,
-                                                                                 trial_allowance=self.trial_allowance,
-                                                                                 unbalanced=self.unbalanced,
-                                                                                 dtype=self.dtype,
-                                                                                 anls_alg=self.anls_alg,
-                                                                                 vec_norm=self.vec_norm,
-                                                                                 normW=self.normW,
-                                                                                 tol=self.tol,
-                                                                                 maxiter=self.maxiter,
-                                                                                 nmf_init_method=self.nmf_init_method)
+            subset, W_buffer_one, H_buffer_one, priority_one = trial_split_sklearn(min_priority=min_priority,
+                                                                                   X=X,
+                                                                                   subset=subset,
+                                                                                   W_parent=W[:, 0],
+                                                                                   random_state=self.random,
+                                                                                   trial_allowance=self.trial_allowance,
+                                                                                   unbalanced=self.unbalanced,
+                                                                                   dtype=self.dtype,
+                                                                                   tol=self.tol,
+                                                                                   maxiter=self.maxiter,
+                                                                                   init=self.init)
             clusters[new_nodes[0]] = subset
             W_buffer[new_nodes[0]] = W_buffer_one
             H_buffer[new_nodes[0]] = H_buffer_one
             priorities[new_nodes[0]] = priority_one
 
             subset = clusters[new_nodes[1]]
-            subset, W_buffer_one, H_buffer_one, priority_one = self._trial_split(min_priority=min_priority,
-                                                                                 X=X,
-                                                                                 subset=subset,
-                                                                                 W_parent=W[:, 1],
-                                                                                 random_state=self.random,
-                                                                                 trial_allowance=self.trial_allowance,
-                                                                                 unbalanced=self.unbalanced,
-                                                                                 dtype=self.dtype,
-                                                                                 anls_alg=self.anls_alg,
-                                                                                 vec_norm=self.vec_norm,
-                                                                                 normW=self.normW,
-                                                                                 tol=self.tol,
-                                                                                 maxiter=self.maxiter,
-                                                                                 nmf_init_method=self.nmf_init_method)
+            subset, W_buffer_one, H_buffer_one, priority_one = trial_split_sklearn(min_priority=min_priority,
+                                                                                   X=X,
+                                                                                   subset=subset,
+                                                                                   W_parent=W[:, 1],
+                                                                                   random_state=self.random,
+                                                                                   trial_allowance=self.trial_allowance,
+                                                                                   unbalanced=self.unbalanced,
+                                                                                   dtype=self.dtype,
+                                                                                   tol=self.tol,
+                                                                                   maxiter=self.maxiter,
+                                                                                   init=self.init)
             clusters[new_nodes[1]] = subset
             W_buffer[new_nodes[1]] = W_buffer_one
             H_buffer[new_nodes[1]] = H_buffer_one
@@ -475,6 +395,31 @@ class HierarchicalNMF(BaseEstimator):
             return vec_[i]
         else:
             return i
+
+    def _stack_clusters(self, clusters: list):
+        stacked = []
+        for cluster in clusters:
+            x = np.zeros(self.n_features_)
+            x[cluster] = 1
+            stacked.append(x)
+        return np.vstack(stacked).astype(np.int)
+
+    def _stack_H_buffer(self, buffer: list) -> np.ndarray:
+        # Returns components_ with shape (2*k-1, 2, n_features)
+        stacked = []
+        for i, buff in enumerate(buffer):
+            x1 = np.zeros(self.n_features_)
+            x2 = np.zeros(self.n_features_)
+            cluster = self.clusters_[i]
+            cluster_nz_idx = np.argwhere(cluster).flatten()
+            x1[cluster_nz_idx] = buff[0, :]
+            x2[cluster_nz_idx] = buff[1, :]
+            stacked_buff = np.vstack([x1, x2])
+            stacked.append(stacked_buff)
+        return np.array(stacked)
+
+    def _remove_empty(self, x):
+        return [c for c in x if c is not None]
 
     def top_features_in_node(self, node: int, n: int = 10, id2feature: Vectorizer = None) \
             -> List[Tuple]:
