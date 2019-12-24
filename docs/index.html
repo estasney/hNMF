@@ -198,27 +198,27 @@ implementation. While this may be true in MATLAB, the original Python implementa
                 </em>
                 ,
                 <em class="sig-param">
+                 unbalanced=0.1
+                </em>
+                ,
+                <em class="sig-param">
+                 init=&lt;NMFInitMethod.DEFAULT: None&gt;
+                </em>
+                ,
+                <em class="sig-param">
+                 solver=&lt;NMFSolver.CD: 'cd'&gt;
+                </em>
+                ,
+                <em class="sig-param">
+                 beta_loss=&lt;NMFBetaLoss.FRO: 2&gt;
+                </em>
+                ,
+                <em class="sig-param">
                  random_state=42
                 </em>
                 ,
                 <em class="sig-param">
                  trial_allowance=100
-                </em>
-                ,
-                <em class="sig-param">
-                 unbalanced=0.1
-                </em>
-                ,
-                <em class="sig-param">
-                 vec_norm=2
-                </em>
-                ,
-                <em class="sig-param">
-                 normW=True
-                </em>
-                ,
-                <em class="sig-param">
-                 anls_alg=&lt;function anls_entry_rank2_precompute&gt;
                 </em>
                 ,
                 <em class="sig-param">
@@ -231,14 +231,6 @@ implementation. While this may be true in MATLAB, the original Python implementa
                 ,
                 <em class="sig-param">
                  dtype=&lt;class 'numpy.float64'&gt;
-                </em>
-                ,
-                <em class="sig-param">
-                 nmf_init_method=&lt;NMFInitMethod.DEFAULT: None&gt;
-                </em>
-                ,
-                <em class="sig-param">
-                 nmf_method=&lt;NMFMethod.SKLEARN: 0&gt;
                 </em>
                 <span class="sig-paren">
                  )
@@ -255,398 +247,6 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    sklearn.base.BaseEstimator
                   </span>
                  </code>
-                </p>
-                <p>
-                 Implements Hierarchical rank-2 NMF
-                </p>
-                <dl class="field-list simple">
-                 <dt class="field-odd">
-                  Parameters
-                 </dt>
-                 <dd class="field-odd">
-                  <ul class="simple">
-                   <li>
-                    <p>
-                     <strong>
-                      k
-                     </strong>
-                     (
-                     <code class="xref py py-class docutils literal notranslate">
-                      <span class="pre">
-                       int
-                      </span>
-                     </code>
-                     ) – The number of desired leaf nodes
-                    </p>
-                   </li>
-                   <li>
-                    <p>
-                     <strong>
-                      random_state
-                     </strong>
-                     (
-                     <code class="xref py py-class docutils literal notranslate">
-                      <span class="pre">
-                       int
-                      </span>
-                     </code>
-                     ) – random seed
-                    </p>
-                   </li>
-                   <li>
-                    <p>
-                     <strong>
-                      trial_allowance
-                     </strong>
-                     (
-                     <code class="xref py py-class docutils literal notranslate">
-                      <span class="pre">
-                       int
-                      </span>
-                     </code>
-                     ) – Number of trials allowed for removing outliers and splitting a node again. See parameter T in Algorithm 3 in
-the reference paper.
-                    </p>
-                   </li>
-                   <li>
-                    <p>
-                     <strong>
-                      unbalanced
-                     </strong>
-                     (
-                     <code class="xref py py-class docutils literal notranslate">
-                      <span class="pre">
-                       float
-                      </span>
-                     </code>
-                     ) – A threshold to determine if one of the two clusters is an outlier set. A smaller value means more tolerance for
-imbalance between two clusters. See parameter beta in Algorithm 3 in the reference paper.
-                    </p>
-                   </li>
-                   <li>
-                    <p>
-                     <strong>
-                      vec_norm
-                     </strong>
-                     (
-                     <code class="xref py py-class docutils literal notranslate">
-                      <span class="pre">
-                       int
-                      </span>
-                     </code>
-                     ) – Indicates which norm to use for the normalization of W or H, e.g. vec_norm=2 means Euclidean norm; vec_norm=0
-means no normalization.
-                    </p>
-                   </li>
-                   <li>
-                    <p>
-                     <strong>
-                      normW
-                     </strong>
-                     (
-                     <code class="xref py py-class docutils literal notranslate">
-                      <span class="pre">
-                       bool
-                      </span>
-                     </code>
-                     ) – true if normalizing columns of W; false if normalizing rows of H.
-                    </p>
-                   </li>
-                   <li>
-                    <p>
-                     <strong>
-                      anls_alg
-                     </strong>
-                     (
-                     <code class="xref py py-class docutils literal notranslate">
-                      <span class="pre">
-                       callable
-                      </span>
-                     </code>
-                     ) – must implement NNLS
-                    </p>
-                   </li>
-                   <li>
-                    <p>
-                     <strong>
-                      tol
-                     </strong>
-                     (
-                     <code class="xref py py-class docutils literal notranslate">
-                      <span class="pre">
-                       float
-                      </span>
-                     </code>
-                     ) – Tolerance parameter for stopping criterion in each run of NMF.
-                    </p>
-                   </li>
-                   <li>
-                    <p>
-                     <strong>
-                      maxiter
-                     </strong>
-                     (
-                     <code class="xref py py-class docutils literal notranslate">
-                      <span class="pre">
-                       int
-                      </span>
-                     </code>
-                     ) – Maximum number of iteration times in each run of NMF
-                    </p>
-                   </li>
-                   <li>
-                    <p>
-                     <strong>
-                      dtype
-                     </strong>
-                     (
-                     <code class="xref py py-data docutils literal notranslate">
-                      <span class="pre">
-                       Union
-                      </span>
-                     </code>
-                     [
-                     <code class="xref py py-class docutils literal notranslate">
-                      <span class="pre">
-                       float32
-                      </span>
-                     </code>
-                     ,
-                     <code class="xref py py-class docutils literal notranslate">
-                      <span class="pre">
-                       float64
-                      </span>
-                     </code>
-                     ]) – Dtype used for numpy arrays
-                    </p>
-                   </li>
-                   <li>
-                    <p>
-                     <strong>
-                      nmf_method
-                     </strong>
-                     (
-                     <a class="reference internal" href="#hNMF.model.NMFMethod" title="hNMF.model.NMFMethod">
-                      <code class="xref py py-class docutils literal notranslate">
-                       <span class="pre">
-                        NMFMethod
-                       </span>
-                      </code>
-                     </a>
-                     ) – Use NMF as implemented by Sklearn or Original Paper
-                    </p>
-                   </li>
-                   <li>
-                    <p>
-                     <strong>
-                      nmf_init_method
-                     </strong>
-                     (
-                     <em>
-                      ~InitMethod
-                     </em>
-                     ) – Only used when nmf_method is sklearn. Specifies nmf init procedure
-                    </p>
-                   </li>
-                  </ul>
-                 </dd>
-                </dl>
-                <dl class="attribute">
-                 <dt id="hNMF.model.HierarchicalNMF.tree_">
-                  <code class="sig-name descname">
-                   tree_
-                  </code>
-                  <a class="headerlink" href="#hNMF.model.HierarchicalNMF.tree_" title="Permalink to this definition">
-                   ¶
-                  </a>
-                 </dt>
-                 <dd>
-                  <p>
-                   A 2-by-(k-1) matrix that encodes the tree structure. The two entries in the i-th column are the numberings of
-the two children of the node with numbering i. The root node has numbering 0, with its two children always
-having numbering 1 and numbering 2. Thus the root node is NOT included in the ‘tree’ variable.
-                  </p>
-                 </dd>
-                </dl>
-                <dl class="attribute">
-                 <dt id="hNMF.model.HierarchicalNMF.splits_">
-                  <code class="sig-name descname">
-                   splits_
-                  </code>
-                  <a class="headerlink" href="#hNMF.model.HierarchicalNMF.splits_" title="Permalink to this definition">
-                   ¶
-                  </a>
-                 </dt>
-                 <dd>
-                  <p>
-                   An array of length k-1. It keeps track of the numberings of the nodes being split from the 1st split to the
-(k-1)-th split. (The first entry is always 0.)
-                  </p>
-                 </dd>
-                </dl>
-                <dl class="attribute">
-                 <dt id="hNMF.model.HierarchicalNMF.is_leaf_">
-                  <code class="sig-name descname">
-                   is_leaf_
-                  </code>
-                  <a class="headerlink" href="#hNMF.model.HierarchicalNMF.is_leaf_" title="Permalink to this definition">
-                   ¶
-                  </a>
-                 </dt>
-                 <dd>
-                  <p>
-                   An array of length 2*(k-1). A “1” at index
-                   <code class="docutils literal notranslate">
-                    <span class="pre">
-                     i
-                    </span>
-                   </code>
-                   means that the node with numbering
-                   <code class="docutils literal notranslate">
-                    <span class="pre">
-                     i
-                    </span>
-                   </code>
-                   is a leaf node in the final
-tree generated, and “0” indicates non-leaf nodes in the final tree.
-                  </p>
-                 </dd>
-                </dl>
-                <dl class="attribute">
-                 <dt id="hNMF.model.HierarchicalNMF.clusters_">
-                  <code class="sig-name descname">
-                   clusters_
-                  </code>
-                  <a class="headerlink" href="#hNMF.model.HierarchicalNMF.clusters_" title="Permalink to this definition">
-                   ¶
-                  </a>
-                 </dt>
-                 <dd>
-                  <p>
-                   Array with shape(n_nodes, n_samples). A “1” at index
-                   <code class="docutils literal notranslate">
-                    <span class="pre">
-                     i
-                    </span>
-                   </code>
-                   means that the sample with numbering
-                   <code class="docutils literal notranslate">
-                    <span class="pre">
-                     c
-                    </span>
-                   </code>
-                   was
-included in this nodes subset
-                  </p>
-                 </dd>
-                </dl>
-                <dl class="attribute">
-                 <dt id="hNMF.model.HierarchicalNMF.graph_">
-                  <code class="sig-name descname">
-                   graph_
-                  </code>
-                  <a class="headerlink" href="#hNMF.model.HierarchicalNMF.graph_" title="Permalink to this definition">
-                   ¶
-                  </a>
-                 </dt>
-                 <dd>
-                  <p>
-                   NetworkX DiGraph of nodes
-                  </p>
-                 </dd>
-                </dl>
-                <dl class="attribute">
-                 <dt id="hNMF.model.HierarchicalNMF.Hs_">
-                  <code class="sig-name descname">
-                   Hs_
-                  </code>
-                  <a class="headerlink" href="#hNMF.model.HierarchicalNMF.Hs_" title="Permalink to this definition">
-                   ¶
-                  </a>
-                 </dt>
-                 <dd>
-                  <p>
-                   Array with shape (n_nodes, n_features)
-                  </p>
-                 </dd>
-                </dl>
-                <dl class="attribute">
-                 <dt id="hNMF.model.HierarchicalNMF.Ws_">
-                  <code class="sig-name descname">
-                   Ws_
-                  </code>
-                  <a class="headerlink" href="#hNMF.model.HierarchicalNMF.Ws_" title="Permalink to this definition">
-                   ¶
-                  </a>
-                 </dt>
-                 <dd>
-                  <p>
-                   Array with shape (n_nodes, n_samples)
-                  </p>
-                 </dd>
-                </dl>
-                <dl class="method">
-                 <dt id="hNMF.model.HierarchicalNMF.fit">
-                  <code class="sig-name descname">
-                   fit
-                  </code>
-                  <span class="sig-paren">
-                   (
-                  </span>
-                  <em class="sig-param">
-                   X
-                  </em>
-                  <span class="sig-paren">
-                   )
-                  </span>
-                  <a class="headerlink" href="#hNMF.model.HierarchicalNMF.fit" title="Permalink to this definition">
-                   ¶
-                  </a>
-                 </dt>
-                 <dd>
-                  <p>
-                   Fit k number of leaves to input array
-                  </p>
-                 </dd>
-                </dl>
-                <p class="rubric">
-                 Notes
-                </p>
-                <p>
-                 <code class="docutils literal notranslate">
-                  <span class="pre">
-                   W
-                  </span>
-                 </code>
-                 refers to the decomposed matrix. scikit-learn equivalent of:
-                </p>
-                <div class="highlight-default notranslate">
-                 <div class="highlight">
-                  <pre><span></span><span class="n">W</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-</pre>
-                 </div>
-                </div>
-                <p>
-                 <code class="docutils literal notranslate">
-                  <span class="pre">
-                   H
-                  </span>
-                 </code>
-                 refers to the factorization matrix. scikit-learn equivalent of:
-                </p>
-                <div class="highlight-default notranslate">
-                 <div class="highlight">
-                  <pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">components_</span>
-</pre>
-                 </div>
-                </div>
-                <p>
-                 Adapted from
-                 <a class="reference internal" href="#rank-2" id="id2">
-                  <span>
-                   [rank-2]
-                  </span>
-                 </a>
                 </p>
                 <dl class="method">
                  <dt id="hNMF.model.HierarchicalNMF.cluster_features">
@@ -812,7 +412,7 @@ included in this nodes subset
                  </dd>
                 </dl>
                 <dl class="method">
-                 <dt>
+                 <dt id="hNMF.model.HierarchicalNMF.fit">
                   <code class="sig-name descname">
                    fit
                   </code>
@@ -825,6 +425,9 @@ included in this nodes subset
                   <span class="sig-paren">
                    )
                   </span>
+                  <a class="headerlink" href="#hNMF.model.HierarchicalNMF.fit" title="Permalink to this definition">
+                   ¶
+                  </a>
                  </dt>
                  <dd>
                  </dd>
@@ -1615,6 +1218,100 @@ included in this nodes subset
                </dd>
               </dl>
               <dl class="class">
+               <dt id="hNMF.model.NMFBetaLoss">
+                <em class="property">
+                 class
+                </em>
+                <code class="sig-prename descclassname">
+                 hNMF.model.
+                </code>
+                <code class="sig-name descname">
+                 NMFBetaLoss
+                </code>
+                <a class="headerlink" href="#hNMF.model.NMFBetaLoss" title="Permalink to this definition">
+                 ¶
+                </a>
+               </dt>
+               <dd>
+                <p>
+                 Bases:
+                 <code class="xref py py-class docutils literal notranslate">
+                  <span class="pre">
+                   enum.Enum
+                  </span>
+                 </code>
+                </p>
+                <p>
+                 Specifies beta loss for NMF
+                </p>
+                <p>
+                 <code class="docutils literal notranslate">
+                  <span class="pre">
+                   FRO
+                  </span>
+                 </code>
+                 refers to Frobenius (2)
+                 <code class="docutils literal notranslate">
+                  <span class="pre">
+                   KL
+                  </span>
+                 </code>
+                 refers to Kullback-Leibler (1)
+                 <code class="docutils literal notranslate">
+                  <span class="pre">
+                   IS
+                  </span>
+                 </code>
+                 refers to Itakura-Saito (0)
+                </p>
+                <dl class="attribute">
+                 <dt id="hNMF.model.NMFBetaLoss.FRO">
+                  <code class="sig-name descname">
+                   FRO
+                  </code>
+                  <em class="property">
+                   = 2
+                  </em>
+                  <a class="headerlink" href="#hNMF.model.NMFBetaLoss.FRO" title="Permalink to this definition">
+                   ¶
+                  </a>
+                 </dt>
+                 <dd>
+                 </dd>
+                </dl>
+                <dl class="attribute">
+                 <dt id="hNMF.model.NMFBetaLoss.IS">
+                  <code class="sig-name descname">
+                   IS
+                  </code>
+                  <em class="property">
+                   = 0
+                  </em>
+                  <a class="headerlink" href="#hNMF.model.NMFBetaLoss.IS" title="Permalink to this definition">
+                   ¶
+                  </a>
+                 </dt>
+                 <dd>
+                 </dd>
+                </dl>
+                <dl class="attribute">
+                 <dt id="hNMF.model.NMFBetaLoss.KL">
+                  <code class="sig-name descname">
+                   KL
+                  </code>
+                  <em class="property">
+                   = 1
+                  </em>
+                  <a class="headerlink" href="#hNMF.model.NMFBetaLoss.KL" title="Permalink to this definition">
+                   ¶
+                  </a>
+                 </dt>
+                 <dd>
+                 </dd>
+                </dl>
+               </dd>
+              </dl>
+              <dl class="class">
                <dt id="hNMF.model.NMFInitMethod">
                 <em class="property">
                  class
@@ -1639,7 +1336,7 @@ included in this nodes subset
                  </code>
                 </p>
                 <p>
-                 Class that
+                 Specifies method used for initial matrices of W and H
                 </p>
                 <dl class="attribute">
                  <dt id="hNMF.model.NMFInitMethod.DEFAULT">
@@ -1719,7 +1416,7 @@ included in this nodes subset
                </dd>
               </dl>
               <dl class="class">
-               <dt id="hNMF.model.NMFMethod">
+               <dt id="hNMF.model.NMFSolver">
                 <em class="property">
                  class
                 </em>
@@ -1727,9 +1424,9 @@ included in this nodes subset
                  hNMF.model.
                 </code>
                 <code class="sig-name descname">
-                 NMFMethod
+                 NMFSolver
                 </code>
-                <a class="headerlink" href="#hNMF.model.NMFMethod" title="Permalink to this definition">
+                <a class="headerlink" href="#hNMF.model.NMFSolver" title="Permalink to this definition">
                  ¶
                 </a>
                </dt>
@@ -1743,17 +1440,17 @@ included in this nodes subset
                  </code>
                 </p>
                 <p>
-                 An enumeration.
+                 Specifies solver for NMF
                 </p>
                 <dl class="attribute">
-                 <dt id="hNMF.model.NMFMethod.ORIGINAL">
+                 <dt id="hNMF.model.NMFSolver.CD">
                   <code class="sig-name descname">
-                   ORIGINAL
+                   CD
                   </code>
                   <em class="property">
-                   = 1
+                   = 'cd'
                   </em>
-                  <a class="headerlink" href="#hNMF.model.NMFMethod.ORIGINAL" title="Permalink to this definition">
+                  <a class="headerlink" href="#hNMF.model.NMFSolver.CD" title="Permalink to this definition">
                    ¶
                   </a>
                  </dt>
@@ -1761,14 +1458,14 @@ included in this nodes subset
                  </dd>
                 </dl>
                 <dl class="attribute">
-                 <dt id="hNMF.model.NMFMethod.SKLEARN">
+                 <dt id="hNMF.model.NMFSolver.MU">
                   <code class="sig-name descname">
-                   SKLEARN
+                   MU
                   </code>
                   <em class="property">
-                   = 0
+                   = 'mu'
                   </em>
-                  <a class="headerlink" href="#hNMF.model.NMFMethod.SKLEARN" title="Permalink to this definition">
+                  <a class="headerlink" href="#hNMF.model.NMFSolver.MU" title="Permalink to this definition">
                    ¶
                   </a>
                  </dt>
@@ -1885,6 +1582,30 @@ included in this nodes subset
                  )
                 </span>
                 <a class="headerlink" href="#hNMF.helpers.compute_priority" title="Permalink to this definition">
+                 ¶
+                </a>
+               </dt>
+               <dd>
+               </dd>
+              </dl>
+              <dl class="function">
+               <dt id="hNMF.helpers.handle_enums">
+                <code class="sig-prename descclassname">
+                 hNMF.helpers.
+                </code>
+                <code class="sig-name descname">
+                 handle_enums
+                </code>
+                <span class="sig-paren">
+                 (
+                </span>
+                <em class="sig-param">
+                 param
+                </em>
+                <span class="sig-paren">
+                 )
+                </span>
+                <a class="headerlink" href="#hNMF.helpers.handle_enums" title="Permalink to this definition">
                  ¶
                 </a>
                </dt>
@@ -2208,7 +1929,7 @@ for i = 1 : length(leaf_level)
                  <div>
                   <p>
                    Adapted from
-                   <a class="reference internal" href="#rank-2" id="id3">
+                   <a class="reference internal" href="#rank-2" id="id2">
                     <span>
                      [rank-2]
                     </span>
@@ -2374,7 +2095,7 @@ for i = 1 : length(leaf_level)
                 </em>
                 ,
                 <em class="sig-param">
-                 nmf_init_method
+                 init
                 </em>
                 <span class="sig-paren">
                  )
@@ -2538,7 +2259,7 @@ for i = 1 : length(leaf_level)
                 </em>
                 ,
                 <em class="sig-param">
-                 nmf_init_method
+                 init
                 </em>
                 <span class="sig-paren">
                  )
