@@ -1,4 +1,5 @@
 import warnings
+from enum import Enum
 from typing import Union
 
 import numpy as np
@@ -219,7 +220,7 @@ def hier8_neat(X, k, random_state=0, trial_allowance: int = 3, unbalanced: float
 
 
 def trial_split_sklearn(min_priority: float, X, subset, W_parent, random_state, trial_allowance: int, unbalanced: float,
-                        dtype: Union[np.float32, np.float64], tol, maxiter, nmf_init_method):
+                        dtype: Union[np.float32, np.float64], tol, maxiter, init):
     m = X.shape[0]
     trial = 0
     subset_backup = subset
@@ -231,7 +232,7 @@ def trial_split_sklearn(min_priority: float, X, subset, W_parent, random_state, 
                                                                                       dtype=dtype,
                                                                                       tol=tol,
                                                                                       maxiter=maxiter,
-                                                                                      nmf_init_method=nmf_init_method)
+                                                                                      init=init)
         if priority_one < 0:
             break
 
@@ -248,7 +249,7 @@ def trial_split_sklearn(min_priority: float, X, subset, W_parent, random_state, 
             _, _, _, priority_one_small = split_once_sklearn(X=X, subset=subset_small,
                                                              W_parent=W_buffer_one[:, idx_small],
                                                              random_state=random_state, dtype=dtype, maxiter=maxiter,
-                                                             tol=tol, nmf_init_method=nmf_init_method)
+                                                             tol=tol, init=init)
             if priority_one_small < min_priority:
                 trial += 1
                 if trial < trial_allowance:
@@ -270,7 +271,7 @@ def trial_split_sklearn(min_priority: float, X, subset, W_parent, random_state, 
 
 
 def split_once_sklearn(X, subset, W_parent, random_state: mtrand.RandomState, dtype: Union[np.float32, np.float64],
-                       tol, maxiter, nmf_init_method):
+                       tol, maxiter, init):
     m = X.shape[0]
     if len(subset) <= 3:
         cluster_subset = np.ones(len(subset), dtype=dtype)
@@ -283,7 +284,7 @@ def split_once_sklearn(X, subset, W_parent, random_state: mtrand.RandomState, dt
         W = random_state.rand(len(term_subset), 2)
         H = random_state.rand(2, len(subset))
         W, H, n_iter_ = non_negative_factorization(X=X_subset, W=W, H=H, n_components=2,
-                                                   init=nmf_init_method,
+                                                   init=init,
                                                    update_H=True,
                                                    solver='cd',
                                                    beta_loss=2,
@@ -561,3 +562,10 @@ def tree_to_nx(tree: np.ndarray, weights: np.ndarray = None):
     g.add_edge("Root", 0)
     g.add_edge("Root", 1)
     return g
+
+
+def handle_enums(param):
+    if isinstance(param, Enum):
+        return param.value
+    else:
+        return param
