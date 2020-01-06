@@ -143,7 +143,7 @@ class HierarchicalNMF(BaseEstimator):
         tree generated, and "0" indicates non-leaf nodes in the final tree.
 
     clusters_ :
-        Array with shape(n_nodes, n_samples). A "1" at index ``i`` means that the sample with numbering ``c`` was
+        Array with shape(n_nodes, n_features). A "1" at index ``i`` means that the sample with numbering ``c`` was
         included in this nodes subset
 
     graph_ :
