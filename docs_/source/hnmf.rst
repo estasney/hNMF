@@ -7,15 +7,13 @@ hNMF
 hNMF.model
 ----------------
 
-.. automodule:: hNMF.model
+.. autoclass:: hNMF.model.HierarchicalNMF
    :members:
-   :undoc-members:
-   :show-inheritance:
+   :private-members:
 
 hNMF.helpers
 -------------------
 
 .. automodule:: hNMF.helpers
    :members:
-   :undoc-members:
    :show-inheritance:

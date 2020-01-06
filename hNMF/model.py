@@ -127,9 +127,10 @@ class HierarchicalNMF(BaseEstimator):
     dtype :
         Dtype used for numpy arrays 
 
+    
     Attributes
     ----------
-    tree_ :
+    tree_ : np.ndarray
         A 2-by-(k-1) matrix that encodes the tree structure. The two entries in the i-th column are the numberings of
         the two children of the node with numbering i. The root node has numbering 0, with its two children always
         having numbering 1 and numbering 2. Thus the root node is NOT included in the 'tree' variable.
@@ -154,11 +155,6 @@ class HierarchicalNMF(BaseEstimator):
 
     Ws_ :
         Array with shape (n_nodes, n_samples)
-
-    Methods
-    -------
-    fit(X)
-        Fit k number of leaves to input array
 
     Notes
     -----
@@ -622,7 +618,6 @@ class HierarchicalNMF(BaseEstimator):
         Returns the features assigned as a cluster to nodes
 
         Parameters
-
         ----------
         leaves_only
             Whether to return only leaf nodes

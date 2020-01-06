@@ -131,9 +131,6 @@ def hier8_neat(X, k, random_state=0, trial_allowance: int = 3, unbalanced: float
 
      (Now the entries in 'partitioning' having value 0 indicate outliers that do not belong to any cluster.)
 
-
-     Notes
-     ----------
      Adapted from [rank-2]_
     """
 
