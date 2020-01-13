@@ -644,6 +644,38 @@ class HierarchicalNMF(BaseEstimator):
 
         return output
 
+    def cluster_assignments(self, leaves_only: bool= True, id2feature: Vectorizer = None) \
+            -> Dict[int, int]:
+        """
+        Returns a dictionary with keys as features and clusters as values
+
+        Parameters
+        ----------
+        leaves_only
+            Whether to return only leaf noes
+        id2feature
+            Decodes features
+
+        """
+        self._handle_vectorizer(id2feature, 'id2feature_')
+
+        if leaves_only:
+            node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
+            clusters = self.clusters_[node_leaf_idx]
+        else:
+            clusters = self.clusters_
+
+        output = {}
+        assignments = np.argwhere(clusters)
+
+        for cluster_idx, feature_idx in assignments:
+            feature_name = self._handle_encoding(i=feature_idx, vec='id2feature_')
+            feature_clusters = output.get(feature_name, [])
+            feature_clusters.append(cluster_idx)
+            output[feature_name] = feature_clusters
+
+        return output
+
     def enrich_tree(self, n: int, id2feature: Vectorizer):
         """
         Appends decoded top features to :py:attr:`self.graph_` Useful if it is desired to export for visualization
