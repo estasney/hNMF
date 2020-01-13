@@ -615,7 +615,8 @@ class HierarchicalNMF(BaseEstimator):
     # TODO top_samples_in_nodes
     # TODO sample_similarity_by_node_weights
 
-    def cluster_features(self, leaves_only: bool = True, id2feature: Vectorizer = None) \
+    def cluster_features(self, leaves_only: bool = True, id2feature: Vectorizer = None,
+                         include_outliers: bool = True) \
             -> Dict[int, List[Union[str, int]]]:
         """
         Returns the features assigned as a cluster to nodes
@@ -626,6 +627,9 @@ class HierarchicalNMF(BaseEstimator):
             Whether to return only leaf nodes
         id2feature
             Decodes features
+        include_outliers
+            If True, features without a node assignment are returned under the key -1
+
 
         """
         self._handle_vectorizer(id2feature, 'id2feature_')
@@ -634,18 +638,28 @@ class HierarchicalNMF(BaseEstimator):
 
         node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
 
-        for i, node in enumerate(self.clusters_):
-            if leaves_only and i not in node_leaf_idx:
-                continue
-            node_features = np.argwhere(node).flatten()
-            features_decoded = [self._handle_encoding(i=feature_idx, vec='id2feature_')
-                                for feature_idx in node_features]
-            output[i] = features_decoded
+        if leaves_only:
+            clusters = self.clusters_[node_leaf_idx]
+        else:
+            clusters = self.clusters_
+
+        assignments = np.argwhere(clusters)
+
+        for cluster_idx, feature_idx in assignments:
+            feature_name = self._handle_encoding(i=feature_idx, vec='id2feature_')
+            cluster_features = output.get(cluster_idx, [])
+            cluster_features.append(feature_name)
+            output[cluster_idx] = feature_name
+
+        if include_outliers:
+            outliers = np.where(clusters.sum(axis=0) == 0)[0]
+            output[-1] = outliers
 
         return output
 
-    def cluster_assignments(self, leaves_only: bool= True, id2feature: Vectorizer = None) \
-            -> Dict[int, int]:
+    def cluster_assignments(self, leaves_only: bool = True, id2feature: Vectorizer = None,
+                            include_outliers: bool = True) \
+            -> Dict[Union[int, str], Union[List[int], Type[None]]]:
         """
         Returns a dictionary with keys as features and clusters as values
 
@@ -655,6 +669,8 @@ class HierarchicalNMF(BaseEstimator):
             Whether to return only leaf noes
         id2feature
             Decodes features
+        include_outliers
+            If True, include feature keys that are not assigned a cluster
 
         """
         self._handle_vectorizer(id2feature, 'id2feature_')
@@ -673,6 +689,12 @@ class HierarchicalNMF(BaseEstimator):
             feature_clusters = output.get(feature_name, [])
             feature_clusters.append(cluster_idx)
             output[feature_name] = feature_clusters
+
+        if include_outliers:
+            outliers = np.where(clusters.sum(axis=0) == 0)[0]
+            for outlier in outliers:
+                outlier_name = self._handle_encoding(i=outlier, vec='id2feature_')
+                output[outlier_name] = None
 
         return output
 

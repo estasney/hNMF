@@ -257,7 +257,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                        </span>
                       </code>
                      </a>
-                     ([leaves_only, id2feature])
+                     ([leaves_only, …])
                     </p>
                    </td>
                    <td>
@@ -276,7 +276,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                        </span>
                       </code>
                      </a>
-                     ([leaves_only, id2feature])
+                     ([leaves_only, id2feature, …])
                     </p>
                    </td>
                    <td>
@@ -510,6 +510,10 @@ implementation. While this may be true in MATLAB, the original Python implementa
                   <em class="sig-param">
                    id2feature=None
                   </em>
+                  ,
+                  <em class="sig-param">
+                   include_outliers=True
+                  </em>
                   <span class="sig-paren">
                    )
                   </span>
@@ -549,7 +553,17 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      </dd>
                      <dt>
                       <strong>
-                       :rtype: :py:class:`~typing.Dict`[:py:class:`int`, :py:class:`int`]
+                       include_outliers
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       If True, include feature keys that are not assigned a cluster
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       :rtype: :py:class:`~typing.Dict`[:py:data:`~typing.Union`[:py:class:`int`, :py:class:`str`], :py:data:`~typing.Union`[:py:class:`~typing.List`[:py:class:`int`], :py:class:`~typing.Type`[``None``]]]
                       </strong>
                      </dt>
                      <dd>
@@ -573,6 +587,10 @@ implementation. While this may be true in MATLAB, the original Python implementa
                   ,
                   <em class="sig-param">
                    id2feature=None
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   include_outliers=True
                   </em>
                   <span class="sig-paren">
                    )
@@ -609,6 +627,16 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      <dd>
                       <p>
                        Decodes features
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       include_outliers
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       If True, features without a node assignment are returned under the key -1
                       </p>
                      </dd>
                      <dt>
