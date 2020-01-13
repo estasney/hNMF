@@ -256,8 +256,8 @@ class HierarchicalNMF(BaseEstimator):
                     self.n_nodes_ = self.is_leaf_.shape[0]
                     self.n_leaves_ = np.count_nonzero(self.is_leaf_)
                     self.clusters_ = self._stack_clusters(clusters)
-                    self.Ws_ = Ws
-                    self.Hs_ = Hs
+                    self.Ws_ = np.array(Ws)
+                    self.Hs_ = np.array(Hs)
                     self.W_buffer_ = np.array(W_buffer)
                     self.H_buffer_ = self._stack_H_buffer(H_buffer)
                     self.priorities_ = priorities
