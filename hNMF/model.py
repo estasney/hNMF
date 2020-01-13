@@ -649,7 +649,7 @@ class HierarchicalNMF(BaseEstimator):
             feature_name = self._handle_encoding(i=feature_idx, vec='id2feature_')
             cluster_features = output.get(cluster_idx, [])
             cluster_features.append(feature_name)
-            output[cluster_idx] = feature_name
+            output[cluster_idx] = cluster_features
 
         if include_outliers:
             outliers = np.where(clusters.sum(axis=0) == 0)[0]
