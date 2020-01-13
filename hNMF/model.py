@@ -57,6 +57,7 @@ BetaLoss = TypeVar('BetaLoss', Type[NMFBetaLoss], int, float, str)
 
 
 class HierarchicalNMF(BaseEstimator):
+    # TODO : Rank parameters
     def __init__(self,
                  k: int,
                  unbalanced: float = 0.1,
@@ -173,6 +174,7 @@ class HierarchicalNMF(BaseEstimator):
     """
 
     def _init_fit(self, X, term_subset):
+        # TODO Flexible Rank
         nmf = NMF(n_components=2, random_state=self.random, tol=self.tol, max_iter=self.maxiter,
                   init=self.init)
 
@@ -194,6 +196,7 @@ class HierarchicalNMF(BaseEstimator):
         self.n_samples_ = n_samples
         self.n_features_ = n_features
 
+        # TODO Expect different sized ranks
         clusters = [None] * (2 * (self.k - 1))
         Ws = [None] * (2 * (self.k - 1))
         Hs = [None] * (2 * (self.k - 1))
@@ -664,7 +667,7 @@ class HierarchicalNMF(BaseEstimator):
             ranks = node.argsort()[::-1][:n]
             for rank in ranks:
                 weight = node[rank]
-                name = self._handle_encoding(rank, True)
+                name = self._handle_encoding(rank, 'id2feature_')
                 word_node_id = id2nodeid[rank]
                 g.add_node(word_node_id, name=name, is_word=True, id=str(word_node_id))
                 g.add_edge(node_id, word_node_id, weight=weight)
