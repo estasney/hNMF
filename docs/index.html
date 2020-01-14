@@ -474,6 +474,25 @@ implementation. While this may be true in MATLAB, the original Python implementa
                     </p>
                    </td>
                   </tr>
+                  <tr class="row-even">
+                   <td>
+                    <p>
+                     <a class="reference internal" href="#hNMF.model.HierarchicalNMF.top_samples_in_nodes" title="hNMF.model.HierarchicalNMF.top_samples_in_nodes">
+                      <code class="xref py py-obj docutils literal notranslate">
+                       <span class="pre">
+                        top_samples_in_nodes
+                       </span>
+                      </code>
+                     </a>
+                     ([n, leaves_only, id2sample])
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     Returns the top samples for each node
+                    </p>
+                   </td>
+                  </tr>
                  </tbody>
                 </table>
                 <table class="docutils align-default">
@@ -1258,6 +1277,77 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      <dd>
                       <p>
                        Optional, if provided returns decoded samples. Should be of form idx : decoded_value
+                      </p>
+                     </dd>
+                    </dl>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+                <dl class="method">
+                 <dt id="hNMF.model.HierarchicalNMF.top_samples_in_nodes">
+                  <code class="sig-name descname">
+                   top_samples_in_nodes
+                  </code>
+                  <span class="sig-paren">
+                   (
+                  </span>
+                  <em class="sig-param">
+                   n=10
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   leaves_only=True
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   id2sample=None
+                  </em>
+                  <span class="sig-paren">
+                   )
+                  </span>
+                  <a class="headerlink" href="#hNMF.model.HierarchicalNMF.top_samples_in_nodes" title="Permalink to this definition">
+                   ¶
+                  </a>
+                 </dt>
+                 <dd>
+                  <p>
+                   Returns the top samples for each node
+                  </p>
+                  <dl class="field-list simple">
+                   <dt class="field-odd">
+                    Parameters
+                   </dt>
+                   <dd class="field-odd">
+                    <dl class="simple">
+                     <dt>
+                      <strong>
+                       n
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       The number of samples to include for each node
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       leaves_only
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Only include leaves
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       id2sample
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Decodes samples
                       </p>
                      </dd>
                     </dl>

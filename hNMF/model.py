@@ -598,7 +598,8 @@ class HierarchicalNMF(BaseEstimator):
         else:
             weights = self.Ws_.T
 
-        sample_tops = weights.argsort()[::-1][:, :n]
+        # The ellipsis indicates that the selection is done row wise
+        sample_tops = weights.argsort()[:, ::-1][:, :n]
 
         # Create an array with samples as rows, top n weights as columns
         sample_top_weights = np.take_along_axis(weights, sample_tops, axis=1)
@@ -612,7 +613,56 @@ class HierarchicalNMF(BaseEstimator):
 
         return output
 
-    # TODO top_samples_in_nodes
+    def top_samples_in_nodes(self, n: int = 10, leaves_only: bool = True, id2sample: Vectorizer = None):
+        """
+
+        Returns the top samples for each node
+
+        Parameters
+        ----------
+        n
+            The number of samples to include for each node
+        leaves_only
+            Only include leaves
+        id2sample
+            Decodes samples
+
+        Returns
+        -------
+
+        """
+
+        self._handle_vectorizer(id2sample, 'id2sample_')
+
+        # Idx of leaves
+        node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
+
+        # A dictionary of {nodes : [sample]}
+
+        output = {}
+
+        # Ws_ is shape n_nodes, n_samples
+
+        if leaves_only:
+            weights = self.Ws_[node_leaf_idx]
+        else:
+            weights = self.Ws_
+
+        # The ellipsis indicates that the selection is done row wise
+        node_tops = weights.argsort()[:, ::-1][:, :n]
+
+        # Create an array with samples as rows, top n weights as columns
+        node_top_weights = np.take_along_axis(weights, node_tops, axis=1)
+
+        for node_idx, (sample_ids, sample_weights) in enumerate(zip(node_tops, node_top_weights)):
+            tops = [(sample_id, weight) for sample_id, weight in zip(sample_ids, sample_weights) if weight > 0]
+            tops.sort(key=itemgetter(1), reverse=True)
+            # Decode samples if available
+            tops = [(self._handle_encoding(i=sample_id, vec='id2sample_'), weight) for (sample_id, weight) in tops]
+            output[node_idx] = tops
+
+        return output
+
     # TODO sample_similarity_by_node_weights
 
     def cluster_features(self, leaves_only: bool = True, id2feature: Vectorizer = None,
