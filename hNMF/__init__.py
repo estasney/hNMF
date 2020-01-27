@@ -1,2 +1,8 @@
 from hNMF.model import *
 from hNMF.helpers import *
+
+import logging
+
+logger = logging.getLogger('hnmf')
+if len(logger.handlers) == 0:
+    logger.addHandler(logging.NullHandler())
