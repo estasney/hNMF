@@ -14,7 +14,7 @@ class MyTestCase(unittest.TestCase):
         self.alpha = beta(10, 1).rvs()
         self.X = np.abs(make_sparse_spd_matrix(dim=self.n_samples, alpha=self.alpha, norm_diag=False,
                                                smallest_coef=0.1, largest_coef=0.7))
-        self.k = np.random.randint(5, 1000)
+        self.k = np.random.randint(5, 50)
 
     def test_hnmf_inits(self):
         try:
