@@ -2,7 +2,7 @@
 from collections import defaultdict
 from enum import Enum
 from operator import itemgetter
-from typing import Union, TypeVar, List, Tuple, Type, Dict, Literal
+from typing import Union, TypeVar, List, Tuple, Type, Dict
 
 import networkx as nx
 import numpy as np
@@ -18,7 +18,6 @@ from hNMF.helpers import (anls_entry_rank2_precompute, trial_split, nmfsh_comb_r
 
 Vectorizer = TypeVar('Vectorizer', dict, TfidfVectorizer, CountVectorizer)
 Array = TypeVar('Array', np.ndarray, csr_matrix)
-Sign = Literal['positive', 'negative', 'abs']
 
 
 class NMFInitMethod(Enum):
@@ -664,7 +663,7 @@ class HierarchicalNMF(BaseEstimator):
 
         return output
 
-    def top_discriminative_features_in_node(self, X: Array, node: int, n: int = 10, sign: Sign = 'abs',
+    def top_discriminative_features_in_node(self, X: Array, node: int, n: int = 10, sign='abs',
                                             id2feature: Vectorizer = None) -> List[Dict]:
         """
         Computes most discriminative features (node vs rest)
@@ -708,11 +707,11 @@ class HierarchicalNMF(BaseEstimator):
 
         for diff in diff_tops:
             output.append({
-                              'feature':      self._handle_encoding(i=diff, vec='id2feature_'),
-                              'node':         node,
-                              'node_value':   a_mean[diff],
-                              'others_value': b_mean[diff]
-                              })
+                'feature':      self._handle_encoding(i=diff, vec='id2feature_'),
+                'node':         node,
+                'node_value':   a_mean[diff],
+                'others_value': b_mean[diff]
+                })
 
         return output
 
