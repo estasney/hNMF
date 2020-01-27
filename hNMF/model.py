@@ -13,6 +13,9 @@ from sklearn.decomposition import NMF
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from tqdm.auto import tqdm
 
+import logging
+logger = logging.getLogger(__name__)
+
 from hNMF.helpers import (anls_entry_rank2_precompute, trial_split, nmfsh_comb_rank2, tree_to_nx,
                           trial_split_sklearn, handle_enums)
 
@@ -75,7 +78,7 @@ class HierarchicalNMF(BaseEstimator):
         self.init = handle_enums(init)
         self.solver = handle_enums(solver)
         self.beta_loss = handle_enums(beta_loss)
-        self.random = np.random.RandomState(seed=random_state)
+        self.random_state = np.random.RandomState(seed=random_state)
         self.trial_allowance = trial_allowance
         self.tol = tol
         self.maxiter = maxiter
@@ -175,7 +178,7 @@ class HierarchicalNMF(BaseEstimator):
 
     def _init_fit(self, X, term_subset):
         # TODO Flexible Rank
-        nmf = NMF(n_components=2, random_state=self.random, tol=self.tol, max_iter=self.maxiter,
+        nmf = NMF(n_components=2, random_state=self.random_state, tol=self.tol, max_iter=self.maxiter,
                   init=self.init)
 
         if len(term_subset) == self.n_samples_:
@@ -307,7 +310,7 @@ class HierarchicalNMF(BaseEstimator):
                                                                                    X=X,
                                                                                    subset=subset,
                                                                                    W_parent=W[:, 0],
-                                                                                   random_state=self.random,
+                                                                                   random_state=self.random_state,
                                                                                    trial_allowance=self.trial_allowance,
                                                                                    unbalanced=self.unbalanced,
                                                                                    dtype=self.dtype,
@@ -324,7 +327,7 @@ class HierarchicalNMF(BaseEstimator):
                                                                                    X=X,
                                                                                    subset=subset,
                                                                                    W_parent=W[:, 1],
-                                                                                   random_state=self.random,
+                                                                                   random_state=self.random_state,
                                                                                    trial_allowance=self.trial_allowance,
                                                                                    unbalanced=self.unbalanced,
                                                                                    dtype=self.dtype,
@@ -663,54 +666,48 @@ class HierarchicalNMF(BaseEstimator):
 
         return output
 
-    def top_discriminative_features_in_node(self, X: Array, node: int, n: int = 10, sign='abs',
-                                            id2feature: Vectorizer = None) -> List[Dict]:
+    def top_discriminative_samples_in_node(self, node: int, n: int = 10, sign='abs',
+                                           id2sample: Vectorizer = None) -> List[Dict]:
         """
-        Computes most discriminative features (node vs rest)
+        Computes most discriminative samples (node vs rest)
         Parameters
         ----------
-        X
-            The original Array
         n
             The number of features to return
         sign
             One of `['positive', 'negative', 'abs']`.
-        id2feature
-            Decodes features
+        id2sample
+            Decodes samples
         Returns
         -------
-        The most discriminative words of a node
-        """
-        self._handle_vectorizer(id2feature, 'id2feature_')
 
-        # getA1 if needed
-        get_A1 = lambda x: x.getA1() if x.ndim > 1 else x
+        """
+        self._handle_vectorizer(id2sample, 'id2sample_')
 
         output = []
 
         # Masks
-        a_mask = self.clusters_[node]
-        b_mask = -self.clusters_[node] + 1  # inversion
+        member_mask = np.array(node, dtype=np.int)
+        non_member_mask = np.array([x for x in np.arange(0, self.n_nodes_) if x != node])
 
-        # Compute mean feature values
-        a_mean = get_A1(X[a_mask].mean(axis=0))
-        b_mean = get_A1(X[b_mask].mean(axis=0))
+        member_values = self.Ws_[member_mask].ravel()
+        other_means = self.Ws_[non_member_mask].mean(axis=0)
 
         if sign == 'abs':
-            diffs = np.abs(a_mean - b_mean)
+            diffs = np.abs(member_values - other_means)
         elif sign == 'positive':
-            diffs = a_mean - b_mean
+            diffs = member_values - other_means
         else:
-            diffs = b_mean - a_mean
+            diffs = other_means - member_values
 
         diff_tops = diffs.argsort()[::-1][:n]
 
         for diff in diff_tops:
             output.append({
-                'feature':      self._handle_encoding(i=diff, vec='id2feature_'),
+                'feature':      self._handle_encoding(i=diff, vec='id2sample_'),
                 'node':         node,
-                'node_value':   a_mean[diff],
-                'others_value': b_mean[diff]
+                'node_value':   member_values[diff],
+                'others_value': other_means[diff]
                 })
 
         return output
