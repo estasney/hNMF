@@ -2,7 +2,7 @@
 from collections import defaultdict
 from enum import Enum
 from operator import itemgetter
-from typing import Union, TypeVar, List, Tuple, Type, Dict
+from typing import Union, TypeVar, List, Tuple, Type, Dict, Literal
 
 import networkx as nx
 import numpy as np
@@ -18,6 +18,7 @@ from hNMF.helpers import (anls_entry_rank2_precompute, trial_split, nmfsh_comb_r
 
 Vectorizer = TypeVar('Vectorizer', dict, TfidfVectorizer, CountVectorizer)
 Array = TypeVar('Array', np.ndarray, csr_matrix)
+Sign = Literal['positive', 'negative', 'abs']
 
 
 class NMFInitMethod(Enum):
@@ -660,6 +661,58 @@ class HierarchicalNMF(BaseEstimator):
             # Decode samples if available
             tops = [(self._handle_encoding(i=sample_id, vec='id2sample_'), weight) for (sample_id, weight) in tops]
             output[node_idx] = tops
+
+        return output
+
+    def top_discriminative_features_in_node(self, X: Array, node: int, n: int = 10, sign: Sign = 'abs',
+                                            id2feature: Vectorizer = None) -> List[Dict]:
+        """
+        Computes most discriminative features (node vs rest)
+        Parameters
+        ----------
+        X
+            The original Array
+        n
+            The number of features to return
+        sign
+            One of `['positive', 'negative', 'abs']`.
+        id2feature
+            Decodes features
+        Returns
+        -------
+        The most discriminative words of a node
+        """
+        self._handle_vectorizer(id2feature, 'id2feature_')
+
+        # getA1 if needed
+        get_A1 = lambda x: x.getA1() if x.ndim > 1 else x
+
+        output = []
+
+        # Masks
+        a_mask = self.clusters_[node]
+        b_mask = -self.clusters_[node] + 1  # inversion
+
+        # Compute mean feature values
+        a_mean = get_A1(X[a_mask].mean(axis=0))
+        b_mean = get_A1(X[b_mask].mean(axis=0))
+
+        if sign == 'abs':
+            diffs = np.abs(a_mean - b_mean)
+        elif sign == 'positive':
+            diffs = a_mean - b_mean
+        else:
+            diffs = b_mean - a_mean
+
+        diff_tops = diffs.argsort()[::-1][:n]
+
+        for diff in diff_tops:
+            output.append({
+                              'feature':      self._handle_encoding(i=diff, vec='id2feature_'),
+                              'node':         node,
+                              'node_value':   a_mean[diff],
+                              'others_value': b_mean[diff]
+                              })
 
         return output
 
