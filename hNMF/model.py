@@ -224,7 +224,6 @@ class HierarchicalNMF(BaseEstimator):
 
                 pb.write("Fitting {} samples, {} features".format(n_samples, n_features))
                 for i in range((self.k - 1)):
-                    pb.write("K : {}".format(i))
                     if i == 0:
                         split_node = 0
                         new_nodes = [0, 1]
@@ -273,7 +272,6 @@ class HierarchicalNMF(BaseEstimator):
                             return self
 
                         split_node = leaves[split_node]  # Attempt to split this node
-                        pb.write("Splitting Node : {}".format(split_node))
                         is_leaf[split_node] = 0
                         W = W_buffer[split_node]
                         H = H_buffer[split_node]
@@ -289,8 +287,13 @@ class HierarchicalNMF(BaseEstimator):
 
                     subset_0 = np.where(cluster_subset == 0)[0]
                     subset_1 = np.where(cluster_subset == 1)[0]
-                    pb.write("Split node into {} groups with {} and {} members".format("2", len(subset_0),
-                                                                                         len(subset_1)))
+                    ls0 = len(subset_0)
+                    ls1 = len(subset_1)
+                    ls = ls0 + ls1
+                    pb.write(
+                        "Iter {}: Split node {} with {} members : {} and {} members".format(i, split_node, ls, ls0, ls1)
+                        )
+                    del ls0, ls1, ls
 
                     clusters[new_nodes[0]] = split_subset[subset_0]
                     clusters[new_nodes[1]] = split_subset[subset_1]
