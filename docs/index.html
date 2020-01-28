@@ -366,19 +366,19 @@ implementation. While this may be true in MATLAB, the original Python implementa
                   <tr class="row-odd">
                    <td>
                     <p>
-                     <a class="reference internal" href="#hNMF.model.HierarchicalNMF.top_discriminative_features_in_node" title="hNMF.model.HierarchicalNMF.top_discriminative_features_in_node">
+                     <a class="reference internal" href="#hNMF.model.HierarchicalNMF.top_discriminative_samples_in_node" title="hNMF.model.HierarchicalNMF.top_discriminative_samples_in_node">
                       <code class="xref py py-obj docutils literal notranslate">
                        <span class="pre">
-                        top_discriminative_features_in_node
+                        top_discriminative_samples_in_node
                        </span>
                       </code>
                      </a>
-                     (X, node)
+                     (node[, …])
                     </p>
                    </td>
                    <td>
                     <p>
-                     Computes most discriminative features (node vs rest) Parameters ———- X     The original Array n     The number of features to return sign     One of
+                     Computes most discriminative samples (node vs rest) Parameters ———- n     The number of features to return sign     One of
                      <cite>
                       [‘positive’, ‘negative’, ‘abs’]
                      </cite>
@@ -800,17 +800,13 @@ implementation. While this may be true in MATLAB, the original Python implementa
                  </dd>
                 </dl>
                 <dl class="method">
-                 <dt id="hNMF.model.HierarchicalNMF.top_discriminative_features_in_node">
+                 <dt id="hNMF.model.HierarchicalNMF.top_discriminative_samples_in_node">
                   <code class="sig-name descname">
-                   top_discriminative_features_in_node
+                   top_discriminative_samples_in_node
                   </code>
                   <span class="sig-paren">
                    (
                   </span>
-                  <em class="sig-param">
-                   X
-                  </em>
-                  ,
                   <em class="sig-param">
                    node
                   </em>
@@ -824,38 +820,30 @@ implementation. While this may be true in MATLAB, the original Python implementa
                   </em>
                   ,
                   <em class="sig-param">
-                   id2feature=None
+                   id2sample=None
                   </em>
                   <span class="sig-paren">
                    )
                   </span>
-                  <a class="headerlink" href="#hNMF.model.HierarchicalNMF.top_discriminative_features_in_node" title="Permalink to this definition">
+                  <a class="headerlink" href="#hNMF.model.HierarchicalNMF.top_discriminative_samples_in_node" title="Permalink to this definition">
                    ¶
                   </a>
                  </dt>
                  <dd>
                   <p>
-                   Computes most discriminative features (node vs rest)
+                   Computes most discriminative samples (node vs rest)
 Parameters
 ———-
-X
+n
                   </p>
                   <blockquote>
                    <div>
                     <p>
-                     The original Array
+                     The number of features to return
                     </p>
                    </div>
                   </blockquote>
                   <dl class="simple">
-                   <dt>
-                    n
-                   </dt>
-                   <dd>
-                    <p>
-                     The number of features to return
-                    </p>
-                   </dd>
                    <dt>
                     sign
                    </dt>
@@ -869,17 +857,14 @@ X
                     </p>
                    </dd>
                    <dt>
-                    id2feature
+                    id2sample
                    </dt>
                    <dd>
                     <p>
-                     Decodes features
+                     Decodes samples
                     </p>
                    </dd>
                   </dl>
-                  <p>
-                   The most discriminative words of a node
-                  </p>
                   <dl class="field-list simple">
                    <dt class="field-odd">
                     Return type
