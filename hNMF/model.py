@@ -789,14 +789,13 @@ class HierarchicalNMF(BaseEstimator):
         """
         self._handle_vectorizer(id2feature, 'id2feature_')
 
-        if leaves_only:
-            node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
-            clusters = self.clusters_[node_leaf_idx]
-        else:
-            clusters = self.clusters_
 
+        node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
+        clusters = self.clusters_
         output = {}
         assignments = np.argwhere(clusters)
+        if leaves_only:
+            assignments = assignments[np.where(np.in1d(assignments[:, 0], node_leaf_idx))[0]]
 
         for cluster_idx, feature_idx in assignments:
             feature_name = self._handle_encoding(i=feature_idx, vec='id2feature_')
