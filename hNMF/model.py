@@ -222,13 +222,9 @@ class HierarchicalNMF(BaseEstimator):
                 pb = tqdm(desc="Finding Leaves", total=len(range(self.k - 1)), file=orig_stdout,
                           dynamic_ncols=True)
 
-                tqdm_handler = logging.StreamHandler(orig_stdout)
-                tqdm_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-                tqdm_handler.setFormatter(tqdm_formatter)
-                logger.addHandler(tqdm_handler)
-                logger.debug("Fitting {} samples, {} features".format(n_samples, n_features))
+                pb.write("Fitting {} samples, {} features".format(n_samples, n_features))
                 for i in range((self.k - 1)):
-                    logger.debug("K : {}".format(i))
+                    pb.write("K : {}".format(i))
                     if i == 0:
                         split_node = 0
                         new_nodes = [0, 1]
@@ -246,8 +242,8 @@ class HierarchicalNMF(BaseEstimator):
                             split_node = 0
 
                         if temp_priority[split_node] < 0 or min_priority == -1:
-                            logger.info("Cannot generate all {k} leaf clusters, stopping at {k_current} leaf clusters"
-                                        .format(k=self.k, k_current=i))
+                            pb.write("Cannot generate all {k} leaf clusters, stopping at {k_current} leaf clusters"
+                                     .format(k=self.k, k_current=i))
 
                             Ws = self._remove_empty(Ws)
                             W_buffer = self._remove_empty(W_buffer)
@@ -277,7 +273,7 @@ class HierarchicalNMF(BaseEstimator):
                             return self
 
                         split_node = leaves[split_node]  # Attempt to split this node
-                        logger.debug("Splitting Node : {}".format(split_node))
+                        pb.write("Splitting Node : {}".format(split_node))
                         is_leaf[split_node] = 0
                         W = W_buffer[split_node]
                         H = H_buffer[split_node]
@@ -293,8 +289,8 @@ class HierarchicalNMF(BaseEstimator):
 
                     subset_0 = np.where(cluster_subset == 0)[0]
                     subset_1 = np.where(cluster_subset == 1)[0]
-                    logger.debug("Split node into {} groups with {} and {} members".format("2", len(subset_0),
-                                                                                           len(subset_1)))
+                    pb.write("Split node into {} groups with {} and {} members".format("2", len(subset_0),
+                                                                                         len(subset_1)))
 
                     clusters[new_nodes[0]] = split_subset[subset_0]
                     clusters[new_nodes[1]] = split_subset[subset_1]
@@ -353,7 +349,7 @@ class HierarchicalNMF(BaseEstimator):
 
                     pb.update(1)
             finally:
-                logger.removeHandler(tqdm_handler)
+                pb.close()
 
         self.tree_ = tree.T
         self.splits_ = splits

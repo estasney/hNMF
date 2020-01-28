@@ -576,7 +576,7 @@ def handle_enums(param):
 
 
 @contextlib.contextmanager
-def std_out_err_redirect_tqdm():
+def std_out_err_redirect_tqdm(stream='stderr'):
     orig_out_err = sys.stdout, sys.stderr
     try:
         sys.stdout, sys.stderr = map(DummyTqdmFile, orig_out_err)
