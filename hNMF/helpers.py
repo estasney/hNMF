@@ -1,13 +1,19 @@
+import sys
 import warnings
 from enum import Enum
 from typing import Union
-
+import contextlib
 import numpy as np
 from numpy.linalg import matrix_rank, svd, norm
 from numpy.random import mtrand
 from scipy import sparse as sp
 from sklearn.decomposition import non_negative_factorization
 from tqdm.auto import tqdm
+from tqdm.contrib import DummyTqdmFile
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def anls_entry_rank2_precompute(left, right, H, dtype):
@@ -23,7 +29,7 @@ def anls_entry_rank2_precompute(left, right, H, dtype):
     solve_either[np.logical_not(choose_first), 0] = 0
 
     if np.abs(left[0, 0]) < eps and abs(left[0, 1]) < eps:
-        tqdm.write('Error: The 2x2 matrix is close to singular or the input data matrix has tiny values')
+        logger.error('Error: The 2x2 matrix is close to singular or the input data matrix has tiny values')
     else:
         if np.abs(left[0, 0] >= np.abs(left[0, 1])):
             t = left[1, 0] / left[0, 0]
@@ -31,7 +37,7 @@ def anls_entry_rank2_precompute(left, right, H, dtype):
             b2 = left[0, 1] + t * left[1, 1]
             d2 = left[1, 1] - t * left[0, 1]
             if np.abs(d2 / a2) < eps:
-                tqdm.write('Error: The 2x2 matrix is close to singular')
+                logger.error('Error: The 2x2 matrix is close to singular')
 
             e2 = right[:, 0] + t * right[:, 1]
             f2 = right[:, 1] - t * right[:, 0]
@@ -41,7 +47,7 @@ def anls_entry_rank2_precompute(left, right, H, dtype):
             b2 = left[1, 1] + ct * left[0, 1]
             d2 = -left[0, 1] + ct * left[1, 1]
             if np.abs(d2 / a2) < eps:
-                tqdm.write('Error: The 2x2 matrix is close to singular')
+                logger.error('Error: The 2x2 matrix is close to singular')
 
             e2 = right[:, 1] + ct * right[:, 0]
             f2 = -right[:, 0] + ct * right[:, 1]
@@ -175,7 +181,7 @@ def hier8_neat(X, k, random_state=0, trial_allowance: int = 3, unbalanced: float
             min_priority = np.min(temp_priority[temp_priority > 0])
             split_node = np.argmax(temp_priority)
             if temp_priority[split_node] < 0:
-                tqdm.write(f'Cannot generate all {k} leaf clusters')
+                logger.info(f'Cannot generate all {k} leaf clusters')
 
                 Ws = [W for W in Ws if W is not None]
                 return tree, splits, is_leaf, clusters, Ws, priorities
@@ -235,11 +241,12 @@ def trial_split_sklearn(min_priority: float, X, subset, W_parent, random_state, 
 
         unique_cluster_subset = np.unique(cluster_subset)
         if len(unique_cluster_subset) != 2:
-            tqdm.write('Invalid number of unique sub-clusters!')
+            logger.error('Invalid number of unique sub-clusters!')
 
         length_cluster1 = len(np.where(cluster_subset == unique_cluster_subset[0])[0])
         length_cluster2 = len(np.where(cluster_subset == unique_cluster_subset[1])[0])
         if min(length_cluster1, length_cluster2) < unbalanced * len(cluster_subset):
+            logger.debug("Below imbalanced threshold: {}".format((unbalanced * len(cluster_subset))))
             idx_small = np.argmin(np.array([length_cluster1, length_cluster2]))
             subset_small = np.where(cluster_subset == unique_cluster_subset[idx_small])[0]
             subset_small = subset[subset_small]
@@ -250,7 +257,7 @@ def trial_split_sklearn(min_priority: float, X, subset, W_parent, random_state, 
             if priority_one_small < min_priority:
                 trial += 1
                 if trial < trial_allowance:
-                    # tqdm.write("Dropped {} documents...".format(len(subset_small)))
+                    logger.debug("Dropped {} features...".format(len(subset_small)))
                     subset = np.setdiff1d(subset, subset_small)
             else:
                 break
@@ -258,7 +265,7 @@ def trial_split_sklearn(min_priority: float, X, subset, W_parent, random_state, 
             break
 
     if trial == trial_allowance:
-        tqdm.write("Recycled {} documents...".format(len(subset_backup) - len(subset)))
+        logger.debug("Reached trial allowance, recycled {} features".format(len(subset_backup) - len(subset)))
         subset = subset_backup
         W_buffer_one = np.zeros((m, 2), dtype=dtype)
         H_buffer_one = np.zeros((2, len(subset)), dtype=dtype)
@@ -566,3 +573,17 @@ def handle_enums(param):
         return param.value
     else:
         return param
+
+
+@contextlib.contextmanager
+def std_out_err_redirect_tqdm():
+    orig_out_err = sys.stdout, sys.stderr
+    try:
+        sys.stdout, sys.stderr = map(DummyTqdmFile, orig_out_err)
+        yield orig_out_err[0]
+    # Relay exceptions
+    except Exception as exc:
+        raise exc
+    # Always restore sys.stdout/err if necessary
+    finally:
+        sys.stdout, sys.stderr = orig_out_err
