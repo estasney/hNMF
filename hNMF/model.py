@@ -290,9 +290,12 @@ class HierarchicalNMF(BaseEstimator):
                     ls0 = len(subset_0)
                     ls1 = len(subset_1)
                     ls = ls0 + ls1
-                    pb.write(
-                        "Iter {}: Split node {} with {} members : {} and {} members".format(i, split_node, ls, ls0, ls1)
-                        )
+                    if i == 0:
+                        pb.write("Iter {}: Split Root node ({} members) ==> node {}({} members), node {} ({} members)"
+                                 .format(i, ls, new_nodes[0], ls0, new_nodes[1], ls1))
+                    else:
+                        pb.write("Iter {}: Split node {} ({} members) ==> node {}({} members), node {} ({} members)"
+                             .format(i, split_node, ls, new_nodes[0], ls0, new_nodes[1], ls1))
                     del ls0, ls1, ls
 
                     clusters[new_nodes[0]] = split_subset[subset_0]
