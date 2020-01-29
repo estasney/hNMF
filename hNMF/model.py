@@ -295,7 +295,7 @@ class HierarchicalNMF(BaseEstimator):
                                  .format(i, ls, new_nodes[0], ls0, new_nodes[1], ls1))
                     else:
                         pb.write("Iter {}: Split node {} ({} members) ==> node {}({} members), node {} ({} members)"
-                             .format(i, split_node, ls, new_nodes[0], ls0, new_nodes[1], ls1))
+                                 .format(i, split_node, ls, new_nodes[0], ls0, new_nodes[1], ls1))
                     del ls0, ls1, ls
 
                     clusters[new_nodes[0]] = split_subset[subset_0]
@@ -603,6 +603,11 @@ class HierarchicalNMF(BaseEstimator):
 
         # Idx of leaves
         node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
+        # Keep map of enumerated -> actual cluster
+        if leaves_only:
+            node_map = {i: v for i, v in enumerate(node_leaf_idx)}
+        else:
+            node_map = {i: v for i, v in np.arange(self.n_nodes_)}
 
         # A dictionary of {sample : [top_nodes]}
 
@@ -623,7 +628,7 @@ class HierarchicalNMF(BaseEstimator):
         sample_top_weights = np.take_along_axis(weights, sample_tops, axis=1)
 
         for sample_idx, (node_ids, node_weights) in enumerate(zip(sample_tops, sample_top_weights)):
-            tops = [(node_id, weight) for node_id, weight in zip(node_ids, node_weights) if weight > 0]
+            tops = [(node_map[node_id], weight) for node_id, weight in zip(node_ids, node_weights) if weight > 0]
             tops.sort(key=itemgetter(1), reverse=True)
             # Decode samples if available
             feature_key = self._handle_encoding(i=sample_idx, vec='id2sample_')
@@ -661,10 +666,7 @@ class HierarchicalNMF(BaseEstimator):
 
         # Ws_ is shape n_nodes, n_samples
 
-        if leaves_only:
-            weights = self.Ws_[node_leaf_idx]
-        else:
-            weights = self.Ws_
+        weights = self.Ws_
 
         # The ellipsis indicates that the selection is done row wise
         node_tops = weights.argsort()[:, ::-1][:, :n]
@@ -673,6 +675,8 @@ class HierarchicalNMF(BaseEstimator):
         node_top_weights = np.take_along_axis(weights, node_tops, axis=1)
 
         for node_idx, (sample_ids, sample_weights) in enumerate(zip(node_tops, node_top_weights)):
+            if leaves_only and node_idx not in node_leaf_idx:
+                continue
             tops = [(sample_id, weight) for sample_id, weight in zip(sample_ids, sample_weights) if weight > 0]
             tops.sort(key=itemgetter(1), reverse=True)
             # Decode samples if available
@@ -789,8 +793,8 @@ class HierarchicalNMF(BaseEstimator):
         """
         self._handle_vectorizer(id2feature, 'id2feature_')
 
-
         node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
+
         clusters = self.clusters_
         output = {}
         assignments = np.argwhere(clusters)
