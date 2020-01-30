@@ -441,12 +441,10 @@ class HierarchicalNMF(BaseEstimator):
     def top_features_in_node(self, node: int, n: int = 10, id2feature: Vectorizer = None) \
             -> List[Tuple]:
         """
+        For a given node, return the top n values
 
         Parameters
         ----------
-
-        For a given node, return the top n values
-
         node
             Index of node to return top items
         n
@@ -466,11 +464,10 @@ class HierarchicalNMF(BaseEstimator):
                               leaves_only=False) \
             -> List[Dict[str, List[Tuple]]]:
         """
+        Return the top n values from all nodes or nodes present in idx if idx is not None
 
         Parameters
         ----------
-
-        Return the top n values from all nodes or nodes present in idx if idx is not None
 
         n
             Number of items to return
@@ -689,6 +686,7 @@ class HierarchicalNMF(BaseEstimator):
                                            id2sample: Vectorizer = None) -> List[Dict]:
         """
         Computes most discriminative samples (node vs rest)
+
         Parameters
         ----------
         n
@@ -697,8 +695,6 @@ class HierarchicalNMF(BaseEstimator):
             One of `['positive', 'negative', 'abs']`.
         id2sample
             Decodes samples
-        Returns
-        -------
 
         """
         self._handle_vectorizer(id2sample, 'id2sample_')

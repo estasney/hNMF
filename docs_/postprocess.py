@@ -1,7 +1,6 @@
 import os
 import shutil
 import glob
-import re
 from bs4 import BeautifulSoup
 
 
@@ -24,26 +23,6 @@ def main(dry_run):
             with open(html_file, mode="r", encoding="utf-8") as fp:
                 doc = fp.read()
                 soup = BeautifulSoup(doc, features="html.parser")
-
-            # script_tags = soup.find_all("script")
-            # for tag in script_tags:
-            #     tag_src = tag.get("src")
-            #     if not tag_src:
-            #         continue
-            #     if not tag_src.startswith("_static"):
-            #         continue
-            #     new_tag_src = "docs/{}".format(tag_src)
-            #     tag.attrs['src'] = new_tag_src
-            #
-            # link_tags = soup.find_all("link")
-            # for tag in link_tags:
-            #     tag_href = tag.get('href')
-            #     if not tag_href:
-            #         continue
-            #     if not tag_href.startswith("_static"):
-            #         continue
-            #     new_tag_href = "docs/{}".format(tag_href)
-            #     tag.attrs['href'] = new_tag_href
 
             with open(file_path, mode="w+", encoding="utf-8") as fp:
                 fp.write(soup.prettify())

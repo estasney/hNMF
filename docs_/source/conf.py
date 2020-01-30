@@ -14,13 +14,10 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath("../.."))
 
-
-
-
 # -- Project information -----------------------------------------------------
 
 project = 'hNMF'
-copyright = '2019, Eric Stasney'
+copyright = '2019 - 2020, Eric Stasney'
 author = 'Eric Stasney'
 
 # The full version, including alpha/beta/rc tags
@@ -60,13 +57,15 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ['./custom_styles']
 
 html_context = {
     'display_github': True,
     'github_user': 'estasney',
     'github_repo': 'hNMF',
-    'github_version': 'master/docs_/source/'
+    'github_version': 'master/docs_/source/',
+    'analytics_id': 'UA-132355416-4',
+    'github_url': 'https://github.com/estasney/hNMF'
     }
 
 rst_epilog = """

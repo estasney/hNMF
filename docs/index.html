@@ -378,11 +378,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </td>
                    <td>
                     <p>
-                     Computes most discriminative samples (node vs rest) Parameters ———- n     The number of features to return sign     One of
-                     <cite>
-                      [‘positive’, ‘negative’, ‘abs’]
-                     </cite>
-                     .
+                     Computes most discriminative samples (node vs rest)
                     </p>
                    </td>
                   </tr>
@@ -401,15 +397,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </td>
                    <td>
                     <p>
-                     <dl class="field-list simple">
-                      <dt class="field-odd">
-                       Parameters
-                      </dt>
-                      <dd class="field-odd">
-                       <p>
-                       </p>
-                      </dd>
-                     </dl>
+                     For a given node, return the top n values
                     </p>
                    </td>
                   </tr>
@@ -428,15 +416,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </td>
                    <td>
                     <p>
-                     <dl class="field-list simple">
-                      <dt class="field-odd">
-                       Parameters
-                      </dt>
-                      <dd class="field-odd">
-                       <p>
-                       </p>
-                      </dd>
-                     </dl>
+                     Return the top n values from all nodes or nodes present in idx if idx is not None
                     </p>
                    </td>
                   </tr>
@@ -832,58 +812,55 @@ implementation. While this may be true in MATLAB, the original Python implementa
                  <dd>
                   <p>
                    Computes most discriminative samples (node vs rest)
-Parameters
-———-
-n
                   </p>
-                  <blockquote>
-                   <div>
-                    <p>
-                     The number of features to return
-                    </p>
-                   </div>
-                  </blockquote>
-                  <dl class="simple">
-                   <dt>
-                    sign
-                   </dt>
-                   <dd>
-                    <p>
-                     One of
-                     <cite>
-                      [‘positive’, ‘negative’, ‘abs’]
-                     </cite>
-                     .
-                    </p>
-                   </dd>
-                   <dt>
-                    id2sample
-                   </dt>
-                   <dd>
-                    <p>
-                     Decodes samples
-                    </p>
-                   </dd>
-                  </dl>
                   <dl class="field-list simple">
                    <dt class="field-odd">
-                    Return type
+                    Parameters
                    </dt>
                    <dd class="field-odd">
-                    <p>
-                     <code class="xref py py-class docutils literal notranslate">
-                      <span class="pre">
-                       List
-                      </span>
-                     </code>
-                     [
-                     <code class="xref py py-class docutils literal notranslate">
-                      <span class="pre">
-                       Dict
-                      </span>
-                     </code>
-                     ]
-                    </p>
+                    <dl class="simple">
+                     <dt>
+                      <strong>
+                       n
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       The number of features to return
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       sign
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       One of
+                       <cite>
+                        [‘positive’, ‘negative’, ‘abs’]
+                       </cite>
+                       .
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       id2sample
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Decodes samples
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       :rtype: :py:class:`~typing.List`[:py:class:`~typing.Dict`]
+                      </strong>
+                     </dt>
+                     <dd>
+                     </dd>
+                    </dl>
                    </dd>
                   </dl>
                  </dd>
@@ -915,19 +892,15 @@ n
                   </a>
                  </dt>
                  <dd>
+                  <p>
+                   For a given node, return the top n values
+                  </p>
                   <dl class="field-list simple">
                    <dt class="field-odd">
                     Parameters
                    </dt>
                    <dd class="field-odd">
                     <dl class="simple">
-                     <dt>
-                      <strong>
-                       For a given node, return the top n values
-                      </strong>
-                     </dt>
-                     <dd>
-                     </dd>
                      <dt>
                       <strong>
                        node
@@ -1001,19 +974,15 @@ n
                   </a>
                  </dt>
                  <dd>
+                  <p>
+                   Return the top n values from all nodes or nodes present in idx if idx is not None
+                  </p>
                   <dl class="field-list simple">
                    <dt class="field-odd">
                     Parameters
                    </dt>
                    <dd class="field-odd">
                     <dl class="simple">
-                     <dt>
-                      <strong>
-                       Return the top n values from all nodes or nodes present in idx if idx is not None
-                      </strong>
-                     </dt>
-                     <dd>
-                     </dd>
                      <dt>
                       <strong>
                        n
@@ -1545,14 +1514,17 @@ n
                   <dl class="simple">
                    <dt>
                     <strong>
-                     X :
+                     X
                     </strong>
                    </dt>
                    <dd>
+                    <p>
+                     Array
+                    </p>
                    </dd>
                    <dt>
                     <strong>
-                     k :
+                     k
                     </strong>
                    </dt>
                    <dd>
@@ -1562,15 +1534,21 @@ n
                    </dd>
                    <dt>
                     <strong>
-                     random_state :
+                     random_state
                     </strong>
+                    <span class="classifier">
+                     int
+                    </span>
                    </dt>
                    <dd>
                    </dd>
                    <dt>
                     <strong>
-                     trial_allowance :
+                     trial_allowance
                     </strong>
+                    <span class="classifier">
+                     int
+                    </span>
                    </dt>
                    <dd>
                     <p>
@@ -1579,8 +1557,11 @@ n
                    </dd>
                    <dt>
                     <strong>
-                     unbalanced :
+                     unbalanced
                     </strong>
+                    <span class="classifier">
+                     float
+                    </span>
                    </dt>
                    <dd>
                     <p>
@@ -1589,7 +1570,7 @@ n
                    </dd>
                    <dt>
                     <strong>
-                     vec_norm :
+                     vec_norm
                     </strong>
                    </dt>
                    <dd>
@@ -1599,7 +1580,7 @@ n
                    </dd>
                    <dt>
                     <strong>
-                     normW :
+                     normW
                     </strong>
                    </dt>
                    <dd>
@@ -1609,7 +1590,7 @@ n
                    </dd>
                    <dt>
                     <strong>
-                     anls_alg :
+                     anls_alg
                     </strong>
                    </dt>
                    <dd>
@@ -1619,7 +1600,7 @@ n
                    </dd>
                    <dt>
                     <strong>
-                     tol :
+                     tol
                     </strong>
                    </dt>
                    <dd>
@@ -1629,7 +1610,7 @@ n
                    </dd>
                    <dt>
                     <strong>
-                     maxiter :
+                     maxiter
                     </strong>
                    </dt>
                    <dd>
@@ -1663,53 +1644,51 @@ n
                    <dd>
                    </dd>
                    <dt>
-                    tree: A 2-by-(k-1) matrix that encodes the tree structure. The two entries in the i-th column are the numberings
+                    tree
                    </dt>
                    <dd>
                     <p>
-                     of the two children of the node with numbering i.
-The root node has numbering 0, with its two children always having numbering 1 and numbering 2.
-Thus the root node is NOT included in the ‘tree’ variable.
+                     A 2-by-(k-1) matrix that encodes the tree structure. The two entries in the i-th column are the numberings of the two children of the node with numbering i. The root node has numbering 0, with its two children always having numbering 1 and numbering 2. Thus the root node is NOT included in the ‘tree’ variable.
                     </p>
                    </dd>
                    <dt>
-                    splits: An array of length k-1. It keeps track of the numberings of the nodes being split
+                    splits
                    </dt>
                    <dd>
                     <p>
-                     from the 1st split to the (k-1)-th split. (The first entry is always 0.)
+                     An array of length k-1. It keeps track of the numberings of the nodes being split from the 1st split to the (k-1)-th split. (The first entry is always 0.)
                     </p>
                    </dd>
                    <dt>
-                    is_leaf: An array of length 2*(k-1). A “1” at index i means that the node with numbering i is a leaf node
+                    is_leaf
                    </dt>
                    <dd>
                     <p>
-                     in the final tree generated, and “0” indicates non-leaf nodes in the final tree.
+                     An array of length 2*(k-1). A “1” at index i means that the node with numbering i is a leaf node in the final tree generated, and “0” indicates non-leaf nodes in the final tree.
                     </p>
                    </dd>
                    <dt>
-                    clusters: A cell array of length 2*(k-1). The i-th element contains the subset of items
+                    clusters
                    </dt>
                    <dd>
                     <p>
-                     at the node with numbering i.
+                     A cell array of length 2*(k-1). The i-th element contains the subset of items at the node with numbering i.
                     </p>
                    </dd>
                    <dt>
-                    Ws: A cell array of length 2*(k-1).
+                    Ws
                    </dt>
                    <dd>
                     <p>
-                     Its i-th element is the topic vector of the cluster at the node with numbering i.
+                     array of length 2*(k-1). Its i-th element is the topic vector of the cluster at the node with numbering i.
                     </p>
                    </dd>
                    <dt>
-                    priorities: An array of length 2*(k-1).
+                    priorities
                    </dt>
                    <dd>
                     <p>
-                     Its i-th element is the modified NDCG scores at the node with numbering i (see the reference paper).
+                     An array of length 2*(k-1). Its i-th element is the modified NDCG scores at the node with numbering i (see the reference paper).
                     </p>
                    </dd>
                   </dl>
@@ -1717,28 +1696,6 @@ Thus the root node is NOT included in the ‘tree’ variable.
                 </dl>
                 <p class="rubric">
                  Notes
-                </p>
-                <p>
-                 If you want to have the flat partitioning induced by the leaf nodes in the final tree,
-use this script:
-                </p>
-                <p>
-                 partitioning = zeros(1, n);  n is the total number of data points
-leaf_level = clusters(is_leaf == 1);
-for i = 1 : length(leaf_level)
-                </p>
-                <blockquote>
-                 <div>
-                  <p>
-                   partitioning(leaf_level{i}) = i;
-                  </p>
-                 </div>
-                </blockquote>
-                <p>
-                 end
-                </p>
-                <p>
-                 (Now the entries in ‘partitioning’ having value 0 indicate outliers that do not belong to any cluster.)
                 </p>
                 <p>
                  Adapted from
@@ -1884,7 +1841,7 @@ The 19th ACM SIGKDD International Conference on Knowledge, Discovery, and Data M
        <hr/>
        <div role="contentinfo">
         <p>
-         © Copyright 2019, Eric Stasney
+         © Copyright 2019 - 2020, Eric Stasney
         </p>
        </div>
        Built with

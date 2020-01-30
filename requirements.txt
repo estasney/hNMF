@@ -1,5 +1,7 @@
+beautifulsoup4
 scikit-learn
 numpy
 scipy
 networkx
 tqdm
+numpydoc
