@@ -17,29 +17,32 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from hNMF.helpers import tree_to_nx, trial_split_sklearn, handle_enums, std_out_err_redirect_tqdm
+from hNMF.helpers import (
+    tree_to_nx,
+    trial_split_sklearn,
+    handle_enums,
+    std_out_err_redirect_tqdm,
+)
 
-Vectorizer = TypeVar('Vectorizer', dict, TfidfVectorizer, CountVectorizer)
-Array = TypeVar('Array', np.ndarray, csr_matrix)
+Vectorizer = TypeVar("Vectorizer", dict, TfidfVectorizer, CountVectorizer)
+Array = TypeVar("Array", np.ndarray, csr_matrix)
 
 
 class NMFInitMethod(Enum):
-    """Specifies method used for initial matrices of W and H
+    """Specifies method used for initial matrices of W and H"""
 
-    """
     DEFAULT = None
-    RANDOM = 'random'
-    NNDSVD = 'nndsvd'
-    NNDSVDA = 'nndsvda'
-    NNDSVDAR = 'nndsvdar'
+    RANDOM = "random"
+    NNDSVD = "nndsvd"
+    NNDSVDA = "nndsvda"
+    NNDSVDAR = "nndsvdar"
 
 
 class NMFSolver(Enum):
-    """Specifies solver for NMF
+    """Specifies solver for NMF"""
 
-    """
-    CD = 'cd'
-    MU = 'mu'
+    CD = "cd"
+    MU = "mu"
 
 
 class NMFBetaLoss(Enum):
@@ -49,30 +52,32 @@ class NMFBetaLoss(Enum):
     ``KL`` refers to Kullback-Leibler (1)
     ``IS`` refers to Itakura-Saito (0)
     """
+
     FRO = 2
     KL = 1
     IS = 0
 
 
-InitMethod = TypeVar('InitMethod', Type[NMFInitMethod], str, Type[None])
-Solver = TypeVar('Solver', Type[NMFSolver], str)
-BetaLoss = TypeVar('BetaLoss', Type[NMFBetaLoss], int, float, str)
+InitMethod = TypeVar("InitMethod", Type[NMFInitMethod], str, Type[None])
+Solver = TypeVar("Solver", Type[NMFSolver], str)
+BetaLoss = TypeVar("BetaLoss", Type[NMFBetaLoss], int, float, str)
 
 
 class HierarchicalNMF(BaseEstimator):
     # TODO : Rank parameters
-    def __init__(self,
-                 k: int,
-                 unbalanced: float = 0.1,
-                 init: InitMethod = NMFInitMethod.DEFAULT,
-                 solver: Solver = NMFSolver.CD,
-                 beta_loss: BetaLoss = NMFBetaLoss.FRO,
-                 random_state: int = 42,
-                 trial_allowance: int = 100,
-                 tol: float = 1e-6,
-                 maxiter: int = 10000,
-                 dtype: Union[np.float32,
-                              np.float64] = np.float64):
+    def __init__(
+        self,
+        k: int,
+        unbalanced: float = 0.1,
+        init: InitMethod = NMFInitMethod.DEFAULT,
+        solver: Solver = NMFSolver.CD,
+        beta_loss: BetaLoss = NMFBetaLoss.FRO,
+        random_state: int = 42,
+        trial_allowance: int = 100,
+        tol: float = 1e-6,
+        maxiter: int = 10000,
+        dtype: Union[np.float32, np.float64] = np.float64,
+    ):
         self.k = k
         self.unbalanced = unbalanced
         self.init = handle_enums(init)
@@ -178,8 +183,13 @@ class HierarchicalNMF(BaseEstimator):
 
     def _init_fit(self, X, term_subset):
         # TODO Flexible Rank
-        nmf = NMF(n_components=2, random_state=self.random_state, tol=self.tol, max_iter=self.maxiter,
-                  init=self.init)
+        nmf = NMF(
+            n_components=2,
+            random_state=self.random_state,
+            tol=self.tol,
+            max_iter=self.maxiter,
+            init=self.init,
+        )
 
         if len(term_subset) == self.n_samples_:
             W = nmf.fit_transform(X)
@@ -210,7 +220,9 @@ class HierarchicalNMF(BaseEstimator):
         tree = np.zeros((2, 2 * (self.k - 1)), dtype=np.int)
         splits = -np.ones(self.k - 1, dtype=np.int)
 
-        term_subset = np.where(np.sum(X, axis=1) != 0)[0]  # Where X has at least one non-zero
+        term_subset = np.where(np.sum(X, axis=1) != 0)[
+            0
+        ]  # Where X has at least one non-zero
 
         # W (n_samples|term_subset, 2)
         # H (2, n_features)
@@ -219,10 +231,16 @@ class HierarchicalNMF(BaseEstimator):
         result_used = 0
         with std_out_err_redirect_tqdm() as orig_stdout:
             try:
-                pb = tqdm(desc="Finding Leaves", total=len(range(self.k - 1)), file=orig_stdout,
-                          dynamic_ncols=True)
+                pb = tqdm(
+                    desc="Finding Leaves",
+                    total=len(range(self.k - 1)),
+                    file=orig_stdout,
+                    dynamic_ncols=True,
+                )
 
-                pb.write("Fitting {} samples, {} features".format(n_samples, n_features))
+                pb.write(
+                    "Fitting {} samples, {} features".format(n_samples, n_features)
+                )
                 for i in range((self.k - 1)):
                     if i == 0:
                         split_node = 0
@@ -241,8 +259,11 @@ class HierarchicalNMF(BaseEstimator):
                             split_node = 0
 
                         if temp_priority[split_node] < 0 or min_priority == -1:
-                            pb.write("Cannot generate all {k} leaf clusters, stopping at {k_current} leaf clusters"
-                                     .format(k=self.k, k_current=i))
+                            pb.write(
+                                "Cannot generate all {k} leaf clusters, stopping at {k_current} leaf clusters".format(
+                                    k=self.k, k_current=i
+                                )
+                            )
 
                             Ws = self._remove_empty(Ws)
                             W_buffer = self._remove_empty(W_buffer)
@@ -291,11 +312,17 @@ class HierarchicalNMF(BaseEstimator):
                     ls1 = len(subset_1)
                     ls = ls0 + ls1
                     if i == 0:
-                        pb.write("Iter {}: Split Root node ({} members) ==> node {}({} members), node {} ({} members)"
-                                 .format(i, ls, new_nodes[0], ls0, new_nodes[1], ls1))
+                        pb.write(
+                            "Iter {}: Split Root node ({} members) ==> node {}({} members), node {} ({} members)".format(
+                                i, ls, new_nodes[0], ls0, new_nodes[1], ls1
+                            )
+                        )
                     else:
-                        pb.write("Iter {}: Split node {} ({} members) ==> node {}({} members), node {} ({} members)"
-                                 .format(i, split_node, ls, new_nodes[0], ls0, new_nodes[1], ls1))
+                        pb.write(
+                            "Iter {}: Split node {} ({} members) ==> node {}({} members), node {} ({} members)".format(
+                                i, split_node, ls, new_nodes[0], ls0, new_nodes[1], ls1
+                            )
+                        )
                     del ls0, ls1, ls
 
                     clusters[new_nodes[0]] = split_subset[subset_0]
@@ -320,34 +347,48 @@ class HierarchicalNMF(BaseEstimator):
                     is_leaf[new_nodes] = 1
 
                     subset = clusters[new_nodes[0]]
-                    subset, W_buffer_one, H_buffer_one, priority_one = trial_split_sklearn(min_priority=min_priority,
-                                                                                           X=X,
-                                                                                           subset=subset,
-                                                                                           W_parent=W[:, 0],
-                                                                                           random_state=self.random_state,
-                                                                                           trial_allowance=self.trial_allowance,
-                                                                                           unbalanced=self.unbalanced,
-                                                                                           dtype=self.dtype,
-                                                                                           tol=self.tol,
-                                                                                           maxiter=self.maxiter,
-                                                                                           init=self.init)
+                    (
+                        subset,
+                        W_buffer_one,
+                        H_buffer_one,
+                        priority_one,
+                    ) = trial_split_sklearn(
+                        min_priority=min_priority,
+                        X=X,
+                        subset=subset,
+                        W_parent=W[:, 0],
+                        random_state=self.random_state,
+                        trial_allowance=self.trial_allowance,
+                        unbalanced=self.unbalanced,
+                        dtype=self.dtype,
+                        tol=self.tol,
+                        maxiter=self.maxiter,
+                        init=self.init,
+                    )
                     clusters[new_nodes[0]] = subset
                     W_buffer[new_nodes[0]] = W_buffer_one
                     H_buffer[new_nodes[0]] = H_buffer_one
                     priorities[new_nodes[0]] = priority_one
 
                     subset = clusters[new_nodes[1]]
-                    subset, W_buffer_one, H_buffer_one, priority_one = trial_split_sklearn(min_priority=min_priority,
-                                                                                           X=X,
-                                                                                           subset=subset,
-                                                                                           W_parent=W[:, 1],
-                                                                                           random_state=self.random_state,
-                                                                                           trial_allowance=self.trial_allowance,
-                                                                                           unbalanced=self.unbalanced,
-                                                                                           dtype=self.dtype,
-                                                                                           tol=self.tol,
-                                                                                           maxiter=self.maxiter,
-                                                                                           init=self.init)
+                    (
+                        subset,
+                        W_buffer_one,
+                        H_buffer_one,
+                        priority_one,
+                    ) = trial_split_sklearn(
+                        min_priority=min_priority,
+                        X=X,
+                        subset=subset,
+                        W_parent=W[:, 1],
+                        random_state=self.random_state,
+                        trial_allowance=self.trial_allowance,
+                        unbalanced=self.unbalanced,
+                        dtype=self.dtype,
+                        tol=self.tol,
+                        maxiter=self.maxiter,
+                        init=self.init,
+                    )
                     clusters[new_nodes[1]] = subset
                     W_buffer[new_nodes[1]] = W_buffer_one
                     H_buffer[new_nodes[1]] = H_buffer_one
@@ -382,17 +423,27 @@ class HierarchicalNMF(BaseEstimator):
             setattr(self, attr, vectorizer)
             if attr == "id2feature_":
                 reverse_idx = {v: k for k, v in vectorizer.items()}
-                setattr(self, 'feature2id_', reverse_idx)
+                setattr(self, "feature2id_", reverse_idx)
         elif type(vectorizer) in [TfidfVectorizer, CountVectorizer]:
-            setattr(self, attr, {i: v for i, v in enumerate(vectorizer.get_feature_names())})
+            setattr(
+                self, attr, {i: v for i, v in enumerate(vectorizer.get_feature_names())}
+            )
             if attr == "id2feature_":
-                setattr(self, 'feature2id_', {v: i for i, v in enumerate(vectorizer.get_feature_names())})
+                setattr(
+                    self,
+                    "feature2id_",
+                    {v: i for i, v in enumerate(vectorizer.get_feature_names())},
+                )
         else:
             raise AttributeError("Unexpected vectorizer received")
         return getattr(self, attr)
 
-    def _handle_tops(self, arr: Union[np.ndarray, list], ranks: Union[np.ndarray, list],
-                     vec: Union[str, Type[None]] = 'id2feature_') -> List[Tuple]:
+    def _handle_tops(
+        self,
+        arr: Union[np.ndarray, list],
+        ranks: Union[np.ndarray, list],
+        vec: Union[str, Type[None]] = "id2feature_",
+    ) -> List[Tuple]:
         if vec:
             vec_ = getattr(self, vec, None)
         else:
@@ -438,8 +489,9 @@ class HierarchicalNMF(BaseEstimator):
     def _remove_empty(self, x):
         return [c for c in x if c is not None]
 
-    def top_features_in_node(self, node: int, n: int = 10, id2feature: Vectorizer = None) \
-            -> List[Tuple]:
+    def top_features_in_node(
+        self, node: int, n: int = 10, id2feature: Vectorizer = None
+    ) -> List[Tuple]:
         """
         For a given node, return the top n values
 
@@ -454,15 +506,15 @@ class HierarchicalNMF(BaseEstimator):
 
         """
 
-        self._handle_vectorizer(id2feature, 'id2feature_')
+        self._handle_vectorizer(id2feature, "id2feature_")
         node = self.Hs_[node]
         ranks = node.argsort()[::-1][:n]
         tops = self._handle_tops(arr=node, ranks=ranks)
         return tops
 
-    def top_features_in_nodes(self, n: int = 10, id2feature: Vectorizer = None, idx=None,
-                              leaves_only=False) \
-            -> List[Dict[str, List[Tuple]]]:
+    def top_features_in_nodes(
+        self, n: int = 10, id2feature: Vectorizer = None, idx=None, leaves_only=False
+    ) -> List[Dict[str, List[Tuple]]]:
         """
         Return the top n values from all nodes or nodes present in idx if idx is not None
 
@@ -480,7 +532,7 @@ class HierarchicalNMF(BaseEstimator):
 
         """
 
-        self._handle_vectorizer(id2feature, 'id2feature_')
+        self._handle_vectorizer(id2feature, "id2feature_")
         if idx is not None:
             nodes = self.Hs_[idx]
         elif idx is None and leaves_only is True:
@@ -494,11 +546,16 @@ class HierarchicalNMF(BaseEstimator):
         for node_id, node in zip(idx, nodes):
             ranks = node.argsort()[::-1][:n]
             tops = self._handle_tops(arr=node, ranks=ranks)
-            output.append({'node': node_id, 'features': tops})
+            output.append({"node": node_id, "features": tops})
         return output
 
-    def top_nodes_in_feature(self, feature: Union[int, str], n: int = 10, leaves_only: bool = True,
-                             id2feature: Vectorizer = None):
+    def top_nodes_in_feature(
+        self,
+        feature: Union[int, str],
+        n: int = 10,
+        leaves_only: bool = True,
+        id2feature: Vectorizer = None,
+    ):
         """
         Returns the top nodes for a specified feature
 
@@ -516,7 +573,7 @@ class HierarchicalNMF(BaseEstimator):
 
         """
 
-        self._handle_vectorizer(id2feature, 'id2feature_')
+        self._handle_vectorizer(id2feature, "id2feature_")
         node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
         if isinstance(feature, str):
             feature_idx = self.feature2id_[feature]
@@ -533,9 +590,13 @@ class HierarchicalNMF(BaseEstimator):
         tops = self._handle_tops(arr=node_weights, ranks=ranks, vec=None)
         return tops
 
-    def top_nodes_in_features(self, features: Union[List[int], List[str], np.ndarray], n: int = 10,
-                              leaves_only: bool = True, id2feature: Vectorizer = None) -> Dict[
-        Union[str, int], List[Tuple]]:
+    def top_nodes_in_features(
+        self,
+        features: Union[List[int], List[str], np.ndarray],
+        n: int = 10,
+        leaves_only: bool = True,
+        id2feature: Vectorizer = None,
+    ) -> Dict[Union[str, int], List[Tuple]]:
         """
         Returns the top nodes for a specified feature
 
@@ -554,7 +615,7 @@ class HierarchicalNMF(BaseEstimator):
 
         """
 
-        self._handle_vectorizer(id2feature, 'id2feature_')
+        self._handle_vectorizer(id2feature, "id2feature_")
 
         # Idx of leaves
         node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
@@ -562,15 +623,23 @@ class HierarchicalNMF(BaseEstimator):
         output = {}
 
         # Encode features if needed
-        feature_idx = [self.feature2id_[x] if isinstance(x, str) else x for x in features]
-        feature_names = [self.id2feature_[x] if isinstance(x, int) else x for x in feature_idx]
+        feature_idx = [
+            self.feature2id_[x] if isinstance(x, str) else x for x in features
+        ]
+        feature_names = [
+            self.id2feature_[x] if isinstance(x, int) else x for x in feature_idx
+        ]
 
         node_weights = self.Hs_.T[feature_idx]
 
-        ranks = np.apply_along_axis(lambda arr: arr.argsort()[::-1], axis=1, arr=node_weights)
+        ranks = np.apply_along_axis(
+            lambda arr: arr.argsort()[::-1], axis=1, arr=node_weights
+        )
 
         if leaves_only:
-            ranks = np.apply_along_axis(lambda x: x[np.isin(x, node_leaf_idx)][:n], axis=1, arr=ranks)
+            ranks = np.apply_along_axis(
+                lambda x: x[np.isin(x, node_leaf_idx)][:n], axis=1, arr=ranks
+            )
         else:
             ranks = np.apply_along_axis(lambda x: x[:n], axis=1, arr=ranks)
 
@@ -580,7 +649,9 @@ class HierarchicalNMF(BaseEstimator):
 
         return output
 
-    def top_nodes_in_samples(self, n: int = 10, leaves_only: bool = True, id2sample: Vectorizer = None):
+    def top_nodes_in_samples(
+        self, n: int = 10, leaves_only: bool = True, id2sample: Vectorizer = None
+    ):
         """
 
         Returns the top nodes for each sample.
@@ -596,7 +667,7 @@ class HierarchicalNMF(BaseEstimator):
 
 
         """
-        self._handle_vectorizer(id2sample, 'id2sample_')
+        self._handle_vectorizer(id2sample, "id2sample_")
 
         # Idx of leaves
         node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
@@ -624,16 +695,24 @@ class HierarchicalNMF(BaseEstimator):
         # Create an array with samples as rows, top n weights as columns
         sample_top_weights = np.take_along_axis(weights, sample_tops, axis=1)
 
-        for sample_idx, (node_ids, node_weights) in enumerate(zip(sample_tops, sample_top_weights)):
-            tops = [(node_map[node_id], weight) for node_id, weight in zip(node_ids, node_weights) if weight > 0]
+        for sample_idx, (node_ids, node_weights) in enumerate(
+            zip(sample_tops, sample_top_weights)
+        ):
+            tops = [
+                (node_map[node_id], weight)
+                for node_id, weight in zip(node_ids, node_weights)
+                if weight > 0
+            ]
             tops.sort(key=itemgetter(1), reverse=True)
             # Decode samples if available
-            feature_key = self._handle_encoding(i=sample_idx, vec='id2sample_')
+            feature_key = self._handle_encoding(i=sample_idx, vec="id2sample_")
             output[feature_key] = tops
 
         return output
 
-    def top_samples_in_nodes(self, n: int = 10, leaves_only: bool = True, id2sample: Vectorizer = None):
+    def top_samples_in_nodes(
+        self, n: int = 10, leaves_only: bool = True, id2sample: Vectorizer = None
+    ):
         """
 
         Returns the top samples for each node
@@ -652,7 +731,7 @@ class HierarchicalNMF(BaseEstimator):
 
         """
 
-        self._handle_vectorizer(id2sample, 'id2sample_')
+        self._handle_vectorizer(id2sample, "id2sample_")
 
         # Idx of leaves
         node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
@@ -671,19 +750,29 @@ class HierarchicalNMF(BaseEstimator):
         # Create an array with samples as rows, top n weights as columns
         node_top_weights = np.take_along_axis(weights, node_tops, axis=1)
 
-        for node_idx, (sample_ids, sample_weights) in enumerate(zip(node_tops, node_top_weights)):
+        for node_idx, (sample_ids, sample_weights) in enumerate(
+            zip(node_tops, node_top_weights)
+        ):
             if leaves_only and node_idx not in node_leaf_idx:
                 continue
-            tops = [(sample_id, weight) for sample_id, weight in zip(sample_ids, sample_weights) if weight > 0]
+            tops = [
+                (sample_id, weight)
+                for sample_id, weight in zip(sample_ids, sample_weights)
+                if weight > 0
+            ]
             tops.sort(key=itemgetter(1), reverse=True)
             # Decode samples if available
-            tops = [(self._handle_encoding(i=sample_id, vec='id2sample_'), weight) for (sample_id, weight) in tops]
+            tops = [
+                (self._handle_encoding(i=sample_id, vec="id2sample_"), weight)
+                for (sample_id, weight) in tops
+            ]
             output[node_idx] = tops
 
         return output
 
-    def top_discriminative_samples_in_node(self, node: int, n: int = 10, sign='abs',
-                                           id2sample: Vectorizer = None) -> List[Dict]:
+    def top_discriminative_samples_in_node(
+        self, node: int, n: int = 10, sign="abs", id2sample: Vectorizer = None
+    ) -> List[Dict]:
         """
         Computes most discriminative samples (node vs rest)
 
@@ -697,20 +786,22 @@ class HierarchicalNMF(BaseEstimator):
             Decodes samples
 
         """
-        self._handle_vectorizer(id2sample, 'id2sample_')
+        self._handle_vectorizer(id2sample, "id2sample_")
 
         output = []
 
         # Masks
         member_mask = np.array(node, dtype=np.int)
-        non_member_mask = np.array([x for x in np.arange(0, self.n_nodes_) if x != node])
+        non_member_mask = np.array(
+            [x for x in np.arange(0, self.n_nodes_) if x != node]
+        )
 
         member_values = self.Ws_[member_mask].ravel()
         other_means = self.Ws_[non_member_mask].mean(axis=0)
 
-        if sign == 'abs':
+        if sign == "abs":
             diffs = np.abs(member_values - other_means)
-        elif sign == 'positive':
+        elif sign == "positive":
             diffs = member_values - other_means
         else:
             diffs = other_means - member_values
@@ -718,20 +809,25 @@ class HierarchicalNMF(BaseEstimator):
         diff_tops = diffs.argsort()[::-1][:n]
 
         for diff in diff_tops:
-            output.append({
-                'feature':      self._handle_encoding(i=diff, vec='id2sample_'),
-                'node':         node,
-                'node_value':   member_values[diff],
-                'others_value': other_means[diff]
-                })
+            output.append(
+                {
+                    "feature": self._handle_encoding(i=diff, vec="id2sample_"),
+                    "node": node,
+                    "node_value": member_values[diff],
+                    "others_value": other_means[diff],
+                }
+            )
 
         return output
 
     # TODO sample_similarity_by_node_weights
 
-    def cluster_features(self, leaves_only: bool = True, id2feature: Vectorizer = None,
-                         include_outliers: bool = True) \
-            -> Dict[int, List[Union[str, int]]]:
+    def cluster_features(
+        self,
+        leaves_only: bool = True,
+        id2feature: Vectorizer = None,
+        include_outliers: bool = True,
+    ) -> Dict[int, List[Union[str, int]]]:
         """
         Returns the features assigned as a cluster to nodes
 
@@ -746,7 +842,7 @@ class HierarchicalNMF(BaseEstimator):
 
 
         """
-        self._handle_vectorizer(id2feature, 'id2feature_')
+        self._handle_vectorizer(id2feature, "id2feature_")
 
         output = {}
 
@@ -760,7 +856,7 @@ class HierarchicalNMF(BaseEstimator):
         assignments = np.argwhere(clusters)
 
         for cluster_idx, feature_idx in assignments:
-            feature_name = self._handle_encoding(i=feature_idx, vec='id2feature_')
+            feature_name = self._handle_encoding(i=feature_idx, vec="id2feature_")
             cluster_features = output.get(cluster_idx, [])
             cluster_features.append(feature_name)
             output[cluster_idx] = cluster_features
@@ -771,9 +867,12 @@ class HierarchicalNMF(BaseEstimator):
 
         return output
 
-    def cluster_assignments(self, leaves_only: bool = True, id2feature: Vectorizer = None,
-                            include_outliers: bool = True) \
-            -> Dict[Union[int, str], Union[List[int], Type[None]]]:
+    def cluster_assignments(
+        self,
+        leaves_only: bool = True,
+        id2feature: Vectorizer = None,
+        include_outliers: bool = True,
+    ) -> Dict[Union[int, str], Union[List[int], Type[None]]]:
         """
         Returns a dictionary with keys as features and clusters as values
 
@@ -787,7 +886,7 @@ class HierarchicalNMF(BaseEstimator):
             If True, include feature keys that are not assigned a cluster
 
         """
-        self._handle_vectorizer(id2feature, 'id2feature_')
+        self._handle_vectorizer(id2feature, "id2feature_")
 
         node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
 
@@ -795,10 +894,12 @@ class HierarchicalNMF(BaseEstimator):
         output = {}
         assignments = np.argwhere(clusters)
         if leaves_only:
-            assignments = assignments[np.where(np.in1d(assignments[:, 0], node_leaf_idx))[0]]
+            assignments = assignments[
+                np.where(np.in1d(assignments[:, 0], node_leaf_idx))[0]
+            ]
 
         for cluster_idx, feature_idx in assignments:
-            feature_name = self._handle_encoding(i=feature_idx, vec='id2feature_')
+            feature_name = self._handle_encoding(i=feature_idx, vec="id2feature_")
             feature_clusters = output.get(feature_name, [])
             feature_clusters.append(cluster_idx)
             output[feature_name] = feature_clusters
@@ -806,7 +907,7 @@ class HierarchicalNMF(BaseEstimator):
         if include_outliers:
             outliers = np.where(clusters.sum(axis=0) == 0)[0]
             for outlier in outliers:
-                outlier_name = self._handle_encoding(i=outlier, vec='id2feature_')
+                outlier_name = self._handle_encoding(i=outlier, vec="id2feature_")
                 output[outlier_name] = None
 
         return output
@@ -824,7 +925,7 @@ class HierarchicalNMF(BaseEstimator):
 
         """
         g = self.graph_
-        self._handle_vectorizer(id2feature, 'id2feature_')
+        self._handle_vectorizer(id2feature, "id2feature_")
         nodes = self.Hs_
         node_id_incrementer = g.number_of_nodes() + 1
         id2nodeid = defaultdict()
@@ -834,7 +935,7 @@ class HierarchicalNMF(BaseEstimator):
             ranks = node.argsort()[::-1][:n]
             for rank in ranks:
                 weight = node[rank]
-                name = self._handle_encoding(rank, 'id2feature_')
+                name = self._handle_encoding(rank, "id2feature_")
                 word_node_id = id2nodeid[rank]
                 g.add_node(word_node_id, name=name, is_word=True, id=str(word_node_id))
                 g.add_edge(node_id, word_node_id, weight=weight)
@@ -855,15 +956,16 @@ class HierarchicalNMF(BaseEstimator):
         """
         data = nx.readwrite.json_graph.node_link_data(self.graph_)
         # fix inconsistency where nodes have str ids and edges are integers
-        for e in data['nodes']:
-            e['id'] = str(e['id'])
-        for e in data['links']:
-            e['source'] = str(e['source'])
-            e['target'] = str(e['target'])
+        for e in data["nodes"]:
+            e["id"] = str(e["id"])
+        for e in data["links"]:
+            e["source"] = str(e["source"])
+            e["target"] = str(e["target"])
 
         if not fp:
             return data
         else:
             import json
+
             with open(fp, "w+", encoding="utf-8") as json_file:
                 json.dump(data, json_file, indent=4)

@@ -29,7 +29,9 @@ def anls_entry_rank2_precompute(left, right, H, dtype):
     solve_either[np.logical_not(choose_first), 0] = 0
 
     if np.abs(left[0, 0]) < eps and abs(left[0, 1]) < eps:
-        logger.error('Error: The 2x2 matrix is close to singular or the input data matrix has tiny values')
+        logger.error(
+            "Error: The 2x2 matrix is close to singular or the input data matrix has tiny values"
+        )
     else:
         if np.abs(left[0, 0] >= np.abs(left[0, 1])):
             t = left[1, 0] / left[0, 0]
@@ -37,7 +39,7 @@ def anls_entry_rank2_precompute(left, right, H, dtype):
             b2 = left[0, 1] + t * left[1, 1]
             d2 = left[1, 1] - t * left[0, 1]
             if np.abs(d2 / a2) < eps:
-                logger.error('Error: The 2x2 matrix is close to singular')
+                logger.error("Error: The 2x2 matrix is close to singular")
 
             e2 = right[:, 0] + t * right[:, 1]
             f2 = right[:, 1] - t * right[:, 0]
@@ -47,7 +49,7 @@ def anls_entry_rank2_precompute(left, right, H, dtype):
             b2 = left[1, 1] + ct * left[0, 1]
             d2 = -left[0, 1] + ct * left[1, 1]
             if np.abs(d2 / a2) < eps:
-                logger.error('Error: The 2x2 matrix is close to singular')
+                logger.error("Error: The 2x2 matrix is close to singular")
 
             e2 = right[:, 1] + ct * right[:, 0]
             f2 = -right[:, 0] + ct * right[:, 1]
@@ -61,9 +63,18 @@ def anls_entry_rank2_precompute(left, right, H, dtype):
     return H
 
 
-def hier8_neat(X, k, random_state=0, trial_allowance: int = 3, unbalanced: float = 0.1,
-               vec_norm: Union[float, int] = 2.0, normW: bool = True, anls_alg: callable = anls_entry_rank2_precompute,
-               tol: float = 1e-4, maxiter: int = 10000):
+def hier8_neat(
+    X,
+    k,
+    random_state=0,
+    trial_allowance: int = 3,
+    unbalanced: float = 0.1,
+    vec_norm: Union[float, int] = 2.0,
+    normW: bool = True,
+    anls_alg: callable = anls_entry_rank2_precompute,
+    tol: float = 1e-4,
+    maxiter: int = 10000,
+):
     """
 
     Parameters
@@ -122,7 +133,7 @@ def hier8_neat(X, k, random_state=0, trial_allowance: int = 3, unbalanced: float
     """
 
     # Repack params
-    params = {k: v for k, v in locals().items() if k not in ['X', 'k', 'random_state']}
+    params = {k: v for k, v in locals().items() if k not in ["X", "k", "random_state"]}
     random_state = np.random.RandomState(seed=random_state)
     n_samples, n_features = X.shape
     clusters = [None] * (2 * (k - 1))
@@ -134,7 +145,9 @@ def hier8_neat(X, k, random_state=0, trial_allowance: int = 3, unbalanced: float
     tree = np.zeros((2, 2 * (k - 1)), dtype=np.float32)
     splits = -np.ones(k - 1, dtype=np.float32)
 
-    term_subset = np.where(np.sum(X, axis=1) != 0)[0]  # Select samples with at least 1 feature
+    term_subset = np.where(np.sum(X, axis=1) != 0)[
+        0
+    ]  # Select samples with at least 1 feature
 
     # Random initial guesses for W and H
     W = random_state.rand(len(term_subset), 2)
@@ -162,7 +175,7 @@ def hier8_neat(X, k, random_state=0, trial_allowance: int = 3, unbalanced: float
             min_priority = np.min(temp_priority[temp_priority > 0])
             split_node = np.argmax(temp_priority)
             if temp_priority[split_node] < 0:
-                logger.info(f'Cannot generate all {k} leaf clusters')
+                logger.info(f"Cannot generate all {k} leaf clusters")
 
                 Ws = [W for W in Ws if W is not None]
                 return tree, splits, is_leaf, clusters, Ws, priorities
@@ -185,16 +198,18 @@ def hier8_neat(X, k, random_state=0, trial_allowance: int = 3, unbalanced: float
         is_leaf[new_nodes] = 1
 
         subset = clusters[new_nodes[0]]
-        subset, W_buffer_one, H_buffer_one, priority_one = trial_split(min_priority, X, subset, W[:, 0], random_state,
-                                                                       **params)
+        subset, W_buffer_one, H_buffer_one, priority_one = trial_split(
+            min_priority, X, subset, W[:, 0], random_state, **params
+        )
         clusters[new_nodes[0]] = subset
         W_buffer[new_nodes[0]] = W_buffer_one
         H_buffer[new_nodes[0]] = H_buffer_one
         priorities[new_nodes[0]] = priority_one
 
         subset = clusters[new_nodes[1]]
-        subset, W_buffer_one, H_buffer_one, priority_one = trial_split(min_priority, X, subset, W[:, 1], random_state,
-                                                                       **params)
+        subset, W_buffer_one, H_buffer_one, priority_one = trial_split(
+            min_priority, X, subset, W[:, 1], random_state, **params
+        )
         clusters[new_nodes[1]] = subset
         W_buffer[new_nodes[1]] = W_buffer_one
         H_buffer[new_nodes[1]] = H_buffer_one
@@ -203,38 +218,63 @@ def hier8_neat(X, k, random_state=0, trial_allowance: int = 3, unbalanced: float
     return tree.T, splits, is_leaf, clusters, Ws, priorities
 
 
-def trial_split_sklearn(min_priority: float, X, subset, W_parent, random_state, trial_allowance: int, unbalanced: float,
-                        dtype: Union[np.float32, np.float64], tol, maxiter, init):
+def trial_split_sklearn(
+    min_priority: float,
+    X,
+    subset,
+    W_parent,
+    random_state,
+    trial_allowance: int,
+    unbalanced: float,
+    dtype: Union[np.float32, np.float64],
+    tol,
+    maxiter,
+    init,
+):
     m = X.shape[0]
     trial = 0
     subset_backup = subset
     while trial < trial_allowance:
-        cluster_subset, W_buffer_one, H_buffer_one, priority_one = split_once_sklearn(X=X,
-                                                                                      subset=subset,
-                                                                                      W_parent=W_parent,
-                                                                                      random_state=random_state,
-                                                                                      dtype=dtype,
-                                                                                      tol=tol,
-                                                                                      maxiter=maxiter,
-                                                                                      init=init)
+        cluster_subset, W_buffer_one, H_buffer_one, priority_one = split_once_sklearn(
+            X=X,
+            subset=subset,
+            W_parent=W_parent,
+            random_state=random_state,
+            dtype=dtype,
+            tol=tol,
+            maxiter=maxiter,
+            init=init,
+        )
         if priority_one < 0:
             break
 
         unique_cluster_subset = np.unique(cluster_subset)
         if len(unique_cluster_subset) != 2:
-            logger.error('Invalid number of unique sub-clusters!')
+            logger.error("Invalid number of unique sub-clusters!")
 
         length_cluster1 = len(np.where(cluster_subset == unique_cluster_subset[0])[0])
         length_cluster2 = len(np.where(cluster_subset == unique_cluster_subset[1])[0])
         if min(length_cluster1, length_cluster2) < unbalanced * len(cluster_subset):
-            logger.debug("Below imbalanced threshold: {}".format((unbalanced * len(cluster_subset))))
+            logger.debug(
+                "Below imbalanced threshold: {}".format(
+                    (unbalanced * len(cluster_subset))
+                )
+            )
             idx_small = np.argmin(np.array([length_cluster1, length_cluster2]))
-            subset_small = np.where(cluster_subset == unique_cluster_subset[idx_small])[0]
+            subset_small = np.where(cluster_subset == unique_cluster_subset[idx_small])[
+                0
+            ]
             subset_small = subset[subset_small]
-            _, _, _, priority_one_small = split_once_sklearn(X=X, subset=subset_small,
-                                                             W_parent=W_buffer_one[:, idx_small],
-                                                             random_state=random_state, dtype=dtype, maxiter=maxiter,
-                                                             tol=tol, init=init)
+            _, _, _, priority_one_small = split_once_sklearn(
+                X=X,
+                subset=subset_small,
+                W_parent=W_buffer_one[:, idx_small],
+                random_state=random_state,
+                dtype=dtype,
+                maxiter=maxiter,
+                tol=tol,
+                init=init,
+            )
             if priority_one_small < min_priority:
                 trial += 1
                 if trial < trial_allowance:
@@ -246,7 +286,11 @@ def trial_split_sklearn(min_priority: float, X, subset, W_parent, random_state, 
             break
 
     if trial == trial_allowance:
-        logger.debug("Reached trial allowance, recycled {} features".format(len(subset_backup) - len(subset)))
+        logger.debug(
+            "Reached trial allowance, recycled {} features".format(
+                len(subset_backup) - len(subset)
+            )
+        )
         subset = subset_backup
         W_buffer_one = np.zeros((m, 2), dtype=dtype)
         H_buffer_one = np.zeros((2, len(subset)), dtype=dtype)
@@ -255,8 +299,16 @@ def trial_split_sklearn(min_priority: float, X, subset, W_parent, random_state, 
     return subset, W_buffer_one, H_buffer_one, priority_one
 
 
-def split_once_sklearn(X, subset, W_parent, random_state: mtrand.RandomState, dtype: Union[np.float32, np.float64],
-                       tol, maxiter, init):
+def split_once_sklearn(
+    X,
+    subset,
+    W_parent,
+    random_state: mtrand.RandomState,
+    dtype: Union[np.float32, np.float64],
+    tol,
+    maxiter,
+    init,
+):
     m = X.shape[0]
     if len(subset) <= 3:
         cluster_subset = np.ones(len(subset), dtype=dtype)
@@ -268,20 +320,24 @@ def split_once_sklearn(X, subset, W_parent, random_state: mtrand.RandomState, dt
         X_subset = X[term_subset, :][:, subset]
         W = random_state.rand(len(term_subset), 2)
         H = random_state.rand(2, len(subset))
-        W, H, n_iter_ = non_negative_factorization(X=X_subset, W=W, H=H, n_components=2,
-                                                   init=init,
-                                                   update_H=True,
-                                                   solver='cd',
-                                                   beta_loss=2,
-                                                   tol=tol,
-                                                   max_iter=maxiter,
-                                                   alpha=0,
-                                                   l1_ratio=0,
-                                                   regularization='both',
-                                                   random_state=random_state,
-                                                   verbose=0,
-                                                   shuffle=False
-                                                   )
+        W, H, n_iter_ = non_negative_factorization(
+            X=X_subset,
+            W=W,
+            H=H,
+            n_components=2,
+            init=init,
+            update_H=True,
+            solver="cd",
+            beta_loss=2,
+            tol=tol,
+            max_iter=maxiter,
+            alpha=0,
+            l1_ratio=0,
+            regularization="both",
+            random_state=random_state,
+            verbose=0,
+            shuffle=False,
+        )
         cluster_subset = np.argmax(H, axis=0)
         W_buffer_one = np.zeros((m, 2), dtype=dtype)
         W_buffer_one[term_subset, :] = W
@@ -293,38 +349,64 @@ def split_once_sklearn(X, subset, W_parent, random_state: mtrand.RandomState, dt
     return cluster_subset, W_buffer_one, H_buffer_one, priority_one
 
 
-def trial_split(min_priority: float, X, subset, W_parent, random_state, trial_allowance: int, unbalanced: float,
-                dtype: Union[np.float32, np.float64], anls_alg, vec_norm, normW, tol, maxiter):
+def trial_split(
+    min_priority: float,
+    X,
+    subset,
+    W_parent,
+    random_state,
+    trial_allowance: int,
+    unbalanced: float,
+    dtype: Union[np.float32, np.float64],
+    anls_alg,
+    vec_norm,
+    normW,
+    tol,
+    maxiter,
+):
     m = X.shape[0]
     trial = 0
     subset_backup = subset
     while trial < trial_allowance:
-        cluster_subset, W_buffer_one, H_buffer_one, priority_one = split_once(X=X,
-                                                                              subset=subset,
-                                                                              W_parent=W_parent,
-                                                                              random_state=random_state,
-                                                                              dtype=dtype,
-                                                                              anls_alg=anls_alg,
-                                                                              vec_norm=vec_norm,
-                                                                              normW=normW,
-                                                                              tol=tol,
-                                                                              maxiter=maxiter)
+        cluster_subset, W_buffer_one, H_buffer_one, priority_one = split_once(
+            X=X,
+            subset=subset,
+            W_parent=W_parent,
+            random_state=random_state,
+            dtype=dtype,
+            anls_alg=anls_alg,
+            vec_norm=vec_norm,
+            normW=normW,
+            tol=tol,
+            maxiter=maxiter,
+        )
         if priority_one < 0:
             break
 
         unique_cluster_subset = np.unique(cluster_subset)
         if len(unique_cluster_subset) != 2:
-            tqdm.write('Invalid number of unique sub-clusters!')
+            tqdm.write("Invalid number of unique sub-clusters!")
 
         length_cluster1 = len(np.where(cluster_subset == unique_cluster_subset[0])[0])
         length_cluster2 = len(np.where(cluster_subset == unique_cluster_subset[1])[0])
         if min(length_cluster1, length_cluster2) < unbalanced * len(cluster_subset):
             idx_small = np.argmin(np.array([length_cluster1, length_cluster2]))
-            subset_small = np.where(cluster_subset == unique_cluster_subset[idx_small])[0]
+            subset_small = np.where(cluster_subset == unique_cluster_subset[idx_small])[
+                0
+            ]
             subset_small = subset[subset_small]
-            _, _, _, priority_one_small = split_once(X=X, subset=subset_small, W_parent=W_buffer_one[:, idx_small],
-                                                     random_state=random_state, dtype=dtype, anls_alg=anls_alg,
-                                                     vec_norm=vec_norm, normW=normW, maxiter=maxiter, tol=tol)
+            _, _, _, priority_one_small = split_once(
+                X=X,
+                subset=subset_small,
+                W_parent=W_buffer_one[:, idx_small],
+                random_state=random_state,
+                dtype=dtype,
+                anls_alg=anls_alg,
+                vec_norm=vec_norm,
+                normW=normW,
+                maxiter=maxiter,
+                tol=tol,
+            )
             if priority_one_small < min_priority:
                 trial += 1
                 if trial < trial_allowance:
@@ -345,8 +427,18 @@ def trial_split(min_priority: float, X, subset, W_parent, random_state, trial_al
     return subset, W_buffer_one, H_buffer_one, priority_one
 
 
-def split_once(X, subset, W_parent, random_state: mtrand.RandomState, dtype: Union[np.float32, np.float64],
-               anls_alg: callable, vec_norm, normW, tol, maxiter):
+def split_once(
+    X,
+    subset,
+    W_parent,
+    random_state: mtrand.RandomState,
+    dtype: Union[np.float32, np.float64],
+    anls_alg: callable,
+    vec_norm,
+    normW,
+    tol,
+    maxiter,
+):
     m = X.shape[0]
     if len(subset) <= 3:
         cluster_subset = np.ones(len(subset), dtype=dtype)
@@ -358,8 +450,17 @@ def split_once(X, subset, W_parent, random_state: mtrand.RandomState, dtype: Uni
         X_subset = X[term_subset, :][:, subset]
         W = random_state.rand(len(term_subset), 2)
         H = random_state.rand(2, len(subset))
-        W, H = nmfsh_comb_rank2(X_subset, W, H, anls_alg=anls_alg, vec_norm=vec_norm, normW=normW, tol=tol,
-                                maxiter=maxiter, dtype=dtype)
+        W, H = nmfsh_comb_rank2(
+            X_subset,
+            W,
+            H,
+            anls_alg=anls_alg,
+            vec_norm=vec_norm,
+            normW=normW,
+            tol=tol,
+            maxiter=maxiter,
+            dtype=dtype,
+        )
         cluster_subset = np.argmax(H, axis=0)
         W_buffer_one = np.zeros((m, 2), dtype=dtype)
         W_buffer_one[term_subset, :] = W
@@ -386,10 +487,10 @@ def compute_priority(W_parent, W_child, dtype: Union[np.float32, np.float64]):
         weight = np.log(np.arange(n, 0, -1))
         first_zero = np.where(sorted_parent == 0)[0]
         if len(first_zero) > 0:
-            weight[first_zero[0]:] = 1
+            weight[first_zero[0] :] = 1
 
         weight_part = np.zeros(n, dtype=dtype)
-        weight_part[: n_part] = np.log(np.arange(n_part, 0, -1))
+        weight_part[:n_part] = np.log(np.arange(n_part, 0, -1))
         idx1 = np.argsort(idx_child1)
         idx2 = np.argsort(idx_child2)
         max_pos = np.maximum(idx1, idx2)
@@ -422,27 +523,41 @@ def NDCG_part(ground, test, weight, weight_part):
     return score
 
 
-def nmfsh_comb_rank2(A, Winit, Hinit, anls_alg: callable, vec_norm: float,
-                     normW: bool, tol: float, maxiter: int,
-                     dtype: Union[np.float32, np.float64]):
-    """
-
-    """
+def nmfsh_comb_rank2(
+    A,
+    Winit,
+    Hinit,
+    anls_alg: callable,
+    vec_norm: float,
+    normW: bool,
+    tol: float,
+    maxiter: int,
+    dtype: Union[np.float32, np.float64],
+):
+    """"""
     eps = 1e-6
     m, n = A.shape
     W, H = Winit, Hinit
 
     if W.shape[1] != 2:
-        warnings.warn("Error: Wrong size of W! Expected shape of (n, 2) but received W of shape ({}, {})"
-                      .format(W.shape[0], W.shape[1]))
+        warnings.warn(
+            "Error: Wrong size of W! Expected shape of (n, 2) but received W of shape ({}, {})".format(
+                W.shape[0], W.shape[1]
+            )
+        )
 
     if H.shape[0] != 2:
-        warnings.warn("Error: Wrong size of H! Expected shape of (2, n) but received H of shape ({}, {})"
-                      .format(H.shape[0], H.shape[1]))
+        warnings.warn(
+            "Error: Wrong size of H! Expected shape of (2, n) but received H of shape ({}, {})".format(
+                H.shape[0], H.shape[1]
+            )
+        )
 
     left = H.dot(H.T)
     right = A.dot(H.T)
-    pb = tqdm(desc="Fitting 2-rank NMF of W and H", total=len(range(maxiter)), leave=False)
+    pb = tqdm(
+        desc="Fitting 2-rank NMF of W and H", total=len(range(maxiter)), leave=False
+    )
     for iter_ in range(maxiter):
         if matrix_rank(left) < 2:
             W = np.zeros((m, 2), dtype=dtype)
@@ -463,7 +578,7 @@ def nmfsh_comb_rank2(A, Winit, Hinit, anls_alg: callable, vec_norm: float,
         W = anls_alg(left, right, W, dtype=dtype)
         norms_W = norm(W, axis=0)
         if np.min(norms_W) < eps:
-            tqdm.write('Error: Some column of W is essentially zero')
+            tqdm.write("Error: Some column of W is essentially zero")
 
         W *= 1.0 / norms_W
         left = W.T.dot(W)
@@ -521,6 +636,7 @@ def nmfsh_comb_rank2(A, Winit, Hinit, anls_alg: callable, vec_norm: float,
 
 def tree_to_nx(tree: np.ndarray, weights: np.ndarray = None):
     import networkx as nx
+
     g = nx.DiGraph()
     g.add_node("Root", name="Root", is_word=False, id="Root")
     for parent_node, row in enumerate(tree, start=0):
@@ -536,13 +652,15 @@ def tree_to_nx(tree: np.ndarray, weights: np.ndarray = None):
                 child_name = "Node {}".format(child_id)
 
                 if parent_idx not in g.nodes:
-                    g.add_node(parent_idx, is_word=False, name=parent_name, id=parent_id)
+                    g.add_node(
+                        parent_idx, is_word=False, name=parent_name, id=parent_id
+                    )
                 if child_idx not in g.nodes:
                     g.add_node(child_idx, is_word=False, name=child_name, id=child_id)
                 g.add_edge(parent_idx, child_idx)
                 if weights is not None:
                     child_weight = weights[child_idx]
-                    g.nodes[child_idx]['weight'] = child_weight
+                    g.nodes[child_idx]["weight"] = child_weight
 
     g.add_edge("Root", 0)
     g.add_edge("Root", 1)
@@ -557,7 +675,7 @@ def handle_enums(param):
 
 
 @contextlib.contextmanager
-def std_out_err_redirect_tqdm(stream='stderr'):
+def std_out_err_redirect_tqdm(stream="stderr"):
     orig_out_err = sys.stdout, sys.stderr
     try:
         sys.stdout, sys.stderr = map(DummyTqdmFile, orig_out_err)
