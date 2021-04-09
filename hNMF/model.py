@@ -216,9 +216,9 @@ class HierarchicalNMF(BaseEstimator):
         W_buffer = [None] * (2 * (self.k - 1))
         H_buffer = [None] * (2 * (self.k - 1))
         priorities = np.zeros(2 * (self.k - 1), dtype=self.dtype)
-        is_leaf = -np.ones(2 * (self.k - 1), dtype=np.int)  # No leaves at start
-        tree = np.zeros((2, 2 * (self.k - 1)), dtype=np.int)
-        splits = -np.ones(self.k - 1, dtype=np.int)
+        is_leaf = -np.ones(2 * (self.k - 1), dtype=np.int64)  # No leaves at start
+        tree = np.zeros((2, 2 * (self.k - 1)), dtype=np.int64)
+        splits = -np.ones(self.k - 1, dtype=np.int64)
 
         term_subset = np.where(np.sum(X, axis=1) != 0)[
             0
@@ -470,7 +470,7 @@ class HierarchicalNMF(BaseEstimator):
             x = np.zeros(self.n_features_)
             x[cluster] = 1
             stacked.append(x)
-        return np.vstack(stacked).astype(np.int)
+        return np.vstack(stacked).astype(np.int64)
 
     def _stack_H_buffer(self, buffer: list) -> np.ndarray:
         # Returns components_ with shape (2*k-1, 2, n_features)
@@ -791,7 +791,7 @@ class HierarchicalNMF(BaseEstimator):
         output = []
 
         # Masks
-        member_mask = np.array(node, dtype=np.int)
+        member_mask = np.array(node, dtype=np.int64)
         non_member_mask = np.array(
             [x for x in np.arange(0, self.n_nodes_) if x != node]
         )
