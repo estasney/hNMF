@@ -3,7 +3,6 @@ import pytest
 from hNMF import model as testmodel
 from sklearn.datasets import make_sparse_spd_matrix
 from scipy.stats import beta
-import unittest
 import numpy as np
 
 
