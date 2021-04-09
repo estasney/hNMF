@@ -1,3 +1,4 @@
 /dist/
 /venv/
 /docs_/build/
+**/*.egg-info
