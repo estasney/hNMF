@@ -2,7 +2,7 @@
 from collections import defaultdict
 from enum import Enum
 from operator import itemgetter
-from typing import Union, TypeVar, List, Tuple, Type, Dict
+from typing import Union, TypeVar, List, Tuple, Type, Dict, Optional
 
 import networkx as nx
 import numpy as np
@@ -113,27 +113,27 @@ class HierarchicalNMF(BaseEstimator):
     Parameters
     ----------
 
-    k:
+    k: int
         The number of desired leaf nodes
-    unbalanced :
+    unbalanced : float
         A threshold to determine if one of the two clusters is an outlier set. A smaller value means more tolerance for
         imbalance between two clusters. See parameter beta in Algorithm 3 in the reference paper.
-    init :
+    init : InitMethod
         The initialization method used to initially fill W and H
-    solver :
+    solver : NMFSolver
         The solver used to minimize the distance function
-    beta_loss :
+    beta_loss : BetaLoss
         Beta divergence to be minimized
-    random_state :
+    random_state : int
         random seed
-    trial_allowance :
+    trial_allowance : int
         Number of trials allowed for removing outliers and splitting a node again. See parameter T in Algorithm 3 in
         the reference paper.
-    tol :
+    tol : float
         Tolerance parameter for stopping criterion in each run of NMF.
-    maxiter :
+    maxiter : int
         Maximum number of iteration times in each run of NMF
-    dtype :
+    dtype : [np.float32, np.float64]
         Dtype used for numpy arrays 
 
     
@@ -181,7 +181,7 @@ class HierarchicalNMF(BaseEstimator):
 
     """
 
-    def _init_fit(self, X, term_subset):
+    def _init_fit(self, X: Array, term_subset: np.ndarray):
         # TODO Flexible Rank
         nmf = NMF(
             n_components=2,
@@ -220,9 +220,8 @@ class HierarchicalNMF(BaseEstimator):
         tree = np.zeros((2, 2 * (self.k - 1)), dtype=np.int64)
         splits = -np.ones(self.k - 1, dtype=np.int64)
 
-        term_subset = np.where(np.sum(X, axis=1) != 0)[
-            0
-        ]  # Where X has at least one non-zero
+        # Where X has at least one non-zero
+        term_subset = np.where(np.sum(X, axis=1) != 0)[0]
 
         # W (n_samples|term_subset, 2)
         # H (2, n_features)
@@ -440,8 +439,8 @@ class HierarchicalNMF(BaseEstimator):
 
     def _handle_tops(
         self,
-        arr: Union[np.ndarray, list],
-        ranks: Union[np.ndarray, list],
+        arr: Union[np.ndarray, List],
+        ranks: Union[np.ndarray, List],
         vec: Union[str, Type[None]] = "id2feature_",
     ) -> List[Tuple]:
         if vec:
@@ -454,7 +453,7 @@ class HierarchicalNMF(BaseEstimator):
         else:
             return [(i, arr[i]) for i in ranks if arr[i] > 0]
 
-    def _handle_encoding(self, i: int, vec: Union[str, Type[None]]) -> Union[int, str]:
+    def _handle_encoding(self, i: int, vec: Optional[str]) -> Union[int, str]:
         if vec:
             vec_ = getattr(self, vec, None)
         else:
@@ -464,7 +463,7 @@ class HierarchicalNMF(BaseEstimator):
         else:
             return i
 
-    def _stack_clusters(self, clusters: list):
+    def _stack_clusters(self, clusters: List) -> np.ndarray:
         stacked = []
         for cluster in clusters:
             x = np.zeros(self.n_features_)
@@ -472,7 +471,7 @@ class HierarchicalNMF(BaseEstimator):
             stacked.append(x)
         return np.vstack(stacked).astype(np.int64)
 
-    def _stack_H_buffer(self, buffer: list) -> np.ndarray:
+    def _stack_H_buffer(self, buffer: List) -> np.ndarray:
         # Returns components_ with shape (2*k-1, 2, n_features)
         stacked = []
         for i, buff in enumerate(buffer):
@@ -486,7 +485,7 @@ class HierarchicalNMF(BaseEstimator):
             stacked.append(stacked_buff)
         return np.array(stacked)
 
-    def _remove_empty(self, x):
+    def _remove_empty(self, x) -> List:
         return [c for c in x if c is not None]
 
     def top_features_in_node(
@@ -513,7 +512,11 @@ class HierarchicalNMF(BaseEstimator):
         return tops
 
     def top_features_in_nodes(
-        self, n: int = 10, id2feature: Vectorizer = None, idx=None, leaves_only=False
+        self,
+        n: int = 10,
+        id2feature: Vectorizer = None,
+        idx=None,
+        leaves_only: bool = False,
     ) -> List[Dict[str, List[Tuple]]]:
         """
         Return the top n values from all nodes or nodes present in idx if idx is not None
@@ -943,7 +946,7 @@ class HierarchicalNMF(BaseEstimator):
         self.graph_ = g
         return self.graph_
 
-    def json_graph(self, fp: Union[str, Type[None]] = None):
+    def json_graph(self, fp: Optional[str] = None):
         """
         Export the graph to json
 
