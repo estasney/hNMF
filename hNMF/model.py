@@ -204,7 +204,18 @@ class HierarchicalNMF(BaseEstimator):
 
         return W, H
 
-    def fit(self, X: Array):
+    def fit(self, X: Array) -> None:
+        """
+        Fit `HierarchicalNMF` to data
+
+        Parameters
+        ----------
+        X : Array
+
+        Returns
+        -------
+        None
+        """
         n_samples, n_features = X.shape
         self.n_samples_ = n_samples
         self.n_features_ = n_features
@@ -441,7 +452,7 @@ class HierarchicalNMF(BaseEstimator):
         self,
         arr: Union[np.ndarray, List],
         ranks: Union[np.ndarray, List],
-        vec: Union[str, Type[None]] = "id2feature_",
+        vec: Optional[str] = "id2feature_",
     ) -> List[Tuple]:
         if vec:
             vec_ = getattr(self, vec, None)
