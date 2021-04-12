@@ -3,3 +3,7 @@ numpy
 scipy
 networkx
 tqdm
+numpydoc
+pytest
+black
+sphinx_rtd_theme
