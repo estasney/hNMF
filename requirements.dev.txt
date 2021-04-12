@@ -7,3 +7,5 @@ numpydoc
 pytest
 black
 sphinx_rtd_theme
+twine
+keyring
