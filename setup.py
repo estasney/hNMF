@@ -14,14 +14,14 @@ from setuptools import find_packages, setup
 # Package meta-data
 NAME = 'hNMF'
 DESCRIPTION = 'Hierarchical NMF'
-URL = 'https://github.com/estasney/hierarchical-nmf-python'
+URL = 'https://github.com/estasney/hNMF'
 EMAIL = 'estasney@users.noreply.github.com'
 AUTHOR = 'Eric Stasney'
-REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.0.1'
+REQUIRES_PYTHON = '>=3.7.0'
+VERSION = '0.0.2'
 
 REQUIRED = [
-    'networkx>=2.3', 'tqdm', 'scikit-learn', 'numpy'
+    'networkx>=2.3', 'tqdm', 'scikit-learn', 'numpy', 'scipy'
 ]
 
 EXTRAS = {}
@@ -63,8 +63,5 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7'
     ],
-
 )
