@@ -132,12 +132,12 @@
 *.bat             text eol=crlf
 *.cmd             text eol=crlf
 *.coffee          text
-*.css             text diff=css
-*.htm             text diff=html
-*.html            text diff=html
+*.css             text eol=lf diff=css
+*.htm             text eol=lf diff=html
+*.html            text eol=lf diff=html
 *.inc             text
 *.ini             text
-*.js              text
+*.js              text eol=lf
 *.json            text
 *.jsx             text
 *.less            text
