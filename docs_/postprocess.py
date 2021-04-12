@@ -1,10 +1,10 @@
 import os
 import shutil
 import glob
+
 from bs4 import BeautifulSoup
 
-
-def main(dry_run):
+def main():
     cwd = os.getcwd()
     parent_folder = os.path.split(cwd)[0]
     target_folder = os.path.join(parent_folder, "docs")
@@ -17,33 +17,23 @@ def main(dry_run):
         file_name = os.path.split(html_file)[1]
         file_path = os.path.join(target_folder, file_name)
 
-        if dry_run:
-            print("Copy {} to {}".format(html_file, file_path))
-        else:
-            with open(html_file, mode="r", encoding="utf-8") as fp:
-                doc = fp.read()
-                soup = BeautifulSoup(doc, features="html.parser")
+        with open(html_file, mode="r", encoding="utf-8") as fp:
+            doc = fp.read()
+            soup = BeautifulSoup(doc, features="html.parser")
 
-            with open(file_path, mode="w+", encoding="utf-8") as fp:
-                fp.write(soup.prettify())
+        with open(file_path, mode="w+", encoding="utf-8") as fp:
+            fp.write(soup.prettify())
 
-    # delete static destination
+        print(f"Wrote {file_name} to {file_path}")
 
     target_folder_static = os.path.join(target_folder, "_static")
+    print(target_folder_static)
+    if os.path.exists(target_folder_static):
+        print("Removing Static Folder from Docs")
+        shutil.rmtree(target_folder_static)
 
-    if os.path.isdir(target_folder_static):
-        if dry_run:
-            print("Delete static at {}".format(target_folder_static))
-        else:
-            shutil.rmtree(target_folder_static)
-
-    # copy static to destination
-
-    if dry_run:
-        print("Copy static from {} to {}".format(source_static, target_folder_static))
-    else:
-        shutil.copytree(source_static, target_folder_static)
+    shutil.copytree(source_static, target_folder_static)
 
 
 if __name__ == '__main__':
-    main(dry_run=False)
+    main()
