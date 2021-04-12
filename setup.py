@@ -18,7 +18,7 @@ URL = 'https://github.com/estasney/hNMF'
 EMAIL = 'estasney@users.noreply.github.com'
 AUTHOR = 'Eric Stasney'
 REQUIRES_PYTHON = '>=3.7.0'
-VERSION = '0.0.2'
+VERSION = '0.0.3'
 
 REQUIRED = [
     'networkx>=2.3', 'tqdm', 'scikit-learn', 'numpy', 'scipy'

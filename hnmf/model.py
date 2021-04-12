@@ -17,7 +17,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from hNMF.helpers import (
+from hnmf.helpers import (
     tree_to_nx,
     trial_split_sklearn,
     handle_enums,
