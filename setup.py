@@ -9,7 +9,7 @@ import os
 import sys
 from shutil import rmtree
 
-from setuptools import find_packages, setup
+from setuptools import find_packages, setup, Command
 
 # Package meta-data
 NAME = 'hNMF'
@@ -39,8 +39,39 @@ except FileNotFoundError:
 about = {}
 about['__version__'] = VERSION
 
+class UploadCommand(Command):
+    """Support setup.py upload."""
 
-# Where the magic happens:
+    description = 'Build and publish the package.'
+    user_options = []
+
+    @staticmethod
+    def status(s):
+        """Prints things in bold."""
+        print('\033[1m{0}\033[0m'.format(s))
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        try:
+            self.status('Removing previous builds…')
+            rmtree(os.path.join(here, 'dist'))
+        except OSError:
+            pass
+
+        self.status('Building distribution…')
+        os.system('python -m build')
+
+        self.status('Uploading the package to PyPI via Twine…')
+        import keyring
+
+        os.system('twine upload -u estasney -p {} dist/*'.format(keyring.get_password("TWINE", "estasney")))
+
+        sys.exit()
 setup(
     name=NAME,
     version=about['__version__'],
@@ -64,4 +95,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
     ],
+    cmdclass={
+        "upload": UploadCommand
+        }
 )

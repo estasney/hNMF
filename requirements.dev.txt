@@ -10,3 +10,4 @@ sphinx_rtd_theme
 twine
 keyring
 beautifulsoup4
+build
