@@ -2,7 +2,7 @@
 from collections import defaultdict
 from enum import Enum
 from operator import itemgetter
-from typing import Union, TypeVar, List, Tuple, Type, Dict, Optional
+from typing import Union, TypeVar, List, Tuple, Type, Dict, Optional, Set
 
 import networkx as nx
 import numpy as np
@@ -526,7 +526,7 @@ class HierarchicalNMF(BaseEstimator):
         self,
         n: int = 10,
         id2feature: Vectorizer = None,
-        idx=None,
+        nodes: Optional[List[int]] = None,
         leaves_only: bool = False,
     ) -> List[Dict[str, List[Tuple]]]:
         """
@@ -539,25 +539,26 @@ class HierarchicalNMF(BaseEstimator):
             Number of items to return
         id2feature
             Optional, if provided returns decoded items
-        idx
-            Optional, if provided, returns top items only for nodes specified in idx
+        nodes
+            Optional, if provided, returns top items only for nodes listed
         leaves_only
             If True and idx is None return top items for all leaf nodes
 
         """
 
         self._handle_vectorizer(id2feature, "id2feature_")
-        if idx is not None:
-            nodes = self.Hs_[idx]
-        elif idx is None and leaves_only is True:
-            idx = np.where(self.is_leaf_ == 1)[0]
-            nodes = self.Hs_[idx]
+        node_idx = nodes
+        if node_idx is not None:
+            nodes = self.Hs_[node_idx]
+        elif node_idx is None and leaves_only is True:
+            node_idx = np.where(self.is_leaf_ == 1)[0]
+            nodes = self.Hs_[node_idx]
         else:
-            idx = np.arange(0, self.Hs_.shape[0])
-            nodes = self.Hs_[idx]
+            node_idx = np.arange(0, self.Hs_.shape[0])
+            nodes = self.Hs_[node_idx]
 
         output = []
-        for node_id, node in zip(idx, nodes):
+        for node_id, node in zip(node_idx, nodes):
             ranks = node.argsort()[::-1][:n]
             tops = self._handle_tops(arr=node, ranks=ranks)
             output.append({"node": node_id, "features": tops})
@@ -598,7 +599,7 @@ class HierarchicalNMF(BaseEstimator):
         ranks = node_weights.argsort()[::-1]
         if leaves_only:
             rank_is_leaf = np.isin(ranks, node_leaf_idx)
-            ranks = rank_is_leaf[rank_is_leaf]
+            ranks = ranks[rank_is_leaf]
 
         ranks = ranks[:n]
         tops = self._handle_tops(arr=node_weights, ranks=ranks, vec=None)
@@ -886,18 +887,18 @@ class HierarchicalNMF(BaseEstimator):
         leaves_only: bool = True,
         id2feature: Vectorizer = None,
         include_outliers: bool = True,
-    ) -> Dict[Union[int, str], Union[List[int], Type[None]]]:
+    ) -> Dict[Union[int, str], Union[Set[int], Type[None]]]:
         """
-        Returns a dictionary with keys as features and clusters as values
+        Returns a mapping of features and their assigned cluster(s)
 
         Parameters
         ----------
         leaves_only
-            Whether to return only leaf noes
+            Whether to return only leaf nodes
         id2feature
             Decodes features
         include_outliers
-            If True, include feature keys that are not assigned a cluster
+            If True, include feature keys that are not assigned a cluster.
 
         """
         self._handle_vectorizer(id2feature, "id2feature_")
@@ -914,15 +915,15 @@ class HierarchicalNMF(BaseEstimator):
 
         for cluster_idx, feature_idx in assignments:
             feature_name = self._handle_encoding(i=feature_idx, vec="id2feature_")
-            feature_clusters = output.get(feature_name, [])
-            feature_clusters.append(cluster_idx)
+            feature_clusters = output.get(feature_name, set([]))
+            feature_clusters.add(cluster_idx)
             output[feature_name] = feature_clusters
 
         if include_outliers:
             outliers = np.where(clusters.sum(axis=0) == 0)[0]
             for outlier in outliers:
                 outlier_name = self._handle_encoding(i=outlier, vec="id2feature_")
-                output[outlier_name] = None
+                output[outlier_name] = {None}
 
         return output
 

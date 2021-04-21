@@ -385,7 +385,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </td>
                    <td>
                     <p>
-                     Returns a dictionary with keys as features and clusters as values
+                     Returns a mapping of features and their assigned cluster(s)
                     </p>
                    </td>
                   </tr>
@@ -557,7 +557,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                        </span>
                       </code>
                      </a>
-                     ([n, id2feature, idx, …])
+                     ([n, id2feature, …])
                     </p>
                    </td>
                    <td>
@@ -800,7 +800,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                   </span>
                   <span class="pre">
-                   List
+                   Set
                   </span>
                   <span class="p">
                    <span class="pre">
@@ -852,7 +852,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                  </dt>
                  <dd>
                   <p>
-                   Returns a dictionary with keys as features and clusters as values
+                   Returns a mapping of features and their assigned cluster(s)
                   </p>
                   <dl class="field-list simple">
                    <dt class="field-odd">
@@ -867,7 +867,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      </dt>
                      <dd>
                       <p>
-                       Whether to return only leaf noes
+                       Whether to return only leaf nodes
                       </p>
                      </dd>
                      <dt>
@@ -887,7 +887,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      </dt>
                      <dd>
                       <p>
-                       If True, include feature keys that are not assigned a cluster
+                       If True, include feature keys that are not assigned a cluster.
                       </p>
                      </dd>
                     </dl>
@@ -1800,7 +1800,43 @@ implementation. While this may be true in MATLAB, the original Python implementa
                   <em class="sig-param">
                    <span class="n">
                     <span class="pre">
-                     idx
+                     nodes
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Optional
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     List
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     int
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
                     </span>
                    </span>
                    <span class="o">
@@ -1932,12 +1968,12 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      </dd>
                      <dt>
                       <strong>
-                       idx
+                       nodes
                       </strong>
                      </dt>
                      <dd>
                       <p>
-                       Optional, if provided, returns top items only for nodes specified in idx
+                       Optional, if provided, returns top items only for nodes listed
                       </p>
                      </dd>
                      <dt>
