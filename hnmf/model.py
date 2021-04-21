@@ -2,7 +2,7 @@
 from collections import defaultdict
 from enum import Enum
 from operator import itemgetter
-from typing import Union, TypeVar, List, Tuple, Type, Dict, Optional, Set
+from typing import Union, TypeVar, List, Tuple, Type, Dict, Optional, Set, Literal
 
 import networkx as nx
 import numpy as np
@@ -14,6 +14,8 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from tqdm.auto import tqdm
 
 import logging
+
+from hnmf.signatures import Sign, DiscrimSample
 
 logger = logging.getLogger(__name__)
 
@@ -786,19 +788,24 @@ class HierarchicalNMF(BaseEstimator):
         return output
 
     def top_discriminative_samples_in_node(
-        self, node: int, n: int = 10, sign="abs", id2sample: Vectorizer = None
-    ) -> List[Dict]:
+        self,
+        node: int,
+        n: int = 10,
+        sign: Sign = "abs",
+        id2sample: Vectorizer = None,
+    ) -> List[DiscrimSample]:
         """
         Computes most discriminative samples (node vs rest)
 
         Parameters
         ----------
+        node
         n
             The number of features to return
         sign
             One of `['positive', 'negative', 'abs']`.
         id2sample
-            Decodes samples
+            Decodes index of sample to something meaningful.
 
         """
         self._handle_vectorizer(id2sample, "id2sample_")
@@ -826,7 +833,7 @@ class HierarchicalNMF(BaseEstimator):
         for diff in diff_tops:
             output.append(
                 {
-                    "feature": self._handle_encoding(i=diff, vec="id2sample_"),
+                    "sample": self._handle_encoding(i=diff, vec="id2sample_"),
                     "node": node,
                     "node_value": member_values[diff],
                     "others_value": other_means[diff],
