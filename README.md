@@ -28,7 +28,7 @@ tfidf = TfidfVectorizer(max_df=0.95, min_df=2,
                                    stop_words='english')
 
 X = tfidf.fit_transform(data)
-id2feature = {i: token for i, token in enumerate(tfidf.get_feature_names())}
+id2feature = {i: token for i, token in enumerate(tfidf.get_feature_names_out())}
 
 # hNMF
 model = HierarchicalNMF(k=n_leaves)

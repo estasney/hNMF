@@ -21,7 +21,7 @@ REQUIRES_PYTHON = '>=3.7.0'
 VERSION = '0.1.2'
 
 REQUIRED = [
-    'networkx>=2.3', 'tqdm', 'scikit-learn', 'numpy', 'scipy'
+    'networkx>=2.3', 'tqdm', 'scikit-learn>=1.0.1', 'numpy', 'scipy'
 ]
 
 EXTRAS = {}
