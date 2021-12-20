@@ -11,3 +11,4 @@ twine
 keyring
 beautifulsoup4
 build
+pre-commit

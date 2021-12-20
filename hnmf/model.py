@@ -1,23 +1,37 @@
-# coding: utf-8
-from collections import defaultdict
-from enum import Enum
-from operator import itemgetter
-from typing import Union, TypeVar, List, Tuple, Type, Dict, Optional, Set, Literal
+import os
+from os import PathLike
 
 import networkx as nx
 import numpy as np
-from scipy.sparse.csr import csr_matrix
 
+from collections import defaultdict
+from operator import itemgetter
+from scipy.sparse.csr import csr_matrix
+from tqdm.auto import tqdm
+from typing import Optional, TYPE_CHECKING, Tuple
 from sklearn.base import BaseEstimator
 from sklearn.decomposition import NMF
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-from tqdm.auto import tqdm
+
+if TYPE_CHECKING:
+    from typing import Union, Literal
+
+    from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+    from hnmf.signatures import Sign
+
+    Vectorizer = Union[dict[str, int], TfidfVectorizer, CountVectorizer]
+    NDArray = np.ndarray
+    SPArray = csr_matrix
+    AnyArray = Union[np.ndarray, csr_matrix]
+    NMFInitMethod = Literal[None, "random", "nndsvd", "nndsvda", "nndsvdar"]
+    NMFSolver = Literal["cd", "mu"]
+    NMFBetaLoss = Literal["FRO", 0, "KL", 1, "IS", 2]
+    DType = Union[np.float32, np.float64]
+
 
 import logging
 
-from hnmf.signatures import Sign, DiscrimSample
+from hnmf.signatures import DiscrimSample
 
-logger = logging.getLogger(__name__)
 
 from hnmf.helpers import (
     tree_to_nx,
@@ -26,59 +40,22 @@ from hnmf.helpers import (
     std_out_err_redirect_tqdm,
 )
 
-Vectorizer = TypeVar("Vectorizer", dict, TfidfVectorizer, CountVectorizer)
-Array = TypeVar("Array", np.ndarray, csr_matrix)
-
-
-class NMFInitMethod(Enum):
-    """Specifies method used for initial matrices of W and H"""
-
-    DEFAULT = None
-    RANDOM = "random"
-    NNDSVD = "nndsvd"
-    NNDSVDA = "nndsvda"
-    NNDSVDAR = "nndsvdar"
-
-
-class NMFSolver(Enum):
-    """Specifies solver for NMF"""
-
-    CD = "cd"
-    MU = "mu"
-
-
-class NMFBetaLoss(Enum):
-    """Specifies beta loss for NMF
-
-    ``FRO`` refers to Frobenius (2)
-    ``KL`` refers to Kullback-Leibler (1)
-    ``IS`` refers to Itakura-Saito (0)
-    """
-
-    FRO = 2
-    KL = 1
-    IS = 0
-
-
-InitMethod = TypeVar("InitMethod", Type[NMFInitMethod], str, Type[None])
-Solver = TypeVar("Solver", Type[NMFSolver], str)
-BetaLoss = TypeVar("BetaLoss", Type[NMFBetaLoss], int, float, str)
+logger = logging.getLogger(__name__)
 
 
 class HierarchicalNMF(BaseEstimator):
-    # TODO : Rank parameters
     def __init__(
         self,
         k: int,
         unbalanced: float = 0.1,
-        init: InitMethod = NMFInitMethod.DEFAULT,
-        solver: Solver = NMFSolver.CD,
-        beta_loss: BetaLoss = NMFBetaLoss.FRO,
+        init: "NMFInitMethod" = None,
+        solver: "NMFSolver" = "cd",
+        beta_loss: "NMFBetaLoss" = 0,
         random_state: int = 42,
         trial_allowance: int = 100,
         tol: float = 1e-6,
         maxiter: int = 10000,
-        dtype: Union[np.float32, np.float64] = np.float64,
+        dtype: "DType" = np.float64,
     ):
         self.k = k
         self.unbalanced = unbalanced
@@ -183,7 +160,7 @@ class HierarchicalNMF(BaseEstimator):
 
     """
 
-    def _init_fit(self, X: Array, term_subset: np.ndarray):
+    def _init_fit(self, X: "AnyArray", term_subset: "NDArray"):
         # TODO Flexible Rank
         nmf = NMF(
             n_components=2,
@@ -206,13 +183,13 @@ class HierarchicalNMF(BaseEstimator):
 
         return W, H
 
-    def fit(self, X: Array) -> None:
+    def fit(self, X: "AnyArray") -> "HierarchicalNMF":
         """
         Fit `HierarchicalNMF` to data
 
         Parameters
         ----------
-        X : Array
+        X : csr_matrix or ndarray
 
         Returns
         -------
@@ -424,7 +401,7 @@ class HierarchicalNMF(BaseEstimator):
         self.n_leaves_ = np.count_nonzero(self.is_leaf_)
         return self
 
-    def _handle_vectorizer(self, vectorizer: Vectorizer, attr: str):
+    def _handle_vectorizer(self, vectorizer: "Vectorizer", attr: str):
         target_attr = getattr(self, attr)
         if not vectorizer:
             if target_attr:
@@ -452,10 +429,10 @@ class HierarchicalNMF(BaseEstimator):
 
     def _handle_tops(
         self,
-        arr: Union[np.ndarray, List],
-        ranks: Union[np.ndarray, List],
-        vec: Optional[str] = "id2feature_",
-    ) -> List[Tuple]:
+        arr: "Union[NDArray, list]",
+        ranks: "Union[NDArray, list]",
+        vec: "Optional[str]" = "id2feature_",
+    ) -> "list[Tuple]":
         if vec:
             vec_ = getattr(self, vec, None)
         else:
@@ -466,7 +443,7 @@ class HierarchicalNMF(BaseEstimator):
         else:
             return [(i, arr[i]) for i in ranks if arr[i] > 0]
 
-    def _handle_encoding(self, i: int, vec: Optional[str]) -> Union[int, str]:
+    def _handle_encoding(self, i: int, vec: "Optional[str]") -> "Union[int, str]":
         if vec:
             vec_ = getattr(self, vec, None)
         else:
@@ -476,7 +453,7 @@ class HierarchicalNMF(BaseEstimator):
         else:
             return i
 
-    def _stack_clusters(self, clusters: List) -> np.ndarray:
+    def _stack_clusters(self, clusters: list) -> "NDArray":
         stacked = []
         for cluster in clusters:
             x = np.zeros(self.n_features_)
@@ -484,7 +461,7 @@ class HierarchicalNMF(BaseEstimator):
             stacked.append(x)
         return np.vstack(stacked).astype(np.int64)
 
-    def _stack_H_buffer(self, buffer: List) -> np.ndarray:
+    def _stack_H_buffer(self, buffer: list) -> "NDArray":
         # Returns components_ with shape (2*k-1, 2, n_features)
         stacked = []
         for i, buff in enumerate(buffer):
@@ -498,14 +475,14 @@ class HierarchicalNMF(BaseEstimator):
             stacked.append(stacked_buff)
         return np.array(stacked)
 
-    def _remove_empty(self, x) -> List:
+    def _remove_empty(self, x) -> list:
         return [c for c in x if c is not None]
 
     def top_features_in_node(
-        self, node: int, n: int = 10, id2feature: Vectorizer = None
-    ) -> List[Tuple]:
+        self, node: int, n: int = 10, id2feature: "Vectorizer" = None
+    ) -> "list[Tuple]":
         """
-        For a given node, return the top n values
+        For a given node, return the top n features and values
 
         Parameters
         ----------
@@ -527,27 +504,25 @@ class HierarchicalNMF(BaseEstimator):
     def top_features_in_nodes(
         self,
         n: int = 10,
-        id2feature: Vectorizer = None,
-        nodes: Optional[List[int]] = None,
+        id2feature: "Vectorizer" = None,
+        nodes: "Optional[list[int]]" = None,
         leaves_only: bool = False,
-    ) -> List[Dict[str, List[Tuple]]]:
+    ) -> "list[dict[str, list[tuple]]]":
         """
-        Return the top n values from all nodes or nodes present in idx if idx is not None
+        Return the top n features and values from all nodes or nodes present in idx if idx is not None
 
         Parameters
         ----------
-
         n
             Number of items to return
-        id2feature
+        id2feature: Vectorizer
             Optional, if provided returns decoded items
-        nodes
+        nodes: list[int]
             Optional, if provided, returns top items only for nodes listed
-        leaves_only
+        leaves_only: bool
             If True and idx is None return top items for all leaf nodes
 
         """
-
         self._handle_vectorizer(id2feature, "id2feature_")
         node_idx = nodes
         if node_idx is not None:
@@ -558,7 +533,6 @@ class HierarchicalNMF(BaseEstimator):
         else:
             node_idx = np.arange(0, self.Hs_.shape[0])
             nodes = self.Hs_[node_idx]
-
         output = []
         for node_id, node in zip(node_idx, nodes):
             ranks = node.argsort()[::-1][:n]
@@ -568,17 +542,17 @@ class HierarchicalNMF(BaseEstimator):
 
     def top_nodes_in_feature(
         self,
-        feature: Union[int, str],
+        feature: "Union[int, str]",
         n: int = 10,
         leaves_only: bool = True,
-        id2feature: Vectorizer = None,
+        id2feature: "Vectorizer" = None,
     ):
         """
         Returns the top nodes for a specified feature
 
         Parameters
         ----------
-        feature
+        feature: int, str
             The feature to return the top nodes for. If string, ``id2feature`` must not be ``None`` or
              ``HierarchicalNMF.id2feature_`` must not be ``None``
         n
@@ -609,11 +583,11 @@ class HierarchicalNMF(BaseEstimator):
 
     def top_nodes_in_features(
         self,
-        features: Union[List[int], List[str], np.ndarray],
+        features: "Union[list[int], list[str], NDArray]",
         n: int = 10,
         leaves_only: bool = True,
-        id2feature: Vectorizer = None,
-    ) -> Dict[Union[str, int], List[Tuple]]:
+        id2feature: "Vectorizer" = None,
+    ) -> "dict[Union[str, int], list[tuple]]":
         """
         Returns the top nodes for a specified feature
 
@@ -667,7 +641,7 @@ class HierarchicalNMF(BaseEstimator):
         return output
 
     def top_nodes_in_samples(
-        self, n: int = 10, leaves_only: bool = True, id2sample: Vectorizer = None
+        self, n: int = 10, leaves_only: bool = True, id2sample: "Vectorizer" = None
     ):
         """
 
@@ -728,7 +702,7 @@ class HierarchicalNMF(BaseEstimator):
         return output
 
     def top_samples_in_nodes(
-        self, n: int = 10, leaves_only: bool = True, id2sample: Vectorizer = None
+        self, n: int = 10, leaves_only: bool = True, id2sample: "Vectorizer" = None
     ):
         """
 
@@ -791,9 +765,9 @@ class HierarchicalNMF(BaseEstimator):
         self,
         node: int,
         n: int = 10,
-        sign: Sign = "abs",
-        id2sample: Vectorizer = None,
-    ) -> List[DiscrimSample]:
+        sign: "Sign" = "abs",
+        id2sample: "Vectorizer" = None,
+    ) -> "list[DiscrimSample]":
         """
         Computes most discriminative samples (node vs rest)
 
@@ -806,6 +780,15 @@ class HierarchicalNMF(BaseEstimator):
             One of `['positive', 'negative', 'abs']`.
         id2sample
             Decodes index of sample to something meaningful.
+
+        Returns
+        --------
+        list of dict with form::
+
+            sample: Any
+            node: int
+            node_value: float
+            others_value: float
 
         """
         self._handle_vectorizer(id2sample, "id2sample_")
@@ -847,9 +830,9 @@ class HierarchicalNMF(BaseEstimator):
     def cluster_features(
         self,
         leaves_only: bool = True,
-        id2feature: Vectorizer = None,
+        id2feature: "Vectorizer" = None,
         include_outliers: bool = True,
-    ) -> Dict[int, List[Union[str, int]]]:
+    ) -> "dict[int, list[Union[str, int]]]":
         """
         Returns the features assigned as a cluster to nodes
 
@@ -861,7 +844,6 @@ class HierarchicalNMF(BaseEstimator):
             Decodes features
         include_outliers
             If True, features without a node assignment are returned under the key -1
-
 
         """
         self._handle_vectorizer(id2feature, "id2feature_")
@@ -892,9 +874,9 @@ class HierarchicalNMF(BaseEstimator):
     def cluster_assignments(
         self,
         leaves_only: bool = True,
-        id2feature: Vectorizer = None,
+        id2feature: "Vectorizer" = None,
         include_outliers: bool = True,
-    ) -> Dict[Union[int, str], Union[Set[int], Type[None]]]:
+    ) -> "dict[Union[int, str], Union[set[int], set[None]]]":
         """
         Returns a mapping of features and their assigned cluster(s)
 
@@ -934,7 +916,7 @@ class HierarchicalNMF(BaseEstimator):
 
         return output
 
-    def enrich_tree(self, n: int, id2feature: Vectorizer):
+    def enrich_tree(self, n: int, id2feature: "Vectorizer"):
         """
         Appends decoded top features to :py:attr:`self.graph_` Useful if it is desired to export for visualization
 
@@ -965,16 +947,14 @@ class HierarchicalNMF(BaseEstimator):
         self.graph_ = g
         return self.graph_
 
-    def json_graph(self, fp: Optional[str] = None):
+    def json_graph(self, fp: "Optional[str, PathLike]" = None):
         """
         Export the graph to json
 
         Parameters
         ----------
-        fp
+        fp: str, PathLike
             Optional, if provided graph is written to this filepath
-
-
         """
         data = nx.readwrite.json_graph.node_link_data(self.graph_)
         # fix inconsistency where nodes have str ids and edges are integers
@@ -989,5 +969,5 @@ class HierarchicalNMF(BaseEstimator):
         else:
             import json
 
-            with open(fp, "w+", encoding="utf-8") as json_file:
+            with open(os.fspath(fp), "w+", encoding="utf-8") as json_file:
                 json.dump(data, json_file, indent=4)

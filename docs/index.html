@@ -5,7 +5,7 @@
   <meta content="Docutils 0.17.1: http://docutils.sourceforge.net/" name="generator"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>
-   hNMF 0.1 documentation
+   hNMF 0.1.3 documentation
   </title>
   <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
   <link href="_static/css/theme.css" rel="stylesheet" type="text/css"/>
@@ -68,7 +68,7 @@
          »
         </li>
         <li>
-         hNMF 0.1 documentation
+         hNMF 0.1.3 documentation
         </li>
         <li class="wy-breadcrumbs-aside">
          <a class="fa fa-github" href="https://github.com/estasney/hNMF/blob/master/docs_/source/index">
@@ -214,13 +214,13 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    init:
                   </span>
                   <span class="pre">
-                   hnmf.model.InitMethod
+                   NMFInitMethod
                   </span>
                   <span class="pre">
                    =
                   </span>
                   <span class="pre">
-                   NMFInitMethod.DEFAULT
+                   None
                   </span>
                  </span>
                 </em>
@@ -231,13 +231,13 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    solver:
                   </span>
                   <span class="pre">
-                   hnmf.model.Solver
+                   NMFSolver
                   </span>
                   <span class="pre">
                    =
                   </span>
                   <span class="pre">
-                   NMFSolver.CD
+                   'cd'
                   </span>
                  </span>
                 </em>
@@ -248,13 +248,13 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    beta_loss:
                   </span>
                   <span class="pre">
-                   hnmf.model.BetaLoss
+                   NMFBetaLoss
                   </span>
                   <span class="pre">
                    =
                   </span>
                   <span class="pre">
-                   NMFBetaLoss.FRO
+                   0
                   </span>
                  </span>
                 </em>
@@ -333,15 +333,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    dtype:
                   </span>
                   <span class="pre">
-                   Union[numpy.float32
-                  </span>
-                 </span>
-                </em>
-                ,
-                <em class="sig-param">
-                 <span class="n">
-                  <span class="pre">
-                   numpy.float64]
+                   DType
                   </span>
                   <span class="pre">
                    =
@@ -544,7 +536,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </td>
                    <td>
                     <p>
-                     For a given node, return the top n values
+                     For a given node, return the top n features and values
                     </p>
                    </td>
                   </tr>
@@ -563,7 +555,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </td>
                    <td>
                     <p>
-                     Return the top n values from all nodes or nodes present in idx if idx is not None
+                     Return the top n features and values from all nodes or nodes present in idx if idx is not None
                     </p>
                    </td>
                   </tr>
@@ -704,20 +696,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="n">
                     <span class="pre">
-                     Optional
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      [
-                     </span>
-                    </span>
-                    <span class="pre">
-                     hnmf.model.Vectorizer
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      ]
-                     </span>
+                     Vectorizer
                     </span>
                    </span>
                    <span class="w">
@@ -778,7 +757,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="sig-return-typehint">
                     <span class="pre">
-                     Dict
+                     dict
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -827,7 +806,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      </span>
                     </span>
                     <span class="pre">
-                     Set
+                     set
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -850,7 +829,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                     <span class="w">
                     </span>
                     <span class="pre">
-                     Type
+                     set
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -985,20 +964,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="n">
                     <span class="pre">
-                     Optional
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      [
-                     </span>
-                    </span>
-                    <span class="pre">
-                     hnmf.model.Vectorizer
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      ]
-                     </span>
+                     Vectorizer
                     </span>
                    </span>
                    <span class="w">
@@ -1059,7 +1025,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="sig-return-typehint">
                     <span class="pre">
-                     Dict
+                     dict
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -1077,7 +1043,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                     <span class="w">
                     </span>
                     <span class="pre">
-                     List
+                     list
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -1216,7 +1182,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="n">
                     <span class="pre">
-                     hnmf.model.Vectorizer
+                     Vectorizer
                     </span>
                    </span>
                   </em>
@@ -1293,7 +1259,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="n">
                     <span class="pre">
-                     hnmf.model.Array
+                     AnyArray
                     </span>
                    </span>
                   </em>
@@ -1305,9 +1271,11 @@ implementation. While this may be true in MATLAB, the original Python implementa
                     →
                    </span>
                    <span class="sig-return-typehint">
-                    <span class="pre">
-                     None
-                    </span>
+                    <a class="reference internal" href="index.html#hnmf.model.HierarchicalNMF" title="hnmf.model.HierarchicalNMF">
+                     <span class="pre">
+                      HierarchicalNMF
+                     </span>
+                    </a>
                    </span>
                   </span>
                   <a class="headerlink" href="#hnmf.model.HierarchicalNMF.fit" title="Permalink to this definition">
@@ -1333,7 +1301,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                        X
                       </strong>
                       <span class="classifier">
-                       Array
+                       csr_matrix or ndarray
                       </span>
                      </dt>
                      <dd>
@@ -1392,6 +1360,16 @@ implementation. While this may be true in MATLAB, the original Python implementa
                     </span>
                     <span class="p">
                      <span class="pre">
+                      ,
+                     </span>
+                    </span>
+                    <span class="w">
+                    </span>
+                    <span class="pre">
+                     PathLike
+                    </span>
+                    <span class="p">
+                     <span class="pre">
                       ]
                      </span>
                     </span>
@@ -1430,7 +1408,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                     <dl class="simple">
                      <dt>
                       <strong>
-                       fp
+                       fp: str, PathLike
                       </strong>
                      </dt>
                      <dd>
@@ -1522,46 +1500,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="n">
                     <span class="pre">
-                     Literal
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      [
-                     </span>
-                    </span>
-                    <span class="s">
-                     <span class="pre">
-                      'positive'
-                     </span>
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      ,
-                     </span>
-                    </span>
-                    <span class="w">
-                    </span>
-                    <span class="s">
-                     <span class="pre">
-                      'negative'
-                     </span>
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      ,
-                     </span>
-                    </span>
-                    <span class="w">
-                    </span>
-                    <span class="s">
-                     <span class="pre">
-                      'abs'
-                     </span>
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      ]
-                     </span>
+                     Sign
                     </span>
                    </span>
                    <span class="w">
@@ -1595,20 +1534,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="n">
                     <span class="pre">
-                     Optional
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      [
-                     </span>
-                    </span>
-                    <span class="pre">
-                     hnmf.model.Vectorizer
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      ]
-                     </span>
+                     Vectorizer
                     </span>
                    </span>
                    <span class="w">
@@ -1635,7 +1561,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="sig-return-typehint">
                     <span class="pre">
-                     List
+                     list
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -1643,7 +1569,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      </span>
                     </span>
                     <span class="pre">
-                     hnmf.signatures.DiscrimSample
+                     DiscrimSample
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -1705,6 +1631,24 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      <dd>
                       <p>
                        Decodes index of sample to something meaningful.
+                      </p>
+                     </dd>
+                    </dl>
+                   </dd>
+                   <dt class="field-even">
+                    Returns
+                   </dt>
+                   <dd class="field-even">
+                    <dl class="simple">
+                     <dt>
+                      list of dict with form::
+                     </dt>
+                     <dd>
+                      <p>
+                       sample: Any
+node: int
+node_value: float
+others_value: float
                       </p>
                      </dd>
                     </dl>
@@ -1791,20 +1735,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="n">
                     <span class="pre">
-                     Optional
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      [
-                     </span>
-                    </span>
-                    <span class="pre">
-                     hnmf.model.Vectorizer
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      ]
-                     </span>
+                     Vectorizer
                     </span>
                    </span>
                    <span class="w">
@@ -1831,7 +1762,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="sig-return-typehint">
                     <span class="pre">
-                     List
+                     list
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -1854,7 +1785,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                  </dt>
                  <dd>
                   <p>
-                   For a given node, return the top n values
+                   For a given node, return the top n features and values
                   </p>
                   <dl class="field-list simple">
                    <dt class="field-odd">
@@ -1956,20 +1887,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="n">
                     <span class="pre">
-                     Optional
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      [
-                     </span>
-                    </span>
-                    <span class="pre">
-                     hnmf.model.Vectorizer
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      ]
-                     </span>
+                     Vectorizer
                     </span>
                    </span>
                    <span class="w">
@@ -2011,7 +1929,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      </span>
                     </span>
                     <span class="pre">
-                     List
+                     list
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -2090,7 +2008,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="sig-return-typehint">
                     <span class="pre">
-                     List
+                     list
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -2098,7 +2016,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      </span>
                     </span>
                     <span class="pre">
-                     Dict
+                     dict
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -2116,7 +2034,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                     <span class="w">
                     </span>
                     <span class="pre">
-                     List
+                     list
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -2124,7 +2042,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      </span>
                     </span>
                     <span class="pre">
-                     Tuple
+                     tuple
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -2149,7 +2067,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                  </dt>
                  <dd>
                   <p>
-                   Return the top n values from all nodes or nodes present in idx if idx is not None
+                   Return the top n features and values from all nodes or nodes present in idx if idx is not None
                   </p>
                   <dl class="field-list simple">
                    <dt class="field-odd">
@@ -2169,7 +2087,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      </dd>
                      <dt>
                       <strong>
-                       id2feature
+                       id2feature: Vectorizer
                       </strong>
                      </dt>
                      <dd>
@@ -2179,7 +2097,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      </dd>
                      <dt>
                       <strong>
-                       nodes
+                       nodes: list[int]
                       </strong>
                      </dt>
                      <dd>
@@ -2189,7 +2107,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      </dd>
                      <dt>
                       <strong>
-                       leaves_only
+                       leaves_only: bool
                       </strong>
                      </dt>
                      <dd>
@@ -2338,20 +2256,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="n">
                     <span class="pre">
-                     Optional
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      [
-                     </span>
-                    </span>
-                    <span class="pre">
-                     hnmf.model.Vectorizer
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      ]
-                     </span>
+                     Vectorizer
                     </span>
                    </span>
                    <span class="w">
@@ -2388,7 +2293,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                     <dl class="simple">
                      <dt>
                       <strong>
-                       feature
+                       feature: int, str
                       </strong>
                      </dt>
                      <dd>
@@ -2505,7 +2410,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      </span>
                     </span>
                     <span class="pre">
-                     List
+                     list
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -2528,7 +2433,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                     <span class="w">
                     </span>
                     <span class="pre">
-                     List
+                     list
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -2551,7 +2456,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                     <span class="w">
                     </span>
                     <span class="pre">
-                     numpy.ndarray
+                     NDArray
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -2644,20 +2549,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="n">
                     <span class="pre">
-                     Optional
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      [
-                     </span>
-                    </span>
-                    <span class="pre">
-                     hnmf.model.Vectorizer
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      ]
-                     </span>
+                     Vectorizer
                     </span>
                    </span>
                    <span class="w">
@@ -2684,7 +2576,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="sig-return-typehint">
                     <span class="pre">
-                     Dict
+                     dict
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -2725,7 +2617,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                     <span class="w">
                     </span>
                     <span class="pre">
-                     List
+                     list
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -2733,7 +2625,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                      </span>
                     </span>
                     <span class="pre">
-                     Tuple
+                     tuple
                     </span>
                     <span class="p">
                      <span class="pre">
@@ -2940,20 +2832,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="n">
                     <span class="pre">
-                     Optional
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      [
-                     </span>
-                    </span>
-                    <span class="pre">
-                     hnmf.model.Vectorizer
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      ]
-                     </span>
+                     Vectorizer
                     </span>
                    </span>
                    <span class="w">
@@ -3116,20 +2995,7 @@ implementation. While this may be true in MATLAB, the original Python implementa
                    </span>
                    <span class="n">
                     <span class="pre">
-                     Optional
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      [
-                     </span>
-                    </span>
-                    <span class="pre">
-                     hnmf.model.Vectorizer
-                    </span>
-                    <span class="p">
-                     <span class="pre">
-                      ]
-                     </span>
+                     Vectorizer
                     </span>
                    </span>
                    <span class="w">
@@ -3666,7 +3532,7 @@ The 19th ACM SIGKDD International Conference on Knowledge, Discovery, and Data M
        <hr/>
        <div role="contentinfo">
         <p>
-         © Copyright 2019 - 2020, Eric Stasney.
+         © Copyright 2019 - 2022, Eric Stasney.
         </p>
        </div>
        Built with
