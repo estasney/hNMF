@@ -18,10 +18,10 @@ DESCRIPTION = "Hierarchical NMF"
 URL = "https://github.com/estasney/hNMF"
 EMAIL = "estasney@users.noreply.github.com"
 AUTHOR = "Eric Stasney"
-REQUIRES_PYTHON = ">=3.7.0"
-VERSION = "0.1.3"
+REQUIRES_PYTHON = ">=3.8.0"
+VERSION = "0.2.0"
 
-REQUIRED = ["networkx>=2.3", "tqdm", "scikit-learn>=1.0.1", "numpy", "scipy"]
+REQUIRED = ["networkx>=2.3", "scikit-learn>=1.0.1", "numpy", "scipy", "rich"]
 
 EXTRAS = {}
 

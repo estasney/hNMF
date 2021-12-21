@@ -3,19 +3,23 @@ from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import TfidfVectorizer
 from hnmf.model import HierarchicalNMF
 
-@pytest.fixture(scope='module')
+
+@pytest.fixture(scope="module")
 def sample_data():
     n_features = 1000
     n_leaves = 20
 
-    data, _ = fetch_20newsgroups(shuffle=True, random_state=1,
-                                 remove=('headers', 'footers', 'quotes'),
-                                 return_X_y=True)
+    data, _ = fetch_20newsgroups(
+        shuffle=True,
+        random_state=1,
+        remove=("headers", "footers", "quotes"),
+        return_X_y=True,
+    )
 
     # Use tf-idf features for NMF.
-    tfidf = TfidfVectorizer(max_df=0.95, min_df=2,
-                            max_features=n_features,
-                            stop_words='english')
+    tfidf = TfidfVectorizer(
+        max_df=0.95, min_df=2, max_features=n_features, stop_words="english"
+    )
 
     X = tfidf.fit_transform(data)
     id2feature = {i: token for i, token in enumerate(tfidf.get_feature_names_out())}
