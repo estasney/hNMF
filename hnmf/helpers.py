@@ -8,8 +8,6 @@ from numpy.linalg import matrix_rank, svd, norm
 from numpy.random import mtrand
 from scipy import sparse as sp
 from sklearn.decomposition import non_negative_factorization
-from tqdm.auto import tqdm
-from tqdm.contrib import DummyTqdmFile
 
 import logging
 
@@ -385,7 +383,7 @@ def trial_split(
 
         unique_cluster_subset = np.unique(cluster_subset)
         if len(unique_cluster_subset) != 2:
-            tqdm.write("Invalid number of unique sub-clusters!")
+            logger.warning("Invalid number of unique sub-clusters!")
 
         length_cluster1 = len(np.where(cluster_subset == unique_cluster_subset[0])[0])
         length_cluster2 = len(np.where(cluster_subset == unique_cluster_subset[1])[0])
@@ -410,7 +408,7 @@ def trial_split(
             if priority_one_small < min_priority:
                 trial += 1
                 if trial < trial_allowance:
-                    tqdm.write("Dropped {} documents...".format(len(subset_small)))
+                    logger.info("Dropped {} documents...".format(len(subset_small)))
                     subset = np.setdiff1d(subset, subset_small)
             else:
                 break
@@ -418,7 +416,7 @@ def trial_split(
             break
 
     if trial == trial_allowance:
-        tqdm.write("Recycled {} documents...".format(len(subset_backup) - len(subset)))
+        logger.info("Recycled {} documents...".format(len(subset_backup) - len(subset)))
         subset = subset_backup
         W_buffer_one = np.zeros((m, 2), dtype=dtype)
         H_buffer_one = np.zeros((2, len(subset)), dtype=dtype)
@@ -555,9 +553,6 @@ def nmfsh_comb_rank2(
 
     left = H.dot(H.T)
     right = A.dot(H.T)
-    pb = tqdm(
-        desc="Fitting 2-rank NMF of W and H", total=len(range(maxiter)), leave=False
-    )
     for iter_ in range(maxiter):
         if matrix_rank(left) < 2:
             W = np.zeros((m, 2), dtype=dtype)
@@ -578,7 +573,7 @@ def nmfsh_comb_rank2(
         W = anls_alg(left, right, W, dtype=dtype)
         norms_W = norm(W, axis=0)
         if np.min(norms_W) < eps:
-            tqdm.write("Error: Some column of W is essentially zero")
+            logger.warning("Error: Some column of W is essentially zero")
 
         W *= 1.0 / norms_W
         left = W.T.dot(W)
@@ -672,17 +667,3 @@ def handle_enums(param):
         return param.value
     else:
         return param
-
-
-@contextlib.contextmanager
-def std_out_err_redirect_tqdm(stream="stderr"):
-    orig_out_err = sys.stdout, sys.stderr
-    try:
-        sys.stdout, sys.stderr = map(DummyTqdmFile, orig_out_err)
-        yield orig_out_err[0]
-    # Relay exceptions
-    except Exception as exc:
-        raise exc
-    # Always restore sys.stdout/err if necessary
-    finally:
-        sys.stdout, sys.stderr = orig_out_err

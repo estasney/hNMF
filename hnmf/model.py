@@ -7,10 +7,11 @@ import numpy as np
 from collections import defaultdict
 from operator import itemgetter
 from scipy.sparse.csr import csr_matrix
-from tqdm.auto import tqdm
 from typing import Optional, TYPE_CHECKING, Tuple
 from sklearn.base import BaseEstimator
 from sklearn.decomposition import NMF
+
+from hnmf.progress_tree import ProgressTree
 
 if TYPE_CHECKING:
     from typing import Union, Literal
@@ -37,7 +38,6 @@ from hnmf.helpers import (
     tree_to_nx,
     trial_split_sklearn,
     handle_enums,
-    std_out_err_redirect_tqdm,
 )
 
 logger = logging.getLogger(__name__)
@@ -218,175 +218,156 @@ class HierarchicalNMF(BaseEstimator):
         W, H = self._init_fit(X, term_subset)
 
         result_used = 0
-        with std_out_err_redirect_tqdm() as orig_stdout:
-            try:
-                pb = tqdm(
-                    desc="Finding Leaves",
-                    total=len(range(self.k - 1)),
-                    file=orig_stdout,
-                    dynamic_ncols=True,
-                )
 
-                pb.write(
-                    "Fitting {} samples, {} features".format(n_samples, n_features)
-                )
-                for i in range((self.k - 1)):
-                    if i == 0:
+        with ProgressTree() as pt:
+            for i in range((self.k - 1)):
+                if i == 0:
+                    split_node = 0
+                    new_nodes = [0, 1]
+                    min_priority = 1e40
+                    split_subset = np.arange(n_features)
+                else:
+                    leaves = np.where(is_leaf == 1)[0]
+                    temp_priority = priorities[leaves]
+
+                    if len(np.where(temp_priority > 0)[0]) > 0:
+                        min_priority = np.min(temp_priority[temp_priority > 0])
+                        split_node = np.argmax(temp_priority)
+                    else:  # There are no more candidates stop early
+                        min_priority = -1
                         split_node = 0
-                        new_nodes = [0, 1]
-                        min_priority = 1e40
-                        split_subset = np.arange(n_features)
-                    else:
-                        leaves = np.where(is_leaf == 1)[0]
-                        temp_priority = priorities[leaves]
 
-                        if len(np.where(temp_priority > 0)[0]) > 0:
-                            min_priority = np.min(temp_priority[temp_priority > 0])
-                            split_node = np.argmax(temp_priority)
-                        else:  # There are no more candidates stop early
-                            min_priority = -1
-                            split_node = 0
-
-                        if temp_priority[split_node] < 0 or min_priority == -1:
-                            pb.write(
-                                "Cannot generate all {k} leaf clusters, stopping at {k_current} leaf clusters".format(
-                                    k=self.k, k_current=i
-                                )
-                            )
-
-                            Ws = self._remove_empty(Ws)
-                            W_buffer = self._remove_empty(W_buffer)
-
-                            Hs = self._remove_empty(Hs)
-                            H_buffer = self._remove_empty(H_buffer)
-
-                            # Resize attributes
-                            tree = tree[:, :result_used]
-                            splits = splits[:result_used]
-                            is_leaf = is_leaf[:result_used]
-                            clusters = clusters[:result_used]
-                            priorities = priorities[:result_used]
-
-                            self.tree_ = tree.T
-                            self.splits_ = splits
-                            self.is_leaf_ = is_leaf
-                            self.n_nodes_ = self.is_leaf_.shape[0]
-                            self.n_leaves_ = np.count_nonzero(self.is_leaf_)
-                            self.clusters_ = self._stack_clusters(clusters)
-                            self.Ws_ = np.array(Ws)
-                            self.Hs_ = np.array(Hs)
-                            self.W_buffer_ = np.array(W_buffer)
-                            self.H_buffer_ = self._stack_H_buffer(H_buffer)
-                            self.priorities_ = priorities
-                            self.graph_ = tree_to_nx(tree.T)
-                            return self
-
-                        split_node = leaves[split_node]  # Attempt to split this node
-                        is_leaf[split_node] = 0
-                        W = W_buffer[split_node]
-                        H = H_buffer[split_node]
-
-                        # Find which features are clustered on this node
-                        split_subset = clusters[split_node]
-                        new_nodes = [result_used, result_used + 1]
-                        tree[:, split_node] = new_nodes
-
-                    result_used += 2
-                    # For each row find where it is more greatly represented
-                    cluster_subset = np.argmax(H, axis=0)
-
-                    subset_0 = np.where(cluster_subset == 0)[0]
-                    subset_1 = np.where(cluster_subset == 1)[0]
-                    ls0 = len(subset_0)
-                    ls1 = len(subset_1)
-                    ls = ls0 + ls1
-                    if i == 0:
+                    if temp_priority[split_node] < 0 or min_priority == -1:
                         pb.write(
-                            "Iter {}: Split Root node ({} members) ==> node {}({} members), node {} ({} members)".format(
-                                i, ls, new_nodes[0], ls0, new_nodes[1], ls1
+                            "Cannot generate all {k} leaf clusters, stopping at {k_current} leaf clusters".format(
+                                k=self.k, k_current=i
                             )
                         )
-                    else:
-                        pb.write(
-                            "Iter {}: Split node {} ({} members) ==> node {}({} members), node {} ({} members)".format(
-                                i, split_node, ls, new_nodes[0], ls0, new_nodes[1], ls1
-                            )
-                        )
-                    del ls0, ls1, ls
 
-                    clusters[new_nodes[0]] = split_subset[subset_0]
-                    clusters[new_nodes[1]] = split_subset[subset_1]
-                    Ws[new_nodes[0]] = W[:, 0]
-                    Ws[new_nodes[1]] = W[:, 1]
+                        Ws = self._remove_empty(Ws)
+                        W_buffer = self._remove_empty(W_buffer)
 
-                    # These will not have shape of (2, n_features) because they are fitting a subset
-                    # Create zero filled array of shape (2, n_features)
-                    h_temp = np.zeros(shape=(2, self.n_features_), dtype=self.dtype)
-                    # Which features are present in H
+                        Hs = self._remove_empty(Hs)
+                        H_buffer = self._remove_empty(H_buffer)
 
-                    h_temp[0, split_subset] = H[0]
-                    h_temp[1, split_subset] = H[1]
+                        # Resize attributes
+                        tree = tree[:, :result_used]
+                        splits = splits[:result_used]
+                        is_leaf = is_leaf[:result_used]
+                        clusters = clusters[:result_used]
+                        priorities = priorities[:result_used]
 
-                    Hs[new_nodes[0]] = h_temp[0]
-                    Hs[new_nodes[1]] = h_temp[1]
+                        self.tree_ = tree.T
+                        self.splits_ = splits
+                        self.is_leaf_ = is_leaf
+                        self.n_nodes_ = self.is_leaf_.shape[0]
+                        self.n_leaves_ = np.count_nonzero(self.is_leaf_)
+                        self.clusters_ = self._stack_clusters(clusters)
+                        self.Ws_ = np.array(Ws)
+                        self.Hs_ = np.array(Hs)
+                        self.W_buffer_ = np.array(W_buffer)
+                        self.H_buffer_ = self._stack_H_buffer(H_buffer)
+                        self.priorities_ = priorities
+                        self.graph_ = tree_to_nx(tree.T)
+                        return self
 
-                    del h_temp
+                    split_node = leaves[split_node]  # Attempt to split this node
+                    is_leaf[split_node] = 0
+                    W = W_buffer[split_node]
+                    H = H_buffer[split_node]
 
-                    splits[i] = split_node
-                    is_leaf[new_nodes] = 1
+                    # Find which features are clustered on this node
+                    split_subset = clusters[split_node]
+                    new_nodes = [result_used, result_used + 1]
+                    tree[:, split_node] = new_nodes
 
-                    subset = clusters[new_nodes[0]]
-                    (
-                        subset,
-                        W_buffer_one,
-                        H_buffer_one,
-                        priority_one,
-                    ) = trial_split_sklearn(
-                        min_priority=min_priority,
-                        X=X,
-                        subset=subset,
-                        W_parent=W[:, 0],
-                        random_state=self.random_state,
-                        trial_allowance=self.trial_allowance,
-                        unbalanced=self.unbalanced,
-                        dtype=self.dtype,
-                        tol=self.tol,
-                        maxiter=self.maxiter,
-                        init=self.init,
-                    )
-                    clusters[new_nodes[0]] = subset
-                    W_buffer[new_nodes[0]] = W_buffer_one
-                    H_buffer[new_nodes[0]] = H_buffer_one
-                    priorities[new_nodes[0]] = priority_one
+                result_used += 2
+                # For each row find where it is more greatly represented
+                cluster_subset = np.argmax(H, axis=0)
 
-                    subset = clusters[new_nodes[1]]
-                    (
-                        subset,
-                        W_buffer_one,
-                        H_buffer_one,
-                        priority_one,
-                    ) = trial_split_sklearn(
-                        min_priority=min_priority,
-                        X=X,
-                        subset=subset,
-                        W_parent=W[:, 1],
-                        random_state=self.random_state,
-                        trial_allowance=self.trial_allowance,
-                        unbalanced=self.unbalanced,
-                        dtype=self.dtype,
-                        tol=self.tol,
-                        maxiter=self.maxiter,
-                        init=self.init,
-                    )
-                    clusters[new_nodes[1]] = subset
-                    W_buffer[new_nodes[1]] = W_buffer_one
-                    H_buffer[new_nodes[1]] = H_buffer_one
-                    priorities[new_nodes[1]] = priority_one
+                subset_0 = np.where(cluster_subset == 0)[0]
+                subset_1 = np.where(cluster_subset == 1)[0]
+                ls0 = len(subset_0)
+                ls1 = len(subset_1)
+                ls = ls0 + ls1
+                if i == 0:
 
-                    pb.update(1)
-            finally:
-                pb.close()
+                    pt.add_branch("Root", new_nodes[0], ls0)
+                    pt.add_branch("Root", new_nodes[1], ls1)
+                else:
+                    pt.add_branch(split_node, new_nodes[0], ls0)
+                    pt.add_branch(split_node, new_nodes[1], ls1)
 
+                del ls0, ls1, ls
+
+                clusters[new_nodes[0]] = split_subset[subset_0]
+                clusters[new_nodes[1]] = split_subset[subset_1]
+                Ws[new_nodes[0]] = W[:, 0]
+                Ws[new_nodes[1]] = W[:, 1]
+
+                # These will not have shape of (2, n_features) because they are fitting a subset
+                # Create zero filled array of shape (2, n_features)
+                h_temp = np.zeros(shape=(2, self.n_features_), dtype=self.dtype)
+                # Which features are present in H
+
+                h_temp[0, split_subset] = H[0]
+                h_temp[1, split_subset] = H[1]
+
+                Hs[new_nodes[0]] = h_temp[0]
+                Hs[new_nodes[1]] = h_temp[1]
+
+                del h_temp
+
+                splits[i] = split_node
+                is_leaf[new_nodes] = 1
+
+                subset = clusters[new_nodes[0]]
+                (
+                    subset,
+                    W_buffer_one,
+                    H_buffer_one,
+                    priority_one,
+                ) = trial_split_sklearn(
+                    min_priority=min_priority,
+                    X=X,
+                    subset=subset,
+                    W_parent=W[:, 0],
+                    random_state=self.random_state,
+                    trial_allowance=self.trial_allowance,
+                    unbalanced=self.unbalanced,
+                    dtype=self.dtype,
+                    tol=self.tol,
+                    maxiter=self.maxiter,
+                    init=self.init,
+                )
+                clusters[new_nodes[0]] = subset
+                W_buffer[new_nodes[0]] = W_buffer_one
+                H_buffer[new_nodes[0]] = H_buffer_one
+                priorities[new_nodes[0]] = priority_one
+
+                subset = clusters[new_nodes[1]]
+                (
+                    subset,
+                    W_buffer_one,
+                    H_buffer_one,
+                    priority_one,
+                ) = trial_split_sklearn(
+                    min_priority=min_priority,
+                    X=X,
+                    subset=subset,
+                    W_parent=W[:, 1],
+                    random_state=self.random_state,
+                    trial_allowance=self.trial_allowance,
+                    unbalanced=self.unbalanced,
+                    dtype=self.dtype,
+                    tol=self.tol,
+                    maxiter=self.maxiter,
+                    init=self.init,
+                )
+                clusters[new_nodes[1]] = subset
+                W_buffer[new_nodes[1]] = W_buffer_one
+                H_buffer[new_nodes[1]] = H_buffer_one
+                priorities[new_nodes[1]] = priority_one
         self.tree_ = tree.T
         self.splits_ = splits
         self.is_leaf_ = is_leaf
