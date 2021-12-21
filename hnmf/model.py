@@ -238,7 +238,7 @@ class HierarchicalNMF(BaseEstimator):
                         split_node = 0
 
                     if temp_priority[split_node] < 0 or min_priority == -1:
-                        pb.write(
+                        logger.warning(
                             "Cannot generate all {k} leaf clusters, stopping at {k_current} leaf clusters".format(
                                 k=self.k, k_current=i
                             )

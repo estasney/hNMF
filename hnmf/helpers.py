@@ -567,7 +567,7 @@ def nmfsh_comb_rank2(
 
             W[:, 0] = U
             H[0, :] = V
-            pb.close()
+
             return W, H
 
         W = anls_alg(left, right, W, dtype=dtype)
@@ -592,7 +592,7 @@ def nmfsh_comb_rank2(
 
             W[:, 0] = U
             H[0, :] = V
-            pb.close()
+
             return W, H
 
         H = anls_alg(left, right, H.T, dtype=dtype).T
@@ -605,13 +605,12 @@ def nmfsh_comb_rank2(
             gradW_square = np.sum(np.power(gradW[np.logical_or(gradW <= 0, W > 0)], 2))
             gradH_square = np.sum(np.power(gradH[np.logical_or(gradH <= 0, H > 0)], 2))
             initgrad = np.sqrt(gradW_square + gradH_square)
-            pb.update(1)
+
             continue
         else:
             gradW_square = np.sum(np.power(gradW[np.logical_or(gradW <= 0, W > 0)], 2))
             gradH_square = np.sum(np.power(gradH[np.logical_or(gradH <= 0, H > 0)], 2))
             projnorm = np.sqrt(gradW_square + gradH_square)
-            pb.update(1)
 
         if projnorm < tol * initgrad:
             break
@@ -625,7 +624,7 @@ def nmfsh_comb_rank2(
             norms = np.power(np.sum(np.power(H, vec_norm), axis=1), 1 / vec_norm)
             W *= norms[None, :]
             H /= norms
-    pb.close()
+
     return W, H
 
 

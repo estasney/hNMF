@@ -13,6 +13,8 @@
 import os
 import sys
 
+from setup import VERSION
+
 sys.path.insert(0, os.path.abspath("../.."))
 
 # -- Project information -----------------------------------------------------
@@ -22,7 +24,7 @@ copyright = "2019 - 2022, Eric Stasney"
 author = "Eric Stasney"
 
 # The full version, including alpha/beta/rc tags
-release = "0.2.0"
+release = VERSION
 
 
 # -- General configuration ---------------------------------------------------
