@@ -1,15 +1,13 @@
-import sys
+import logging
 import warnings
 from enum import Enum
 from typing import Union
-import contextlib
+
 import numpy as np
-from numpy.linalg import matrix_rank, svd, norm
+from numpy.linalg import matrix_rank, norm, svd
 from numpy.random import mtrand
 from scipy import sparse as sp
 from sklearn.decomposition import non_negative_factorization
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -228,6 +226,8 @@ def trial_split_sklearn(
     tol,
     maxiter,
     init,
+    alpha_W,
+    alpha_H,
 ):
     m = X.shape[0]
     trial = 0
@@ -242,6 +242,8 @@ def trial_split_sklearn(
             tol=tol,
             maxiter=maxiter,
             init=init,
+            alpha_W=alpha_W,
+            alpha_H=alpha_H,
         )
         if priority_one < 0:
             break
@@ -269,9 +271,11 @@ def trial_split_sklearn(
                 W_parent=W_buffer_one[:, idx_small],
                 random_state=random_state,
                 dtype=dtype,
-                maxiter=maxiter,
                 tol=tol,
+                maxiter=maxiter,
                 init=init,
+                alpha_W=0.0,
+                alpha_H=0.0,
             )
             if priority_one_small < min_priority:
                 trial += 1
@@ -306,6 +310,8 @@ def split_once_sklearn(
     tol,
     maxiter,
     init,
+    alpha_W,
+    alpha_H,
 ):
     m = X.shape[0]
     if len(subset) <= 3:
@@ -329,8 +335,8 @@ def split_once_sklearn(
             beta_loss=2,
             tol=tol,
             max_iter=maxiter,
-            alpha_W=0.0,
-            alpha_H="same",
+            alpha_W=alpha_W,
+            alpha_H=alpha_H,
             l1_ratio=0.0,
             random_state=random_state,
             verbose=0,

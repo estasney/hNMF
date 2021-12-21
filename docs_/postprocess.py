@@ -4,6 +4,7 @@ import glob
 
 from bs4 import BeautifulSoup
 
+
 def main():
     cwd = os.getcwd()
     parent_folder = os.path.split(cwd)[0]
@@ -35,5 +36,5 @@ def main():
     shutil.copytree(source_static, target_folder_static)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

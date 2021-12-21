@@ -19,7 +19,7 @@ URL = "https://github.com/estasney/hNMF"
 EMAIL = "estasney@users.noreply.github.com"
 AUTHOR = "Eric Stasney"
 REQUIRES_PYTHON = ">=3.8.0"
-VERSION = "0.2.1"
+VERSION = "0.2.2"
 
 REQUIRED = ["networkx>=2.3", "scikit-learn>=1.0.1", "numpy", "scipy", "rich"]
 
@@ -39,6 +39,9 @@ about = {"__version__": VERSION}
 
 
 class BaseCommand(Command):
+    def run(self) -> None:
+        raise NotImplementedError
+
     @staticmethod
     def status(s):
         """Prints things in bold."""

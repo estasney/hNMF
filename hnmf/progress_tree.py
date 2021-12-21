@@ -43,5 +43,5 @@ class ProgressTree:
         desc: "Optional[int]",
     ):
         source_branch = self._lookup_branch(source, None, None)
-        target_branch = self._lookup_branch(target, source_branch, desc)
+        self._lookup_branch(target, source_branch, desc)
         self.live.update(self.tree)

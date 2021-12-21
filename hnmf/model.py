@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     NMFSolver = Literal["cd", "mu"]
     NMFBetaLoss = Literal["FRO", 0, "KL", 1, "IS", 2]
     DType = Union[np.float32, np.float64]
+    AlphaH = Union[Literal["same"], float]
 
 
 import logging
@@ -51,6 +52,8 @@ class HierarchicalNMF(BaseEstimator):
         init: "NMFInitMethod" = None,
         solver: "NMFSolver" = "cd",
         beta_loss: "NMFBetaLoss" = 0,
+        alpha_W: float = 0.0,
+        alpha_H: "AlphaH" = "same",
         random_state: int = 42,
         trial_allowance: int = 100,
         tol: float = 1e-6,
@@ -62,6 +65,8 @@ class HierarchicalNMF(BaseEstimator):
         self.init = handle_enums(init)
         self.solver = handle_enums(solver)
         self.beta_loss = handle_enums(beta_loss)
+        self.alpha_W = alpha_W
+        self.alpha_H = alpha_H
         self.random_state = np.random.RandomState(seed=random_state)
         self.trial_allowance = trial_allowance
         self.tol = tol
@@ -103,6 +108,13 @@ class HierarchicalNMF(BaseEstimator):
         The solver used to minimize the distance function
     beta_loss : BetaLoss
         Beta divergence to be minimized
+    alpha_W : float, defaults to 0.0
+        Constant that multiplies the regularization terms of W. Set it to zero (default) to have no regularization on W.
+        See `sklearn.decomposition.NMF`_ 
+    alpha_H: float or 'same', defaults to 'same'
+        Constant that multiplies the regularization terms of H. Set it to zero to have no regularization on H. If 'same'
+         (default), it takes the same value as alpha_W.
+        See `sklearn.decomposition.NMF`_
     random_state : int
         random seed
     trial_allowance : int
@@ -289,7 +301,7 @@ class HierarchicalNMF(BaseEstimator):
                 subset_1 = np.where(cluster_subset == 1)[0]
                 ls0 = len(subset_0)
                 ls1 = len(subset_1)
-                ls = ls0 + ls1
+
                 if i == 0:
 
                     pt.add_branch("Root", new_nodes[0], ls0)
@@ -298,7 +310,7 @@ class HierarchicalNMF(BaseEstimator):
                     pt.add_branch(split_node, new_nodes[0], ls0)
                     pt.add_branch(split_node, new_nodes[1], ls1)
 
-                del ls0, ls1, ls
+                del ls0, ls1
 
                 clusters[new_nodes[0]] = split_subset[subset_0]
                 clusters[new_nodes[1]] = split_subset[subset_1]
@@ -339,6 +351,8 @@ class HierarchicalNMF(BaseEstimator):
                     tol=self.tol,
                     maxiter=self.maxiter,
                     init=self.init,
+                    alpha_W=self.alpha_W,
+                    alpha_H=self.alpha_H,
                 )
                 clusters[new_nodes[0]] = subset
                 W_buffer[new_nodes[0]] = W_buffer_one
@@ -363,6 +377,8 @@ class HierarchicalNMF(BaseEstimator):
                     tol=self.tol,
                     maxiter=self.maxiter,
                     init=self.init,
+                    alpha_W=self.alpha_W,
+                    alpha_H=self.alpha_H,
                 )
                 clusters[new_nodes[1]] = subset
                 W_buffer[new_nodes[1]] = W_buffer_one
@@ -456,7 +472,8 @@ class HierarchicalNMF(BaseEstimator):
             stacked.append(stacked_buff)
         return np.array(stacked)
 
-    def _remove_empty(self, x) -> list:
+    @staticmethod
+    def _remove_empty(x) -> list:
         return [c for c in x if c is not None]
 
     def top_features_in_node(
