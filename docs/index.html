@@ -158,14 +158,3336 @@ implementation. While this may be true in MATLAB, the original Python implementa
                 
                </a>
               </h5>
+              <dl class="py class">
+               <dt class="sig sig-object py" id="hnmf.model.HierarchicalNMF">
+                <em class="property">
+                 <span class="pre">
+                  class
+                 </span>
+                 <span class="w">
+                 </span>
+                </em>
+                <span class="sig-prename descclassname">
+                 <span class="pre">
+                  hnmf.model.
+                 </span>
+                </span>
+                <span class="sig-name descname">
+                 <span class="pre">
+                  HierarchicalNMF
+                 </span>
+                </span>
+                <span class="sig-paren">
+                 (
+                </span>
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   k:
+                  </span>
+                  <span class="pre">
+                   int
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   unbalanced:
+                  </span>
+                  <span class="pre">
+                   float
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   0.1
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   init:
+                  </span>
+                  <span class="pre">
+                   NMFInitMethod
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   None
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   solver:
+                  </span>
+                  <span class="pre">
+                   NMFSolver
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   'cd'
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   beta_loss:
+                  </span>
+                  <span class="pre">
+                   NMFBetaLoss
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   0
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   alpha_W:
+                  </span>
+                  <span class="pre">
+                   float
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   0.0
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   alpha_H:
+                  </span>
+                  <span class="pre">
+                   AlphaH
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   'same'
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   random_state:
+                  </span>
+                  <span class="pre">
+                   int
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   42
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   trial_allowance:
+                  </span>
+                  <span class="pre">
+                   int
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   100
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   tol:
+                  </span>
+                  <span class="pre">
+                   float
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   1e-06
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   maxiter:
+                  </span>
+                  <span class="pre">
+                   int
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   10000
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   dtype:
+                  </span>
+                  <span class="pre">
+                   DType
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   &lt;class
+                  </span>
+                  <span class="pre">
+                   'numpy.float64'&gt;
+                  </span>
+                 </span>
+                </em>
+                <span class="sig-paren">
+                 )
+                </span>
+                <a class="headerlink" href="#hnmf.model.HierarchicalNMF" title="Permalink to this definition">
+                 
+                </a>
+               </dt>
+               <dd>
+                <p class="rubric">
+                 Methods
+                </p>
+                <table class="longtable docutils align-default">
+                 <colgroup>
+                  <col style="width: 10%"/>
+                  <col style="width: 90%"/>
+                 </colgroup>
+                 <tbody>
+                  <tr class="row-odd">
+                   <td>
+                    <p>
+                     <a class="reference internal" href="#hnmf.model.HierarchicalNMF.cluster_assignments" title="hnmf.model.HierarchicalNMF.cluster_assignments">
+                      <code class="xref py py-obj docutils literal notranslate">
+                       <span class="pre">
+                        cluster_assignments
+                       </span>
+                      </code>
+                     </a>
+                     ([leaves_only, ...])
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     Returns a mapping of features and their assigned cluster(s)
+                    </p>
+                   </td>
+                  </tr>
+                  <tr class="row-even">
+                   <td>
+                    <p>
+                     <a class="reference internal" href="#hnmf.model.HierarchicalNMF.cluster_features" title="hnmf.model.HierarchicalNMF.cluster_features">
+                      <code class="xref py py-obj docutils literal notranslate">
+                       <span class="pre">
+                        cluster_features
+                       </span>
+                      </code>
+                     </a>
+                     ([leaves_only, id2feature, ...])
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     Returns the features assigned as a cluster to nodes
+                    </p>
+                   </td>
+                  </tr>
+                  <tr class="row-odd">
+                   <td>
+                    <p>
+                     <a class="reference internal" href="#hnmf.model.HierarchicalNMF.enrich_tree" title="hnmf.model.HierarchicalNMF.enrich_tree">
+                      <code class="xref py py-obj docutils literal notranslate">
+                       <span class="pre">
+                        enrich_tree
+                       </span>
+                      </code>
+                     </a>
+                     (n, id2feature)
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     Appends decoded top features to
+                     <code class="xref py py-attr docutils literal notranslate">
+                      <span class="pre">
+                       self.graph_
+                      </span>
+                     </code>
+                     Useful if it is desired to export for visualization
+                    </p>
+                   </td>
+                  </tr>
+                  <tr class="row-even">
+                   <td>
+                    <p>
+                     <a class="reference internal" href="#hnmf.model.HierarchicalNMF.fit" title="hnmf.model.HierarchicalNMF.fit">
+                      <code class="xref py py-obj docutils literal notranslate">
+                       <span class="pre">
+                        fit
+                       </span>
+                      </code>
+                     </a>
+                     (X)
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     Fit
+                     <cite>
+                      HierarchicalNMF
+                     </cite>
+                     to data
+                    </p>
+                   </td>
+                  </tr>
+                  <tr class="row-odd">
+                   <td>
+                    <p>
+                     <code class="xref py py-obj docutils literal notranslate">
+                      <span class="pre">
+                       get_params
+                      </span>
+                     </code>
+                     ([deep])
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     Get parameters for this estimator.
+                    </p>
+                   </td>
+                  </tr>
+                  <tr class="row-even">
+                   <td>
+                    <p>
+                     <a class="reference internal" href="#hnmf.model.HierarchicalNMF.json_graph" title="hnmf.model.HierarchicalNMF.json_graph">
+                      <code class="xref py py-obj docutils literal notranslate">
+                       <span class="pre">
+                        json_graph
+                       </span>
+                      </code>
+                     </a>
+                     ([fp])
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     Export the graph to json
+                    </p>
+                   </td>
+                  </tr>
+                  <tr class="row-odd">
+                   <td>
+                    <p>
+                     <code class="xref py py-obj docutils literal notranslate">
+                      <span class="pre">
+                       set_params
+                      </span>
+                     </code>
+                     (**params)
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     Set the parameters of this estimator.
+                    </p>
+                   </td>
+                  </tr>
+                  <tr class="row-even">
+                   <td>
+                    <p>
+                     <a class="reference internal" href="#hnmf.model.HierarchicalNMF.top_discriminative_samples_in_node" title="hnmf.model.HierarchicalNMF.top_discriminative_samples_in_node">
+                      <code class="xref py py-obj docutils literal notranslate">
+                       <span class="pre">
+                        top_discriminative_samples_in_node
+                       </span>
+                      </code>
+                     </a>
+                     (node[, ...])
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     Computes most discriminative samples (node vs rest)
+                    </p>
+                   </td>
+                  </tr>
+                  <tr class="row-odd">
+                   <td>
+                    <p>
+                     <a class="reference internal" href="#hnmf.model.HierarchicalNMF.top_features_in_node" title="hnmf.model.HierarchicalNMF.top_features_in_node">
+                      <code class="xref py py-obj docutils literal notranslate">
+                       <span class="pre">
+                        top_features_in_node
+                       </span>
+                      </code>
+                     </a>
+                     (node[, n, id2feature])
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     For a given node, return the top n features and values
+                    </p>
+                   </td>
+                  </tr>
+                  <tr class="row-even">
+                   <td>
+                    <p>
+                     <a class="reference internal" href="#hnmf.model.HierarchicalNMF.top_features_in_nodes" title="hnmf.model.HierarchicalNMF.top_features_in_nodes">
+                      <code class="xref py py-obj docutils literal notranslate">
+                       <span class="pre">
+                        top_features_in_nodes
+                       </span>
+                      </code>
+                     </a>
+                     ([n, id2feature, ...])
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     Return the top n features and values from all nodes or nodes present in idx if idx is not None
+                    </p>
+                   </td>
+                  </tr>
+                  <tr class="row-odd">
+                   <td>
+                    <p>
+                     <a class="reference internal" href="#hnmf.model.HierarchicalNMF.top_nodes_in_feature" title="hnmf.model.HierarchicalNMF.top_nodes_in_feature">
+                      <code class="xref py py-obj docutils literal notranslate">
+                       <span class="pre">
+                        top_nodes_in_feature
+                       </span>
+                      </code>
+                     </a>
+                     (feature[, n, ...])
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     Returns the top nodes for a specified feature
+                    </p>
+                   </td>
+                  </tr>
+                  <tr class="row-even">
+                   <td>
+                    <p>
+                     <a class="reference internal" href="#hnmf.model.HierarchicalNMF.top_nodes_in_features" title="hnmf.model.HierarchicalNMF.top_nodes_in_features">
+                      <code class="xref py py-obj docutils literal notranslate">
+                       <span class="pre">
+                        top_nodes_in_features
+                       </span>
+                      </code>
+                     </a>
+                     (features[, n, ...])
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     Returns the top nodes for a specified feature
+                    </p>
+                   </td>
+                  </tr>
+                  <tr class="row-odd">
+                   <td>
+                    <p>
+                     <a class="reference internal" href="#hnmf.model.HierarchicalNMF.top_nodes_in_samples" title="hnmf.model.HierarchicalNMF.top_nodes_in_samples">
+                      <code class="xref py py-obj docutils literal notranslate">
+                       <span class="pre">
+                        top_nodes_in_samples
+                       </span>
+                      </code>
+                     </a>
+                     ([n, leaves_only, id2sample])
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     Returns the top nodes for each sample.
+                    </p>
+                   </td>
+                  </tr>
+                  <tr class="row-even">
+                   <td>
+                    <p>
+                     <a class="reference internal" href="#hnmf.model.HierarchicalNMF.top_samples_in_nodes" title="hnmf.model.HierarchicalNMF.top_samples_in_nodes">
+                      <code class="xref py py-obj docutils literal notranslate">
+                       <span class="pre">
+                        top_samples_in_nodes
+                       </span>
+                      </code>
+                     </a>
+                     ([n, leaves_only, id2sample])
+                    </p>
+                   </td>
+                   <td>
+                    <p>
+                     Returns the top samples for each node
+                    </p>
+                   </td>
+                  </tr>
+                 </tbody>
+                </table>
+                <dl class="py method">
+                 <dt class="sig sig-object py" id="hnmf.model.HierarchicalNMF.cluster_assignments">
+                  <span class="sig-name descname">
+                   <span class="pre">
+                    cluster_assignments
+                   </span>
+                  </span>
+                  <span class="sig-paren">
+                   (
+                  </span>
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     leaves_only
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     bool
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     True
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     id2feature
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Vectorizer
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     None
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     include_outliers
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     bool
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     True
+                    </span>
+                   </span>
+                  </em>
+                  <span class="sig-paren">
+                   )
+                  </span>
+                  <span class="sig-return">
+                   <span class="sig-return-icon">
+                    →
+                   </span>
+                   <span class="sig-return-typehint">
+                    <span class="pre">
+                     dict
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     Union
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     int
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ,
+                     </span>
+                    </span>
+                    <span class="w">
+                    </span>
+                    <span class="pre">
+                     str
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ,
+                     </span>
+                    </span>
+                    <span class="w">
+                    </span>
+                    <span class="pre">
+                     Union
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     set
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     int
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ,
+                     </span>
+                    </span>
+                    <span class="w">
+                    </span>
+                    <span class="pre">
+                     set
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     None
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                   </span>
+                  </span>
+                  <a class="headerlink" href="#hnmf.model.HierarchicalNMF.cluster_assignments" title="Permalink to this definition">
+                   
+                  </a>
+                 </dt>
+                 <dd>
+                  <p>
+                   Returns a mapping of features and their assigned cluster(s)
+                  </p>
+                  <dl class="field-list simple">
+                   <dt class="field-odd">
+                    Parameters
+                   </dt>
+                   <dd class="field-odd">
+                    <dl class="simple">
+                     <dt>
+                      <strong>
+                       leaves_only
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Whether to return only leaf nodes
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       id2feature
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Decodes features
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       include_outliers
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       If True, include feature keys that are not assigned a cluster.
+                      </p>
+                     </dd>
+                    </dl>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+                <dl class="py method">
+                 <dt class="sig sig-object py" id="hnmf.model.HierarchicalNMF.cluster_features">
+                  <span class="sig-name descname">
+                   <span class="pre">
+                    cluster_features
+                   </span>
+                  </span>
+                  <span class="sig-paren">
+                   (
+                  </span>
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     leaves_only
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     bool
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     True
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     id2feature
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Vectorizer
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     None
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     include_outliers
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     bool
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     True
+                    </span>
+                   </span>
+                  </em>
+                  <span class="sig-paren">
+                   )
+                  </span>
+                  <span class="sig-return">
+                   <span class="sig-return-icon">
+                    →
+                   </span>
+                   <span class="sig-return-typehint">
+                    <span class="pre">
+                     dict
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     int
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ,
+                     </span>
+                    </span>
+                    <span class="w">
+                    </span>
+                    <span class="pre">
+                     list
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     Union
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     str
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ,
+                     </span>
+                    </span>
+                    <span class="w">
+                    </span>
+                    <span class="pre">
+                     int
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                   </span>
+                  </span>
+                  <a class="headerlink" href="#hnmf.model.HierarchicalNMF.cluster_features" title="Permalink to this definition">
+                   
+                  </a>
+                 </dt>
+                 <dd>
+                  <p>
+                   Returns the features assigned as a cluster to nodes
+                  </p>
+                  <dl class="field-list simple">
+                   <dt class="field-odd">
+                    Parameters
+                   </dt>
+                   <dd class="field-odd">
+                    <dl class="simple">
+                     <dt>
+                      <strong>
+                       leaves_only
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Whether to return only leaf nodes
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       id2feature
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Decodes features
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       include_outliers
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       If True, features without a node assignment are returned under the key -1
+                      </p>
+                     </dd>
+                    </dl>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+                <dl class="py method">
+                 <dt class="sig sig-object py" id="hnmf.model.HierarchicalNMF.enrich_tree">
+                  <span class="sig-name descname">
+                   <span class="pre">
+                    enrich_tree
+                   </span>
+                  </span>
+                  <span class="sig-paren">
+                   (
+                  </span>
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     n
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     int
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     id2feature
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Vectorizer
+                    </span>
+                   </span>
+                  </em>
+                  <span class="sig-paren">
+                   )
+                  </span>
+                  <a class="headerlink" href="#hnmf.model.HierarchicalNMF.enrich_tree" title="Permalink to this definition">
+                   
+                  </a>
+                 </dt>
+                 <dd>
+                  <p>
+                   Appends decoded top features to
+                   <code class="xref py py-attr docutils literal notranslate">
+                    <span class="pre">
+                     self.graph_
+                    </span>
+                   </code>
+                   Useful if it is desired to export for visualization
+                  </p>
+                  <dl class="field-list simple">
+                   <dt class="field-odd">
+                    Parameters
+                   </dt>
+                   <dd class="field-odd">
+                    <dl class="simple">
+                     <dt>
+                      <strong>
+                       n
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       The number of top items to add to each node
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       id2feature
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Decodes features
+                      </p>
+                     </dd>
+                    </dl>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+                <dl class="py method">
+                 <dt class="sig sig-object py" id="hnmf.model.HierarchicalNMF.fit">
+                  <span class="sig-name descname">
+                   <span class="pre">
+                    fit
+                   </span>
+                  </span>
+                  <span class="sig-paren">
+                   (
+                  </span>
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     X
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     AnyArray
+                    </span>
+                   </span>
+                  </em>
+                  <span class="sig-paren">
+                   )
+                  </span>
+                  <span class="sig-return">
+                   <span class="sig-return-icon">
+                    →
+                   </span>
+                   <span class="sig-return-typehint">
+                    <a class="reference internal" href="index.html#hnmf.model.HierarchicalNMF" title="hnmf.model.HierarchicalNMF">
+                     <span class="pre">
+                      HierarchicalNMF
+                     </span>
+                    </a>
+                   </span>
+                  </span>
+                  <a class="headerlink" href="#hnmf.model.HierarchicalNMF.fit" title="Permalink to this definition">
+                   
+                  </a>
+                 </dt>
+                 <dd>
+                  <p>
+                   Fit
+                   <cite>
+                    HierarchicalNMF
+                   </cite>
+                   to data
+                  </p>
+                  <dl class="field-list simple">
+                   <dt class="field-odd">
+                    Parameters
+                   </dt>
+                   <dd class="field-odd">
+                    <dl class="simple">
+                     <dt>
+                      <strong>
+                       X
+                      </strong>
+                      <span class="classifier">
+                       csr_matrix or ndarray
+                      </span>
+                     </dt>
+                     <dd>
+                     </dd>
+                    </dl>
+                   </dd>
+                   <dt class="field-even">
+                    Returns
+                   </dt>
+                   <dd class="field-even">
+                    <dl class="simple">
+                     <dt>
+                      None
+                     </dt>
+                     <dd>
+                     </dd>
+                    </dl>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+                <dl class="py method">
+                 <dt class="sig sig-object py" id="hnmf.model.HierarchicalNMF.json_graph">
+                  <span class="sig-name descname">
+                   <span class="pre">
+                    json_graph
+                   </span>
+                  </span>
+                  <span class="sig-paren">
+                   (
+                  </span>
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     fp
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Optional
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     str
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ,
+                     </span>
+                    </span>
+                    <span class="w">
+                    </span>
+                    <span class="pre">
+                     PathLike
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     None
+                    </span>
+                   </span>
+                  </em>
+                  <span class="sig-paren">
+                   )
+                  </span>
+                  <a class="headerlink" href="#hnmf.model.HierarchicalNMF.json_graph" title="Permalink to this definition">
+                   
+                  </a>
+                 </dt>
+                 <dd>
+                  <p>
+                   Export the graph to json
+                  </p>
+                  <dl class="field-list simple">
+                   <dt class="field-odd">
+                    Parameters
+                   </dt>
+                   <dd class="field-odd">
+                    <dl class="simple">
+                     <dt>
+                      <strong>
+                       fp: str, PathLike
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Optional, if provided graph is written to this filepath
+                      </p>
+                     </dd>
+                    </dl>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+                <dl class="py method">
+                 <dt class="sig sig-object py" id="hnmf.model.HierarchicalNMF.top_discriminative_samples_in_node">
+                  <span class="sig-name descname">
+                   <span class="pre">
+                    top_discriminative_samples_in_node
+                   </span>
+                  </span>
+                  <span class="sig-paren">
+                   (
+                  </span>
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     node
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     int
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     n
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     int
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     10
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     sign
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Sign
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     'abs'
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     id2sample
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Vectorizer
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     None
+                    </span>
+                   </span>
+                  </em>
+                  <span class="sig-paren">
+                   )
+                  </span>
+                  <span class="sig-return">
+                   <span class="sig-return-icon">
+                    →
+                   </span>
+                   <span class="sig-return-typehint">
+                    <span class="pre">
+                     list
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     DiscrimSample
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                   </span>
+                  </span>
+                  <a class="headerlink" href="#hnmf.model.HierarchicalNMF.top_discriminative_samples_in_node" title="Permalink to this definition">
+                   
+                  </a>
+                 </dt>
+                 <dd>
+                  <p>
+                   Computes most discriminative samples (node vs rest)
+                  </p>
+                  <dl class="field-list simple">
+                   <dt class="field-odd">
+                    Parameters
+                   </dt>
+                   <dd class="field-odd">
+                    <dl class="simple">
+                     <dt>
+                      <strong>
+                       node
+                      </strong>
+                     </dt>
+                     <dd>
+                     </dd>
+                     <dt>
+                      <strong>
+                       n
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       The number of features to return
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       sign
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       One of
+                       <cite>
+                        [‘positive’, ‘negative’, ‘abs’]
+                       </cite>
+                       .
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       id2sample
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Decodes index of sample to something meaningful.
+                      </p>
+                     </dd>
+                    </dl>
+                   </dd>
+                   <dt class="field-even">
+                    Returns
+                   </dt>
+                   <dd class="field-even">
+                    <dl class="simple">
+                     <dt>
+                      list of dict with form::
+                     </dt>
+                     <dd>
+                      <p>
+                       sample: Any
+node: int
+node_value: float
+others_value: float
+                      </p>
+                     </dd>
+                    </dl>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+                <dl class="py method">
+                 <dt class="sig sig-object py" id="hnmf.model.HierarchicalNMF.top_features_in_node">
+                  <span class="sig-name descname">
+                   <span class="pre">
+                    top_features_in_node
+                   </span>
+                  </span>
+                  <span class="sig-paren">
+                   (
+                  </span>
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     node
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     int
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     n
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     int
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     10
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     id2feature
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Vectorizer
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     None
+                    </span>
+                   </span>
+                  </em>
+                  <span class="sig-paren">
+                   )
+                  </span>
+                  <span class="sig-return">
+                   <span class="sig-return-icon">
+                    →
+                   </span>
+                   <span class="sig-return-typehint">
+                    <span class="pre">
+                     list
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     Tuple
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                   </span>
+                  </span>
+                  <a class="headerlink" href="#hnmf.model.HierarchicalNMF.top_features_in_node" title="Permalink to this definition">
+                   
+                  </a>
+                 </dt>
+                 <dd>
+                  <p>
+                   For a given node, return the top n features and values
+                  </p>
+                  <dl class="field-list simple">
+                   <dt class="field-odd">
+                    Parameters
+                   </dt>
+                   <dd class="field-odd">
+                    <dl class="simple">
+                     <dt>
+                      <strong>
+                       node
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Index of node to return top items
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       n
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Number of items to return
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       id2feature
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Optional, if provided returns decoded features
+                      </p>
+                     </dd>
+                    </dl>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+                <dl class="py method">
+                 <dt class="sig sig-object py" id="hnmf.model.HierarchicalNMF.top_features_in_nodes">
+                  <span class="sig-name descname">
+                   <span class="pre">
+                    top_features_in_nodes
+                   </span>
+                  </span>
+                  <span class="sig-paren">
+                   (
+                  </span>
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     n
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     int
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     10
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     id2feature
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Vectorizer
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     None
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     nodes
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Optional
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     list
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     int
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     None
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     leaves_only
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     bool
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     False
+                    </span>
+                   </span>
+                  </em>
+                  <span class="sig-paren">
+                   )
+                  </span>
+                  <span class="sig-return">
+                   <span class="sig-return-icon">
+                    →
+                   </span>
+                   <span class="sig-return-typehint">
+                    <span class="pre">
+                     list
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     dict
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     str
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ,
+                     </span>
+                    </span>
+                    <span class="w">
+                    </span>
+                    <span class="pre">
+                     list
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     tuple
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                   </span>
+                  </span>
+                  <a class="headerlink" href="#hnmf.model.HierarchicalNMF.top_features_in_nodes" title="Permalink to this definition">
+                   
+                  </a>
+                 </dt>
+                 <dd>
+                  <p>
+                   Return the top n features and values from all nodes or nodes present in idx if idx is not None
+                  </p>
+                  <dl class="field-list simple">
+                   <dt class="field-odd">
+                    Parameters
+                   </dt>
+                   <dd class="field-odd">
+                    <dl class="simple">
+                     <dt>
+                      <strong>
+                       n
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Number of items to return
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       id2feature: Vectorizer
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Optional, if provided returns decoded items
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       nodes: list[int]
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Optional, if provided, returns top items only for nodes listed
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       leaves_only: bool
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       If True and idx is None return top items for all leaf nodes
+                      </p>
+                     </dd>
+                    </dl>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+                <dl class="py method">
+                 <dt class="sig sig-object py" id="hnmf.model.HierarchicalNMF.top_nodes_in_feature">
+                  <span class="sig-name descname">
+                   <span class="pre">
+                    top_nodes_in_feature
+                   </span>
+                  </span>
+                  <span class="sig-paren">
+                   (
+                  </span>
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     feature
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Union
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     int
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ,
+                     </span>
+                    </span>
+                    <span class="w">
+                    </span>
+                    <span class="pre">
+                     str
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     n
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     int
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     10
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     leaves_only
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     bool
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     True
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     id2feature
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Vectorizer
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     None
+                    </span>
+                   </span>
+                  </em>
+                  <span class="sig-paren">
+                   )
+                  </span>
+                  <a class="headerlink" href="#hnmf.model.HierarchicalNMF.top_nodes_in_feature" title="Permalink to this definition">
+                   
+                  </a>
+                 </dt>
+                 <dd>
+                  <p>
+                   Returns the top nodes for a specified feature
+                  </p>
+                  <dl class="field-list simple">
+                   <dt class="field-odd">
+                    Parameters
+                   </dt>
+                   <dd class="field-odd">
+                    <dl class="simple">
+                     <dt>
+                      <strong>
+                       feature: int, str
+                      </strong>
+                     </dt>
+                     <dd>
+                      <dl class="simple">
+                       <dt>
+                        The feature to return the top nodes for. If string,
+                        <code class="docutils literal notranslate">
+                         <span class="pre">
+                          id2feature
+                         </span>
+                        </code>
+                        must not be
+                        <code class="docutils literal notranslate">
+                         <span class="pre">
+                          None
+                         </span>
+                        </code>
+                        or
+                       </dt>
+                       <dd>
+                        <p>
+                         <code class="docutils literal notranslate">
+                          <span class="pre">
+                           HierarchicalNMF.id2feature_
+                          </span>
+                         </code>
+                         must not be
+                         <code class="docutils literal notranslate">
+                          <span class="pre">
+                           None
+                          </span>
+                         </code>
+                        </p>
+                       </dd>
+                      </dl>
+                     </dd>
+                     <dt>
+                      <strong>
+                       n
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       The number of nodes to return
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       leaves_only
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Whether to filter nodes returned to leaf nodes
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       id2feature
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Optional, if provided encodes
+                       <code class="docutils literal notranslate">
+                        <span class="pre">
+                         feature
+                        </span>
+                       </code>
+                       if
+                       <code class="docutils literal notranslate">
+                        <span class="pre">
+                         feature
+                        </span>
+                       </code>
+                       is passed as a string
+                      </p>
+                     </dd>
+                    </dl>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+                <dl class="py method">
+                 <dt class="sig sig-object py" id="hnmf.model.HierarchicalNMF.top_nodes_in_features">
+                  <span class="sig-name descname">
+                   <span class="pre">
+                    top_nodes_in_features
+                   </span>
+                  </span>
+                  <span class="sig-paren">
+                   (
+                  </span>
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     features
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Union
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     list
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     int
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ,
+                     </span>
+                    </span>
+                    <span class="w">
+                    </span>
+                    <span class="pre">
+                     list
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     str
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ,
+                     </span>
+                    </span>
+                    <span class="w">
+                    </span>
+                    <span class="pre">
+                     NDArray
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     n
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     int
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     10
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     leaves_only
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     bool
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     True
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     id2feature
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Vectorizer
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     None
+                    </span>
+                   </span>
+                  </em>
+                  <span class="sig-paren">
+                   )
+                  </span>
+                  <span class="sig-return">
+                   <span class="sig-return-icon">
+                    →
+                   </span>
+                   <span class="sig-return-typehint">
+                    <span class="pre">
+                     dict
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     Union
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     str
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ,
+                     </span>
+                    </span>
+                    <span class="w">
+                    </span>
+                    <span class="pre">
+                     int
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ,
+                     </span>
+                    </span>
+                    <span class="w">
+                    </span>
+                    <span class="pre">
+                     list
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      [
+                     </span>
+                    </span>
+                    <span class="pre">
+                     tuple
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                    <span class="p">
+                     <span class="pre">
+                      ]
+                     </span>
+                    </span>
+                   </span>
+                  </span>
+                  <a class="headerlink" href="#hnmf.model.HierarchicalNMF.top_nodes_in_features" title="Permalink to this definition">
+                   
+                  </a>
+                 </dt>
+                 <dd>
+                  <p>
+                   Returns the top nodes for a specified feature
+                  </p>
+                  <dl class="field-list simple">
+                   <dt class="field-odd">
+                    Parameters
+                   </dt>
+                   <dd class="field-odd">
+                    <dl class="simple">
+                     <dt>
+                      <strong>
+                       features
+                      </strong>
+                     </dt>
+                     <dd>
+                      <dl class="simple">
+                       <dt>
+                        The features to return the top nodes for. If features are strings,
+                        <code class="docutils literal notranslate">
+                         <span class="pre">
+                          id2feature
+                         </span>
+                        </code>
+                        must not be
+                        <code class="docutils literal notranslate">
+                         <span class="pre">
+                          None
+                         </span>
+                        </code>
+                        or
+                       </dt>
+                       <dd>
+                        <p>
+                         <code class="docutils literal notranslate">
+                          <span class="pre">
+                           HierarchicalNMF.id2feature_
+                          </span>
+                         </code>
+                         must not be
+                         <code class="docutils literal notranslate">
+                          <span class="pre">
+                           None
+                          </span>
+                         </code>
+                        </p>
+                       </dd>
+                      </dl>
+                     </dd>
+                     <dt>
+                      <strong>
+                       n
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       The number of nodes to return
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       leaves_only
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Whether to filter nodes returned to leaf nodes
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       id2feature
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Optional, if provided encodes
+                       <code class="docutils literal notranslate">
+                        <span class="pre">
+                         feature
+                        </span>
+                       </code>
+                       if
+                       <code class="docutils literal notranslate">
+                        <span class="pre">
+                         feature
+                        </span>
+                       </code>
+                       is passed as a string
+                      </p>
+                     </dd>
+                    </dl>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+                <dl class="py method">
+                 <dt class="sig sig-object py" id="hnmf.model.HierarchicalNMF.top_nodes_in_samples">
+                  <span class="sig-name descname">
+                   <span class="pre">
+                    top_nodes_in_samples
+                   </span>
+                  </span>
+                  <span class="sig-paren">
+                   (
+                  </span>
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     n
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     int
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     10
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     leaves_only
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     bool
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     True
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     id2sample
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Vectorizer
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     None
+                    </span>
+                   </span>
+                  </em>
+                  <span class="sig-paren">
+                   )
+                  </span>
+                  <a class="headerlink" href="#hnmf.model.HierarchicalNMF.top_nodes_in_samples" title="Permalink to this definition">
+                   
+                  </a>
+                 </dt>
+                 <dd>
+                  <p>
+                   Returns the top nodes for each sample.
+                  </p>
+                  <dl class="field-list simple">
+                   <dt class="field-odd">
+                    Parameters
+                   </dt>
+                   <dd class="field-odd">
+                    <dl class="simple">
+                     <dt>
+                      <strong>
+                       n
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Number of items to return
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       leaves_only
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Whether to filter top items to nodes identified as leaves
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       id2sample
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Optional, if provided returns decoded samples. Should be of form idx : decoded_value
+                      </p>
+                     </dd>
+                    </dl>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+                <dl class="py method">
+                 <dt class="sig sig-object py" id="hnmf.model.HierarchicalNMF.top_samples_in_nodes">
+                  <span class="sig-name descname">
+                   <span class="pre">
+                    top_samples_in_nodes
+                   </span>
+                  </span>
+                  <span class="sig-paren">
+                   (
+                  </span>
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     n
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     int
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     10
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     leaves_only
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     bool
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     True
+                    </span>
+                   </span>
+                  </em>
+                  ,
+                  <em class="sig-param">
+                   <span class="n">
+                    <span class="pre">
+                     id2sample
+                    </span>
+                   </span>
+                   <span class="p">
+                    <span class="pre">
+                     :
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="n">
+                    <span class="pre">
+                     Vectorizer
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="o">
+                    <span class="pre">
+                     =
+                    </span>
+                   </span>
+                   <span class="w">
+                   </span>
+                   <span class="default_value">
+                    <span class="pre">
+                     None
+                    </span>
+                   </span>
+                  </em>
+                  <span class="sig-paren">
+                   )
+                  </span>
+                  <a class="headerlink" href="#hnmf.model.HierarchicalNMF.top_samples_in_nodes" title="Permalink to this definition">
+                   
+                  </a>
+                 </dt>
+                 <dd>
+                  <p>
+                   Returns the top samples for each node
+                  </p>
+                  <dl class="field-list simple">
+                   <dt class="field-odd">
+                    Parameters
+                   </dt>
+                   <dd class="field-odd">
+                    <dl class="simple">
+                     <dt>
+                      <strong>
+                       n
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       The number of samples to include for each node
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       leaves_only
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Only include leaves
+                      </p>
+                     </dd>
+                     <dt>
+                      <strong>
+                       id2sample
+                      </strong>
+                     </dt>
+                     <dd>
+                      <p>
+                       Decodes samples
+                      </p>
+                     </dd>
+                    </dl>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+               </dd>
+              </dl>
              </section>
-             <section id="hnmf-helpers">
+             <section id="module-hnmf.helpers">
+              <span id="hnmf-helpers">
+              </span>
               <h5>
                hNMF.helpers
-               <a class="headerlink" href="#hnmf-helpers" title="Permalink to this headline">
+               <a class="headerlink" href="#module-hnmf.helpers" title="Permalink to this headline">
                 
                </a>
               </h5>
+              <dl class="py function">
+               <dt class="sig sig-object py" id="hnmf.helpers.hier8_neat">
+                <span class="sig-prename descclassname">
+                 <span class="pre">
+                  hnmf.helpers.
+                 </span>
+                </span>
+                <span class="sig-name descname">
+                 <span class="pre">
+                  hier8_neat
+                 </span>
+                </span>
+                <span class="sig-paren">
+                 (
+                </span>
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   X
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   k
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   random_state=0
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   trial_allowance:
+                  </span>
+                  <span class="pre">
+                   int
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   3
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   unbalanced:
+                  </span>
+                  <span class="pre">
+                   float
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   0.1
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   vec_norm:
+                  </span>
+                  <span class="pre">
+                   Union[float
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   int]
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   2.0
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   normW:
+                  </span>
+                  <span class="pre">
+                   bool
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   True
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   anls_alg:
+                  </span>
+                  <span class="pre">
+                   callable
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   &lt;function
+                  </span>
+                  <span class="pre">
+                   anls_entry_rank2_precompute&gt;
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   tol:
+                  </span>
+                  <span class="pre">
+                   float
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   0.0001
+                  </span>
+                 </span>
+                </em>
+                ,
+                <em class="sig-param">
+                 <span class="n">
+                  <span class="pre">
+                   maxiter:
+                  </span>
+                  <span class="pre">
+                   int
+                  </span>
+                  <span class="pre">
+                   =
+                  </span>
+                  <span class="pre">
+                   10000
+                  </span>
+                 </span>
+                </em>
+                <span class="sig-paren">
+                 )
+                </span>
+                <a class="headerlink" href="#hnmf.helpers.hier8_neat" title="Permalink to this definition">
+                 
+                </a>
+               </dt>
+               <dd>
+                <dl class="field-list simple">
+                 <dt class="field-odd">
+                  Parameters
+                 </dt>
+                 <dd class="field-odd">
+                  <dl class="simple">
+                   <dt>
+                    <strong>
+                     X
+                    </strong>
+                   </dt>
+                   <dd>
+                    <p>
+                     Array
+                    </p>
+                   </dd>
+                   <dt>
+                    <strong>
+                     k
+                    </strong>
+                   </dt>
+                   <dd>
+                    <p>
+                     int, The number of desired leaf nodes
+                    </p>
+                   </dd>
+                   <dt>
+                    <strong>
+                     random_state
+                    </strong>
+                    <span class="classifier">
+                     int
+                    </span>
+                   </dt>
+                   <dd>
+                   </dd>
+                   <dt>
+                    <strong>
+                     trial_allowance
+                    </strong>
+                    <span class="classifier">
+                     int
+                    </span>
+                   </dt>
+                   <dd>
+                    <p>
+                     Number of trials allowed for removing outliers and splitting a node again. See parameter T in Algorithm 3 in the reference paper.
+                    </p>
+                   </dd>
+                   <dt>
+                    <strong>
+                     unbalanced
+                    </strong>
+                    <span class="classifier">
+                     float
+                    </span>
+                   </dt>
+                   <dd>
+                    <p>
+                     A threshold to determine if one of the two clusters is an outlier set. A smaller value means more tolerance for unbalance between two clusters. See parameter beta in Algorithm 3 in the reference paper.
+                    </p>
+                   </dd>
+                   <dt>
+                    <strong>
+                     vec_norm
+                    </strong>
+                   </dt>
+                   <dd>
+                    <p>
+                     Indicates which norm to use for the normalization of W or H, e.g. vec_norm=2 means Euclidean norm; vec_norm=0 means no normalization.
+                    </p>
+                   </dd>
+                   <dt>
+                    <strong>
+                     normW
+                    </strong>
+                   </dt>
+                   <dd>
+                    <p>
+                     true if normalizing columns of W; false if normalizing rows of H.
+                    </p>
+                   </dd>
+                   <dt>
+                    <strong>
+                     anls_alg
+                    </strong>
+                   </dt>
+                   <dd>
+                    <p>
+                     The function handle to NNLS algorithm whose signature is the same as @anls_entry_rank2_precompute
+                    </p>
+                   </dd>
+                   <dt>
+                    <strong>
+                     tol
+                    </strong>
+                   </dt>
+                   <dd>
+                    <p>
+                     Tolerance parameter for stopping criterion in each run of NMF.
+                    </p>
+                   </dd>
+                   <dt>
+                    <strong>
+                     maxiter
+                    </strong>
+                   </dt>
+                   <dd>
+                    <p>
+                     Maximum number of iteration times in each run of NMF
+                    </p>
+                   </dd>
+                  </dl>
+                 </dd>
+                 <dt class="field-even">
+                  Returns
+                 </dt>
+                 <dd class="field-even">
+                  <dl class="simple">
+                   <dt>
+                    From the output parameters, you can reconstruct the tree and “replay” the k-1 steps that generated it.
+                   </dt>
+                   <dd>
+                   </dd>
+                   <dt>
+                    For a binary tree with k leaf nodes, the total number of nodes (including leaf and non-leaf nodes)
+                   </dt>
+                   <dd>
+                    <p>
+                     is 2*(k-1) plus the root node, because k-1 splits are performed and each split generates two new nodes.
+                    </p>
+                   </dd>
+                   <dt>
+                    We only keep track of the 2*(k-1) non-root node in the output.
+                   </dt>
+                   <dd>
+                   </dd>
+                   <dt>
+                    tree
+                   </dt>
+                   <dd>
+                    <p>
+                     A 2-by-(k-1) matrix that encodes the tree structure. The two entries in the i-th column are the numberings of the two children of the node with numbering i. The root node has numbering 0, with its two children always having numbering 1 and numbering 2. Thus the root node is NOT included in the ‘tree’ variable.
+                    </p>
+                   </dd>
+                   <dt>
+                    splits
+                   </dt>
+                   <dd>
+                    <p>
+                     An array of length k-1. It keeps track of the numberings of the nodes being split from the 1st split to the (k-1)-th split. (The first entry is always 0.)
+                    </p>
+                   </dd>
+                   <dt>
+                    is_leaf
+                   </dt>
+                   <dd>
+                    <p>
+                     An array of length 2*(k-1). A “1” at index i means that the node with numbering i is a leaf node in the final tree generated, and “0” indicates non-leaf nodes in the final tree.
+                    </p>
+                   </dd>
+                   <dt>
+                    clusters
+                   </dt>
+                   <dd>
+                    <p>
+                     A cell array of length 2*(k-1). The i-th element contains the subset of items at the node with numbering i.
+                    </p>
+                   </dd>
+                   <dt>
+                    Ws
+                   </dt>
+                   <dd>
+                    <p>
+                     array of length 2*(k-1). Its i-th element is the topic vector of the cluster at the node with numbering i.
+                    </p>
+                   </dd>
+                   <dt>
+                    priorities
+                   </dt>
+                   <dd>
+                    <p>
+                     An array of length 2*(k-1). Its i-th element is the modified NDCG scores at the node with numbering i (see the reference paper).
+                    </p>
+                   </dd>
+                  </dl>
+                 </dd>
+                </dl>
+                <p class="rubric">
+                 Notes
+                </p>
+                <p>
+                 Adapted from
+                 <a class="reference internal" href="#rank-2" id="id2">
+                  <span>
+                   [rank-2]
+                  </span>
+                 </a>
+                </p>
+               </dd>
+              </dl>
              </section>
             </section>
            </div>
