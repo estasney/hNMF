@@ -1,5 +1,9 @@
 /dist/
 /venv/
+.venv
 /docs_/build/
 **/*.egg-info
 /build
+**/.*
+.*
+!.pre-commit-config.yaml
