@@ -1,18 +1,37 @@
 import logging
 import warnings
-from enum import Enum
-from typing import Union
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Literal, TypeAlias
 
 import numpy as np
+import numpy.typing as npt
 from numpy.linalg import matrix_rank, norm, svd
 from numpy.random import mtrand
 from scipy import sparse as sp
 from sklearn.decomposition import non_negative_factorization
 
+if TYPE_CHECKING:
+    import networkx as nx
+
 logger = logging.getLogger(__name__)
 
+AnlsAlgorithm: TypeAlias = Callable[
+    [
+        npt.NDArray[np.float64],
+        npt.NDArray[np.float64],
+        npt.NDArray[np.float64],
+        npt.DTypeLike,
+    ],
+    npt.NDArray[np.float64],
+]
 
-def anls_entry_rank2_precompute(left, right, H, dtype):
+
+def anls_entry_rank2_precompute(
+    left: npt.NDArray[np.float64],
+    right: npt.NDArray[np.float64],
+    H: npt.NDArray[np.float64],
+    dtype: npt.DTypeLike,
+) -> npt.NDArray[np.float64]:
     eps = 1e-6
     n = right.shape[0]
 
@@ -26,7 +45,7 @@ def anls_entry_rank2_precompute(left, right, H, dtype):
 
     if np.abs(left[0, 0]) < eps and abs(left[0, 1]) < eps:
         logger.error(
-            "Error: The 2x2 matrix is close to singular or the input data matrix has tiny values"
+            "Error: The 2x2 matrix is close to singular or the input data matrix has tiny values",
         )
     else:
         if np.abs(left[0, 0] >= np.abs(left[0, 1])):
@@ -59,179 +78,27 @@ def anls_entry_rank2_precompute(left, right, H, dtype):
     return H
 
 
-def hier8_neat(
-    X,
-    k,
-    random_state=0,
-    trial_allowance: int = 3,
-    unbalanced: float = 0.1,
-    vec_norm: Union[float, int] = 2.0,
-    normW: bool = True,
-    anls_alg: callable = anls_entry_rank2_precompute,
-    tol: float = 1e-4,
-    maxiter: int = 10000,
-):
-    """
-
-    Parameters
-    ----------
-    X
-        Array
-    k
-        int, The number of desired leaf nodes
-    random_state : int
-    trial_allowance : int
-        Number of trials allowed for removing outliers and splitting a node again. See parameter T in Algorithm 3 in the reference paper.
-    unbalanced : float
-        A threshold to determine if one of the two clusters is an outlier set. A smaller value means more tolerance for unbalance between two clusters. See parameter beta in Algorithm 3 in the reference paper.
-    vec_norm
-        Indicates which norm to use for the normalization of W or H, e.g. vec_norm=2 means Euclidean norm; vec_norm=0 means no normalization.
-    normW
-        true if normalizing columns of W; false if normalizing rows of H.
-    anls_alg
-        The function handle to NNLS algorithm whose signature is the same as @anls_entry_rank2_precompute
-    tol
-        Tolerance parameter for stopping criterion in each run of NMF.
-    maxiter
-        Maximum number of iteration times in each run of NMF
-
-    Returns
-    -------
-    From the output parameters, you can reconstruct the tree and "replay" the k-1 steps that generated it.
-
-    For a binary tree with k leaf nodes, the total number of nodes (including leaf and non-leaf nodes)
-     is 2*(k-1) plus the root node, because k-1 splits are performed and each split generates two new nodes.
-
-    We only keep track of the 2*(k-1) non-root node in the output.
-
-    tree
-        A 2-by-(k-1) matrix that encodes the tree structure. The two entries in the i-th column are the numberings of the two children of the node with numbering i. The root node has numbering 0, with its two children always having numbering 1 and numbering 2. Thus the root node is NOT included in the 'tree' variable.
-
-    splits
-        An array of length k-1. It keeps track of the numberings of the nodes being split from the 1st split to the (k-1)-th split. (The first entry is always 0.)
-
-    is_leaf
-        An array of length 2*(k-1). A "1" at index i means that the node with numbering i is a leaf node in the final tree generated, and "0" indicates non-leaf nodes in the final tree.
-
-    clusters
-        A cell array of length 2*(k-1). The i-th element contains the subset of items at the node with numbering i.
-
-
-    Ws
-        array of length 2*(k-1). Its i-th element is the topic vector of the cluster at the node with numbering i.
-
-    priorities
-        An array of length 2*(k-1). Its i-th element is the modified NDCG scores at the node with numbering i (see the reference paper).
-
-    Notes
-    -----
-    Adapted from [rank-2]_
-    """
-
-    # Repack params
-    params = {k: v for k, v in locals().items() if k not in ["X", "k", "random_state"]}
-    random_state = np.random.RandomState(seed=random_state)
-    n_samples, n_features = X.shape
-    clusters = [None] * (2 * (k - 1))
-    Ws = [None] * (2 * (k - 1))
-    W_buffer = [None] * (2 * (k - 1))
-    H_buffer = [None] * (2 * (k - 1))
-    priorities = np.zeros(2 * k - 1, dtype=np.float32)
-    is_leaf = -np.ones(2 * (k - 1), dtype=np.float32)  # No leafs at start
-    tree = np.zeros((2, 2 * (k - 1)), dtype=np.float32)
-    splits = -np.ones(k - 1, dtype=np.float32)
-
-    term_subset = np.where(np.sum(X, axis=1) != 0)[
-        0
-    ]  # Select samples with at least 1 feature
-
-    # Random initial guesses for W and H
-    W = random_state.rand(len(term_subset), 2)
-    H = random_state.rand(2, n_features)
-
-    # Compute the 2-rank NMF of W and H
-    if len(term_subset) == n_samples:
-        W, H = nmfsh_comb_rank2(X, W, H, **params)
-    else:
-        W_tmp, H = nmfsh_comb_rank2(X[term_subset, :], W, H, **params)
-        W = np.zeros((n_samples, 2), dtype=np.float32)
-        W[term_subset, :] = W_tmp
-        del W_tmp
-
-    result_used = 0
-    for i in range(k - 1):
-        if i == 0:
-            split_node = 0
-            new_nodes = [0, 1]
-            min_priority = 1e40
-            split_subset = np.arange(n_features)
-        else:
-            leaves = np.where(is_leaf == 1)[0]
-            temp_priority = priorities[leaves]
-            min_priority = np.min(temp_priority[temp_priority > 0])
-            split_node = np.argmax(temp_priority)
-            if temp_priority[split_node] < 0:
-                logger.info(f"Cannot generate all {k} leaf clusters")
-
-                Ws = [W for W in Ws if W is not None]
-                return tree, splits, is_leaf, clusters, Ws, priorities
-
-            split_node = leaves[split_node]
-            is_leaf[split_node] = 0
-            W = W_buffer[split_node]
-            H = H_buffer[split_node]
-            split_subset = clusters[split_node]
-            new_nodes = [result_used, result_used + 1]
-            tree[:, split_node] = new_nodes
-
-        result_used += 2
-        cluster_subset = np.argmax(H, axis=0)
-        clusters[new_nodes[0]] = split_subset[np.where(cluster_subset == 0)[0]]
-        clusters[new_nodes[1]] = split_subset[np.where(cluster_subset == 1)[0]]
-        Ws[new_nodes[0]] = W[:, 0]
-        Ws[new_nodes[1]] = W[:, 1]
-        splits[i] = split_node
-        is_leaf[new_nodes] = 1
-
-        subset = clusters[new_nodes[0]]
-        subset, W_buffer_one, H_buffer_one, priority_one = trial_split(
-            min_priority, X, subset, W[:, 0], random_state, **params
-        )
-        clusters[new_nodes[0]] = subset
-        W_buffer[new_nodes[0]] = W_buffer_one
-        H_buffer[new_nodes[0]] = H_buffer_one
-        priorities[new_nodes[0]] = priority_one
-
-        subset = clusters[new_nodes[1]]
-        subset, W_buffer_one, H_buffer_one, priority_one = trial_split(
-            min_priority, X, subset, W[:, 1], random_state, **params
-        )
-        clusters[new_nodes[1]] = subset
-        W_buffer[new_nodes[1]] = W_buffer_one
-        H_buffer[new_nodes[1]] = H_buffer_one
-        priorities[new_nodes[1]] = priority_one
-
-    return tree.T, splits, is_leaf, clusters, Ws, priorities
-
-
 def trial_split_sklearn(
     min_priority: float,
-    X,
-    subset,
-    W_parent,
-    random_state,
+    X: npt.NDArray,
+    subset: npt.NDArray[np.int64],
+    W_parent: npt.NDArray[np.float64],
+    random_state: np.random.RandomState,
     trial_allowance: int,
     unbalanced: float,
-    dtype: Union[np.float32, np.float64],
-    tol,
-    maxiter,
-    init,
-    alpha_W,
-    alpha_H,
+    dtype: npt.DTypeLike,
+    tol: float,
+    maxiter: int,
+    init: Literal[None, "random", "nndsvd", "nndsvda", "nndsvdar"],
+    alpha_W: float,
+    alpha_H: float,
 ):
-    m = X.shape[0]
+    m: int = X.shape[0]
     trial = 0
     subset_backup = subset
+    W_buffer_one = np.zeros((m, 2), dtype=dtype)
+    H_buffer_one = np.zeros((2, len(subset)), dtype=dtype)
+    priority_one = -2.0
     while trial < trial_allowance:
         cluster_subset, W_buffer_one, H_buffer_one, priority_one = split_once_sklearn(
             X=X,
@@ -256,9 +123,7 @@ def trial_split_sklearn(
         length_cluster2 = len(np.where(cluster_subset == unique_cluster_subset[1])[0])
         if min(length_cluster1, length_cluster2) < unbalanced * len(cluster_subset):
             logger.debug(
-                "Below imbalanced threshold: {}".format(
-                    (unbalanced * len(cluster_subset))
-                )
+                f"Below imbalanced threshold: {unbalanced * len(cluster_subset)}",
             )
             idx_small = np.argmin(np.array([length_cluster1, length_cluster2]))
             subset_small = np.where(cluster_subset == unique_cluster_subset[idx_small])[
@@ -280,7 +145,7 @@ def trial_split_sklearn(
             if priority_one_small < min_priority:
                 trial += 1
                 if trial < trial_allowance:
-                    logger.debug("Dropped {} features...".format(len(subset_small)))
+                    logger.debug(f"Dropped {len(subset_small)} features...")
                     subset = np.setdiff1d(subset, subset_small)
             else:
                 break
@@ -289,9 +154,7 @@ def trial_split_sklearn(
 
     if trial == trial_allowance:
         logger.debug(
-            "Reached trial allowance, recycled {} features".format(
-                len(subset_backup) - len(subset)
-            )
+            f"Reached trial allowance, recycled {len(subset_backup) - len(subset)} features",
         )
         subset = subset_backup
         W_buffer_one = np.zeros((m, 2), dtype=dtype)
@@ -302,17 +165,19 @@ def trial_split_sklearn(
 
 
 def split_once_sklearn(
-    X,
-    subset,
-    W_parent,
+    X: npt.NDArray,
+    subset: npt.NDArray[np.int64],
+    W_parent: npt.NDArray[np.float64],
     random_state: mtrand.RandomState,
-    dtype: Union[np.float32, np.float64],
-    tol,
-    maxiter,
-    init,
-    alpha_W,
-    alpha_H,
-):
+    dtype: npt.DTypeLike,
+    tol: float,
+    maxiter: int,
+    init: Literal[None, "random", "nndsvd", "nndsvda", "nndsvdar", "custom"],
+    alpha_W: float,
+    alpha_H: float | Literal["same"],
+) -> tuple[
+    npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64], float
+]:
     m = X.shape[0]
     if len(subset) <= 3:
         cluster_subset = np.ones(len(subset), dtype=dtype)
@@ -320,11 +185,11 @@ def split_once_sklearn(
         H_buffer_one = np.zeros((2, len(subset)), dtype=dtype)
         priority_one = -1
     else:
-        term_subset = np.where(np.sum(X[:, subset], axis=1) != 0)[0]
+        term_subset = np.flatnonzero(np.sum(X[:, subset], axis=1))
         X_subset = X[term_subset, :][:, subset]
         W = random_state.rand(len(term_subset), 2)
         H = random_state.rand(2, len(subset))
-        W, H, n_iter_ = non_negative_factorization(
+        W, H, _n_iter = non_negative_factorization(
             X=X_subset,
             W=W,
             H=H,
@@ -355,22 +220,25 @@ def split_once_sklearn(
 
 def trial_split(
     min_priority: float,
-    X,
-    subset,
-    W_parent,
-    random_state,
+    X: npt.NDArray[np.float64],
+    subset: npt.NDArray[np.int64],
+    W_parent: npt.NDArray[np.float64],
+    random_state: np.random.RandomState,
     trial_allowance: int,
     unbalanced: float,
-    dtype: Union[np.float32, np.float64],
-    anls_alg,
-    vec_norm,
-    normW,
-    tol,
-    maxiter,
-):
+    dtype: npt.DTypeLike,
+    anls_alg: AnlsAlgorithm,
+    vec_norm: float,
+    normW: bool,
+    tol: float,
+    maxiter: int,
+) -> tuple[npt.NDArray[np.int64], npt.NDArray, npt.NDArray, float]:
     m = X.shape[0]
     trial = 0
     subset_backup = subset
+    W_buffer_one = np.zeros((m, 2), dtype=dtype)
+    H_buffer_one = np.zeros((2, len(subset)), dtype=dtype)
+    priority_one = -2.0
     while trial < trial_allowance:
         cluster_subset, W_buffer_one, H_buffer_one, priority_one = split_once(
             X=X,
@@ -414,7 +282,7 @@ def trial_split(
             if priority_one_small < min_priority:
                 trial += 1
                 if trial < trial_allowance:
-                    logger.info("Dropped {} documents...".format(len(subset_small)))
+                    logger.info(f"Dropped {len(subset_small)} documents...")
                     subset = np.setdiff1d(subset, subset_small)
             else:
                 break
@@ -422,7 +290,7 @@ def trial_split(
             break
 
     if trial == trial_allowance:
-        logger.info("Recycled {} documents...".format(len(subset_backup) - len(subset)))
+        logger.info(f"Recycled {len(subset_backup) - len(subset)} documents...")
         subset = subset_backup
         W_buffer_one = np.zeros((m, 2), dtype=dtype)
         H_buffer_one = np.zeros((2, len(subset)), dtype=dtype)
@@ -432,17 +300,17 @@ def trial_split(
 
 
 def split_once(
-    X,
-    subset,
-    W_parent,
+    X: npt.NDArray[np.float64],
+    subset: npt.NDArray[np.int64],
+    W_parent: npt.NDArray[np.float64],
     random_state: mtrand.RandomState,
-    dtype: Union[np.float32, np.float64],
-    anls_alg: callable,
-    vec_norm,
-    normW,
-    tol,
-    maxiter,
-):
+    dtype: npt.DTypeLike,
+    anls_alg: AnlsAlgorithm,
+    vec_norm: float,
+    normW: bool,
+    tol: float,
+    maxiter: int,
+) -> tuple[npt.NDArray[np.float64], npt.NDArray, npt.NDArray, float]:
     m = X.shape[0]
     if len(subset) <= 3:
         cluster_subset = np.ones(len(subset), dtype=dtype)
@@ -477,7 +345,11 @@ def split_once(
     return cluster_subset, W_buffer_one, H_buffer_one, priority_one
 
 
-def compute_priority(W_parent, W_child, dtype: Union[np.float32, np.float64]):
+def compute_priority(
+    W_parent: npt.NDArray[np.float64],
+    W_child: npt.NDArray[np.float64],
+    dtype: npt.DTypeLike,
+) -> float:
     n = len(W_parent)
     idx_parent = np.argsort(W_parent)[::-1]
     sorted_parent = W_parent[idx_parent]
@@ -510,7 +382,12 @@ def compute_priority(W_parent, W_child, dtype: Union[np.float32, np.float64]):
     return priority
 
 
-def NDCG_part(ground, test, weight, weight_part):
+def NDCG_part(
+    ground: npt.NDArray[np.int64],
+    test: npt.NDArray[np.int64],
+    weight: npt.NDArray,
+    weight_part: npt.NDArray,
+) -> float:
     seq_idx = np.argsort(ground)
     weight_part = weight_part[seq_idx]
 
@@ -528,33 +405,32 @@ def NDCG_part(ground, test, weight, weight_part):
 
 
 def nmfsh_comb_rank2(
-    A,
-    Winit,
-    Hinit,
-    anls_alg: callable,
+    A: npt.NDArray,
+    Winit: npt.NDArray,
+    Hinit: npt.NDArray,
+    anls_alg: AnlsAlgorithm,
     vec_norm: float,
     normW: bool,
     tol: float,
     maxiter: int,
-    dtype: Union[np.float32, np.float64],
-):
+    dtype: npt.DTypeLike,
+) -> tuple[npt.NDArray, npt.NDArray]:
     """"""
     eps = 1e-6
-    m, n = A.shape
+    shape: tuple[int, int] = A.shape
+    m, n = shape
     W, H = Winit, Hinit
 
     if W.shape[1] != 2:
         warnings.warn(
-            "Error: Wrong size of W! Expected shape of (n, 2) but received W of shape ({}, {})".format(
-                W.shape[0], W.shape[1]
-            )
+            f"Error: Wrong size of W! Expected shape of (n, 2) but received W of shape ({W.shape[0]}, {W.shape[1]})",
+            stacklevel=2,
         )
 
     if H.shape[0] != 2:
         warnings.warn(
-            "Error: Wrong size of H! Expected shape of (2, n) but received H of shape ({}, {})".format(
-                H.shape[0], H.shape[1]
-            )
+            f"Error: Wrong size of H! Expected shape of (2, n) but received H of shape ({H.shape[0]}, {H.shape[1]})",
+            stacklevel=2,
         )
 
     left = H.dot(H.T)
@@ -564,9 +440,9 @@ def nmfsh_comb_rank2(
             W = np.zeros((m, 2), dtype=dtype)
             H = np.zeros((2, n), dtype=dtype)
             if sp.issparse(A):
-                U, S, V = svd(A.toarray(), full_matrices=False)
+                U, _S, V = svd(A.toarray(), full_matrices=False)  # type: ignore[attr-defined]  # A can be sparse
             else:
-                U, S, V = svd(A, full_matrices=False)
+                U, _S, V = svd(A, full_matrices=False)
             U, V = U[:, 0], V[0, :]
             if sum(U) < 0:
                 U, V = -U, -V
@@ -576,7 +452,7 @@ def nmfsh_comb_rank2(
 
             return W, H
 
-        W = anls_alg(left, right, W, dtype=dtype)
+        W = anls_alg(left, right, W, dtype)
         norms_W = norm(W, axis=0)
         if np.min(norms_W) < eps:
             logger.warning("Error: Some column of W is essentially zero")
@@ -585,13 +461,12 @@ def nmfsh_comb_rank2(
         left = W.T.dot(W)
         right = A.T.dot(W)
         if matrix_rank(left) < 2:
-
             W = np.zeros((m, 2), dtype=dtype)
             H = np.zeros((2, n), dtype=dtype)
             if sp.issparse(A):
-                U, S, V = svd(A.toarray(), full_matrices=False)
+                U, _S, V = svd(A.toarray(), full_matrices=False)  # type: ignore[attr-defined]  # A can be sparse
             else:
-                U, S, V = svd(A, full_matrices=False)
+                U, _S, V = svd(A, full_matrices=False)
             U, V = U[:, 0], V[0, :]
             if sum(U) < 0:
                 U, V = -U, -V
@@ -601,22 +476,20 @@ def nmfsh_comb_rank2(
 
             return W, H
 
-        H = anls_alg(left, right, H.T, dtype=dtype).T
+        H = anls_alg(left, right, H.T, dtype).T
         gradH = left.dot(H) - right.T
         left = H.dot(H.T)
         right = A.dot(H.T)
         gradW = W.dot(left) - right
-
+        initgrad = 1
         if iter_ == 0:
             gradW_square = np.sum(np.power(gradW[np.logical_or(gradW <= 0, W > 0)], 2))
             gradH_square = np.sum(np.power(gradH[np.logical_or(gradH <= 0, H > 0)], 2))
             initgrad = np.sqrt(gradW_square + gradH_square)
-
             continue
-        else:
-            gradW_square = np.sum(np.power(gradW[np.logical_or(gradW <= 0, W > 0)], 2))
-            gradH_square = np.sum(np.power(gradH[np.logical_or(gradH <= 0, H > 0)], 2))
-            projnorm = np.sqrt(gradW_square + gradH_square)
+        gradW_square = np.sum(np.power(gradW[np.logical_or(gradW <= 0, W > 0)], 2))
+        gradH_square = np.sum(np.power(gradH[np.logical_or(gradH <= 0, H > 0)], 2))
+        projnorm = np.sqrt(gradW_square + gradH_square)
 
         if projnorm < tol * initgrad:
             break
@@ -634,7 +507,7 @@ def nmfsh_comb_rank2(
     return W, H
 
 
-def tree_to_nx(tree: np.ndarray, weights: np.ndarray = None):
+def tree_to_nx(tree: npt.NDArray, weights: npt.NDArray | None = None) -> "nx.DiGraph":
     import networkx as nx
 
     g = nx.DiGraph()
@@ -643,17 +516,19 @@ def tree_to_nx(tree: np.ndarray, weights: np.ndarray = None):
         # Here the ith row refers to the ith node as a parent
         parent_id = str(int(parent_node))
         parent_idx = int(parent_node)
-        parent_name = "Node {}".format(parent_id)
+        parent_name = f"Node {parent_id}"
         if row.sum() > 0:
             for child in row:
-
                 child_id = str(int(child))
                 child_idx = int(child)
-                child_name = "Node {}".format(child_id)
+                child_name = f"Node {child_id}"
 
                 if parent_idx not in g.nodes:
                     g.add_node(
-                        parent_idx, is_word=False, name=parent_name, id=parent_id
+                        parent_idx,
+                        is_word=False,
+                        name=parent_name,
+                        id=parent_id,
                     )
                 if child_idx not in g.nodes:
                     g.add_node(child_idx, is_word=False, name=child_name, id=child_id)
@@ -665,10 +540,3 @@ def tree_to_nx(tree: np.ndarray, weights: np.ndarray = None):
     g.add_edge("Root", 0)
     g.add_edge("Root", 1)
     return g
-
-
-def handle_enums(param):
-    if isinstance(param, Enum):
-        return param.value
-    else:
-        return param

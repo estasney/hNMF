@@ -1,6 +1,6 @@
+import glob
 import os
 import shutil
-import glob
 
 from bs4 import BeautifulSoup
 
@@ -18,7 +18,7 @@ def main():
         file_name = os.path.split(html_file)[1]
         file_path = os.path.join(target_folder, file_name)
 
-        with open(html_file, mode="r", encoding="utf-8") as fp:
+        with open(html_file, encoding="utf-8") as fp:
             doc = fp.read()
             soup = BeautifulSoup(doc, features="html.parser")
 

@@ -1,9 +1,6 @@
+
 from rich.live import Live
 from rich.tree import Tree
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Union, Optional
 
 
 class ProgressTree:
@@ -23,24 +20,21 @@ class ProgressTree:
         self.live.stop()
 
     def _lookup_branch(
-        self, k: "Union[str, int]", source: "Optional[Tree]", desc: "Optional[int]"
+        self, k: "str | int", source: "Tree | None", desc: "int | None",
     ) -> "Tree":
         branch = self.branches.get(k, None)
         if branch:
             return branch
         display_name = f"[green]{k}" if not desc else f"[green]{k}:({desc})"
-        if source:
-            branch = source.add(display_name)
-        else:
-            branch = self.tree.add(display_name)
+        branch = source.add(display_name) if source else self.tree.add(display_name)
         self.branches[k] = branch
         return branch
 
     def add_branch(
         self,
-        source: "Union[str, int]",
-        target: "Union[int, str]",
-        desc: "Optional[int]",
+        source: "str | int",
+        target: "int | str",
+        desc: "int | None",
     ):
         source_branch = self._lookup_branch(source, None, None)
         self._lookup_branch(target, source_branch, desc)
