@@ -27,6 +27,9 @@ Homepage = "https://github.com/estasney/hNMF"
 [dependency-groups]
 dev = [
     "beautifulsoup4>=4.14.3",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.7.1",
+    "mkdocstrings[python]>=1.0.1",
     "numpydoc>=1.7.0",
     "pre-commit>=3.5.0",
     "pytest>=8.3.5",

@@ -33,10 +33,24 @@ id2feature = {i: token for i, token in enumerate(tfidf.get_feature_names_out())}
 # hNMF
 model = HierarchicalNMF(k=n_leaves)
 model.fit(X)
-model.cluster_features(id2feature=id2feature)
+model.cluster_features()
 ```
+
+## Documentation
+
+To build the documentation:
+```bash
+mkdocs build
+```
+
+To preview locally:
+```bash
+mkdocs serve
+```
+
+The documentation will be built to the `docs/` folder for GitHub Pages.
 
 ## Reference
 - Papers: [Fast rank-2 nonnegative matrix factorization for hierarchical document clustering](https://smallk.github.io/papers/hierNMF2.pdf)
 
-- Original version of codes (matlab): https://github.com/dakuang/hiernmf2
+- Originally adapted from MATLAB: https://github.com/dakuang/hiernmf2
