@@ -1,18 +1,27 @@
 import logging
 from collections import defaultdict
+from dataclasses import dataclass
 from operator import itemgetter
-from typing import Literal, Self
+from typing import Any, Literal, Self
 
 import numpy as np
 import numpy.typing as npt
 from sklearn.base import BaseEstimator
 from sklearn.decomposition import NMF
 
-from src.hnmf.helpers import (
+from hnmf.helpers import (
     trial_split_sklearn,
 )
-from src.hnmf.progress_tree import ProgressTree
-from src.hnmf.signatures import DiscrimSample
+from hnmf.progress_tree import ProgressTree
+
+
+@dataclass(frozen=True, slots=True)
+class DiscriminatedSample:
+    sample: Any
+    node: int
+    node_value: float
+    others_value: float
+
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +29,7 @@ logger = logging.getLogger(__name__)
 class HierarchicalNMF(BaseEstimator):
     k: int
     unbalanced: float
-    init: Literal[None, "random", "nndsvd", "nndsvda", "nndsvdar", "custom"]
+    init: Literal[None, "random", "nndsvd", "nndsvda", "nndsvdar"]
     solver: Literal["cd", "mu"]
     beta_loss: Literal["FRO", 0, "KL", 1, "IS", 2]
     alpha_W: float
@@ -528,7 +537,7 @@ class HierarchicalNMF(BaseEstimator):
         node: int,
         n: int = 10,
         sign: Literal["positive", "negative", "abs"] = "abs",
-    ) -> "list[DiscrimSample]":
+    ) -> "list[DiscriminatedSample]":
         """
         Computes most discriminative samples (node vs rest)
 
@@ -576,7 +585,7 @@ class HierarchicalNMF(BaseEstimator):
         diff_tops = diffs.argsort()[::-1][:n]
 
         return [
-            DiscrimSample(
+            DiscriminatedSample(
                 sample=diff,
                 node=node,
                 node_value=member_values[diff],

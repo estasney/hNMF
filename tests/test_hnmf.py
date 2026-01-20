@@ -1,9 +1,9 @@
-import pytest
 import numpy.typing as npt
+import pytest
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from src.hnmf import HierarchicalNMF
+from hnmf import HierarchicalNMF
 
 
 @pytest.fixture(scope="module")

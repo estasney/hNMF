@@ -91,7 +91,7 @@ def trial_split_sklearn(
     maxiter: int,
     init: Literal[None, "random", "nndsvd", "nndsvda", "nndsvdar"],
     alpha_W: float,
-    alpha_H: float,
+    alpha_H: float | Literal["same"],
 ):
     m: int = X.shape[0]
     trial = 0
