@@ -1,6 +1,0 @@
-scikit-learn>=1.0.1
-numpy
-scipy
-networkx
-tqdm
-rich

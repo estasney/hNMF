@@ -1,16 +1,15 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Note: To use the 'upload' functionality of this file, you must:
 #   $ pip install twine
 
-import io
+import contextlib
 import os
 import sys
 from pathlib import Path
 from shutil import rmtree
 
-from setuptools import find_packages, setup, Command
+from setuptools import Command, find_packages, setup
 
 # Package meta-data
 NAME = "hNMF"
@@ -30,7 +29,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 # Import the README and use it as the long-description.
 # Note: this will only work if 'README.md' is present in your MANIFEST.in file!
 try:
-    with io.open(os.path.join(here, "README.md"), encoding="utf-8") as f:
+    with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
         long_description = "\n" + f.read()
 except FileNotFoundError:
     long_description = DESCRIPTION
@@ -45,7 +44,7 @@ class BaseCommand(Command):
     @staticmethod
     def status(s):
         """Prints things in bold."""
-        print("\033[1m{0}\033[0m".format(s))
+        print(f"\033[1m{s}\033[0m")
 
     def initialize_options(self):
         pass
@@ -62,15 +61,11 @@ class BuildCommand(BaseCommand):
 
     def run(self):
         self.status("Removing Old Builds")
-        try:
+        with contextlib.suppress(OSError):
             rmtree(os.path.join(here, "build"))
-        except OSError:
-            pass
         self.status("Removing Old Distributions")
-        try:
+        with contextlib.suppress(OSError):
             rmtree(os.path.join(here, "dist"))
-        except OSError:
-            pass
         os.system("python setup.py build sdist bdist_wheel")
         self.status("Done")
         sys.exit()
@@ -89,7 +84,7 @@ class UploadCommand(BaseCommand):
         dist_path = str(Path(here) / "dist" / "*")
 
         os.system(
-            f"twine upload -u estasney -p {keyring.get_password('TWINE', 'estasney')} {dist_path}"
+            f"twine upload -u estasney -p {keyring.get_password('TWINE', 'estasney')} {dist_path}",
         )
 
         sys.exit()
