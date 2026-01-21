@@ -52,10 +52,7 @@ class HierarchicalNMF(BaseEstimator):
     W_buffer_: npt.NDArray | None
     H_buffer_: npt.NDArray | None
     priorities_: npt.NDArray | None
-    id2sample_: dict[int, str] | None
-    id2feature_: dict[int, str] | None
-    feature2id_: dict[str, int] | None
-
+    
     def __init__(
         self,
         k: int,
@@ -97,10 +94,7 @@ class HierarchicalNMF(BaseEstimator):
         self.W_buffer_ = None
         self.H_buffer_ = None
         self.priorities_ = None
-        self.id2sample_ = None
-        self.id2feature_ = None
-        self.feature2id_ = None
-
+        
     """
     Implements Hierarchical rank-2 NMF
 
@@ -598,7 +592,7 @@ class HierarchicalNMF(BaseEstimator):
         self,
         leaves_only: bool = True,
         include_outliers: bool = True,
-    ) -> dict[int, list[int]]:
+    ) -> dict[int, set[int]]:
         """
         Returns the features assigned as a cluster to nodes
 
@@ -623,11 +617,11 @@ class HierarchicalNMF(BaseEstimator):
         assignments = np.argwhere(clusters)
 
         for cluster_idx, feature_idx in assignments:
-            output[cluster_idx].append(feature_idx)
+            output[int(cluster_idx)].add(int(feature_idx))
 
         if include_outliers:
             outliers = np.where(clusters.sum(axis=0) == 0)[0]
-            output[-1] = outliers
+            output[-1] = set(outliers)
 
         return dict(output)
 
@@ -662,11 +656,11 @@ class HierarchicalNMF(BaseEstimator):
             ]
 
         for cluster_idx, feature_idx in assignments:
-            output[cluster_idx].add(feature_idx)
+            output[int(cluster_idx)].add(int(feature_idx))
 
         if include_outliers:
             outliers = np.where(clusters.sum(axis=0) == 0)[0]
             for outlier in outliers:
-                output[outlier] = set()
+                output[int(outlier)] = set()
 
         return dict(output)

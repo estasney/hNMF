@@ -7,10 +7,8 @@ from hnmf import HierarchicalNMF
 
 
 @pytest.fixture(scope="module")
-def sample_data() -> tuple[npt.NDArray, int, dict[int, str]]:
+def sample_data() -> tuple[npt.NDArray, dict[int, str]]:
     n_features = 1000
-    n_leaves = 20
-
     data, _ = fetch_20newsgroups(
         shuffle=True,
         random_state=1,
@@ -18,22 +16,27 @@ def sample_data() -> tuple[npt.NDArray, int, dict[int, str]]:
         return_X_y=True,
     )
 
-    # Use tf-idf features for NMF.
     tfidf = TfidfVectorizer(
         max_df=0.95, min_df=2, max_features=n_features, stop_words="english",
     )
 
     X = tfidf.fit_transform(data)
     id2feature = dict(enumerate(tfidf.get_feature_names_out()))
-    return X, n_leaves, id2feature
+    return X, id2feature
 
-
-def test_hnmf_can_fit(sample_data):
-    """Given dataset
-    Check that model can fit to leaves
-    Model will not be able to completely fit if regularization is not called as intended
+@pytest.mark.parametrize("k", [20, 1000])
+def test_hnmf_can_fit(sample_data, k: int):
     """
-    X, n_leaves, _id2feature = sample_data
-    model = HierarchicalNMF(k=n_leaves)
+    Given dataset
+    Check that model successfully fits the data
+    Ensure that the number of leaves does not exceed k
+    """
+    X, _id2feature = sample_data
+    model = HierarchicalNMF(k=k)
     model.fit(X)
-    assert model.n_leaves_ == n_leaves
+    assert 2 <= model.n_leaves_ <= k
+    assert model.n_samples_ == X.shape[0]
+    assert model.n_features_ == X.shape[1]
+    assert model.clusters_.shape[0] == model.n_nodes_
+    assert model.is_leaf_.shape[0] == model.clusters_.shape[0]
+    assert model.n_samples_ == X.shape[0]

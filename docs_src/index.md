@@ -1,3 +1,7 @@
+---
+title: hNMF - Hierarchical Non-negative Matrix Factorization
+---
+
 # hNMF
 
 hNMF implements Rank-2 NMF for Hierarchical Clustering as described in this [paper](https://smallk.github.io/papers/hierNMF2.pdf) and [repository](https://github.com/dakuang/hiernmf2).
@@ -7,6 +11,10 @@ hNMF is a fork of [hierarchical-nmf-python](https://github.com/rudvlf0413/hierar
 - Interface to hNMF is provided with a scikit-learn compatible BaseEstimator
 - Improved performance timings
 - Convenience methods for interpreting results
+
+## Why hNMF?
+
+Unlike flat NMF where you specify cluster count upfront, hNMF discovers it through successive splitting using a coherence threshold. In practice, this means you don't need to guess the number of topics or account for nuances in topic granularity. Instead, you can rapidly iterate to find a coherence level that yields meaningful topics for your dataset.
 
 ## Performance
 
