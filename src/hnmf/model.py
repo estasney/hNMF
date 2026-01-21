@@ -414,7 +414,41 @@ class HierarchicalNMF(BaseEstimator):
 
         node_i = self.Hs_[node]
         ranks = node_i.argsort()[::-1][:n]
-        return [(i, node_i[i]) for i in ranks if node_i[i] > 0]
+        return [(int(i), float(node_i[i])) for i in ranks if node_i[i] > 0]
+
+    def top_features_in_nodes(self, n: int = 10, leaves_only: bool = True, min_samples: int = 0) -> dict[int, list[tuple[int, float]]]:
+        """Returns mapping of each node to its top N features ranked by weight. Each node maps to a list of (feature_idx, weight) tuples sorted descending by weight from Hs_ matrix."""
+
+        if self.Hs_ is None:
+            raise ValueError("Model not fitted, Hs_ is None")
+
+        node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
+        output = {}
+        weights = self.Hs_
+
+        node_tops = weights.argsort()[:, ::-1][:, :n]
+        node_top_weights = np.take_along_axis(weights, node_tops, axis=1)
+
+        for node_idx, (feature_ids, feature_weights) in enumerate(
+            zip(node_tops, node_top_weights, strict=True)
+        ):
+            if leaves_only and node_idx not in node_leaf_idx:
+                continue
+
+            if min_samples > 0:
+                sample_count = np.count_nonzero(self.Ws_[node_idx])
+                if sample_count < min_samples:
+                    continue
+
+            tops = [
+                (int(feature_id), float(weight))
+                for feature_id, weight in zip(feature_ids, feature_weights, strict=True)
+                if weight > 0
+            ]
+            tops.sort(key=itemgetter(1), reverse=True)
+            output[node_idx] = tops
+
+        return output
 
     def top_nodes_in_feature(
         self,

@@ -191,8 +191,6 @@ def split_once_sklearn(
         H = random_state.rand(2, len(subset))
         W, H, _n_iter = non_negative_factorization(
             X=X_subset,
-            W=W,
-            H=H,
             n_components=2,
             init=init,
             update_H=True,
