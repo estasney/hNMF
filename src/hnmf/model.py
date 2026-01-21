@@ -52,7 +52,7 @@ class HierarchicalNMF(BaseEstimator):
     W_buffer_: npt.NDArray | None
     H_buffer_: npt.NDArray | None
     priorities_: npt.NDArray | None
-    
+
     def __init__(
         self,
         k: int,
@@ -94,7 +94,7 @@ class HierarchicalNMF(BaseEstimator):
         self.W_buffer_ = None
         self.H_buffer_ = None
         self.priorities_ = None
-        
+
     """
     Implements Hierarchical rank-2 NMF
 
@@ -330,7 +330,7 @@ class HierarchicalNMF(BaseEstimator):
                 ) = trial_split_sklearn(
                     min_priority=min_priority,
                     X=X,
-                    subset=subset,
+                    subset=subset,  # ty:ignore[invalid-argument-type]
                     W_parent=W[:, 0],
                     random_state=self.random_state,
                     trial_allowance=self.trial_allowance,
@@ -356,7 +356,7 @@ class HierarchicalNMF(BaseEstimator):
                 ) = trial_split_sklearn(
                     min_priority=min_priority,
                     X=X,
-                    subset=subset,
+                    subset=subset,  # ty:ignore[invalid-argument-type]
                     W_parent=W[:, 1],
                     random_state=self.random_state,
                     trial_allowance=self.trial_allowance,
@@ -406,10 +406,8 @@ class HierarchicalNMF(BaseEstimator):
             result[i, 1, cluster_nz_idx] = buff[1, :]
         return result
 
-    def top_features_in_node(self, node: int, n: int = 10) -> list[tuple]:
-        """
-        For a given node, return the top n features and values
-        """
+    def top_features_in_node(self, node: int, n: int = 10) -> list[tuple[int, float]]:
+        """Returns list of (feature_idx, weight) tuples showing the top N features for a given node, sorted descending by weight from Hs_ matrix."""
 
         if self.Hs_ is None:
             raise ValueError("Model not fitted, Hs_ is None")
@@ -440,10 +438,11 @@ class HierarchicalNMF(BaseEstimator):
 
         return [(i, node_weights[i]) for i in ranks if node_weights[i] > 0]
 
-    def top_nodes_in_samples(self, n: int = 10, leaves_only: bool = True):
-        """
-        Returns the top nodes for each sample.
-        """
+    def top_nodes_in_samples(
+        self, n: int = 10, leaves_only: bool = True
+    ) -> dict[int, list[tuple[int, float]]]:
+        """Returns mapping of each sample to its top N nodes ranked by weight. Each sample maps to a list of (node_id, weight) tuples sorted descending.
+        Based on soft ranking from Ws_ matrix."""
 
         if self.Ws_ is None or self.n_nodes_ is None:
             raise ValueError("Model not fitted, Ws_ is None")
@@ -484,10 +483,8 @@ class HierarchicalNMF(BaseEstimator):
 
         return output
 
-    def top_samples_in_nodes(self, n: int = 10, leaves_only: bool = True):
-        """
-        Returns the top samples for each node
-        """
+    def top_samples_in_nodes(self, n: int = 10, leaves_only: bool = True) -> dict[int, list[tuple[int, float]]]:
+        """Returns mapping of each node to its top N samples ranked by weight. Each node maps to a list of (sample_id, weight) tuples sorted descending. Based on soft ranking from Ws_ matrix."""
 
         if self.Ws_ is None:
             raise ValueError("Model not fitted, Ws_ is None")
@@ -532,25 +529,16 @@ class HierarchicalNMF(BaseEstimator):
         n: int = 10,
         sign: Literal["positive", "negative", "abs"] = "abs",
     ) -> "list[DiscriminatedSample]":
-        """
-        Computes most discriminative samples (node vs rest)
+        """Returns samples with the largest weight difference between the specified node and the mean of all other nodes, identifying samples most characteristic of this node.
 
         Parameters
         ----------
         node
+            The index of the node to compute discriminative samples for
         n
             The number of features to return
         sign
             One of `['positive', 'negative', 'abs']`.
-
-        Returns
-        --------
-        list of dict with form::
-
-            sample: Any
-            node: int
-            node_value: float
-            others_value: float
 
         """
 
@@ -594,21 +582,21 @@ class HierarchicalNMF(BaseEstimator):
         include_outliers: bool = True,
     ) -> dict[int, set[int]]:
         """
-        Returns the features assigned as a cluster to nodes
+        Returns a mapping of node IDs to the set of feature indices assigned to each node.
 
         Parameters
         ----------
         leaves_only
-            Whether to return only leaf nodes
+            Whether to return only leaf nodes. Defaults to True
         include_outliers
-            If True, features without a node assignment are returned under the key -1
+            If True, features without a node assignment are returned under the key -1. Defaults to True
 
         """
 
         if self.clusters_ is None:
             raise ValueError("Model not fitted, clusters_ is None")
 
-        output = defaultdict(list)
+        output = defaultdict(set)
 
         node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
 
@@ -621,46 +609,6 @@ class HierarchicalNMF(BaseEstimator):
 
         if include_outliers:
             outliers = np.where(clusters.sum(axis=0) == 0)[0]
-            output[-1] = set(outliers)
-
-        return dict(output)
-
-    def cluster_assignments(
-        self,
-        leaves_only: bool = True,
-        include_outliers: bool = True,
-    ) -> dict[int, set[int]]:
-        """
-        Returns a mapping of features and their assigned cluster(s)
-
-        Parameters
-        ----------
-        leaves_only
-            Whether to return only leaf nodes
-        include_outliers
-            If True, include feature_idx keys that are not assigned a cluster.
-
-        """
-
-        if self.clusters_ is None:
-            raise ValueError("Model not fitted, clusters_ is None")
-
-        node_leaf_idx = np.where(self.is_leaf_ == 1)[0]
-
-        clusters = self.clusters_
-        output = defaultdict(set)
-        assignments = np.argwhere(clusters)
-        if leaves_only:
-            assignments = assignments[
-                np.where(np.isin(assignments[:, 0], node_leaf_idx))[0]
-            ]
-
-        for cluster_idx, feature_idx in assignments:
-            output[int(cluster_idx)].add(int(feature_idx))
-
-        if include_outliers:
-            outliers = np.where(clusters.sum(axis=0) == 0)[0]
-            for outlier in outliers:
-                output[int(outlier)] = set()
+            output[-1] = {int(o) for o in outliers}
 
         return dict(output)

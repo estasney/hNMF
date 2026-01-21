@@ -4,12 +4,14 @@
 
 ::: hnmf.model.HierarchicalNMF
     options:
-      members: true
       show_source: true
       heading_level: 3
-      summary: true
+      summary: 
+        functions: true
       filters:
-        - public
+        - "!_$"
+        - "!^_"
+        - "^__"
 
 ## hNMF.helpers
 
